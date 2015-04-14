@@ -21,12 +21,6 @@ gulp.task( 'compile', function(){
 
 gulp.task( 'reload', function(){
 
-  gulp.watch( 'style.less', ['compile'] );
-
-  $.livereload.listen();
-  gulp.watch( [ 'script.js', 'style.css', 'newtab.html' ], function(){
-    console.log('\n=============\nPAGE RELOADED\n==============');
-  })
-  .on('change', $.livereload.changed);
+  return gulp.watch( 'style.less', ['compile'] );
 
 })
