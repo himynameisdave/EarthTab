@@ -1,0 +1,71 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  font-family: "Open Sans", "Roboto", Helvetica, Arial, sans-serif;
+  font-weight: 300;
+  font-size: 18px;
+  height: 100%;
+  width: 100%;
+}
+
+.main {
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  background-color: goldenrod;
+  display: block;
+  height: 100%;
+  position: relative;
+  width: 100%;
+}
+
+.pic-info {
+  background-color: rgba( 255, 255, 255, 0.1 );
+  padding: 1rem;
+  position: absolute;
+  left: 50%; bottom: 1%;
+  transform: translate(-50%, 0%);
+  width: 95%;
+  opacity: 0.25;
+  //  this should apply to the 
+  transition: opacity 0.475s ease-in-out, bottom 0.85s cubic-bezier(.57,0,.35,1);
+  &:hover {
+    bottom: 10%;
+    opacity: 1;
+  }
+  @media all and (min-width: 500px){
+    bottom: 0;
+    width: 80%;
+    &:hover {
+      bottom: 15%;
+      opacity: 1;
+    }
+  }
+  @media all and (min-width: 600px){
+    left: 0%;
+    transform: none;
+    width: 70%;
+    &:hover {
+      bottom: 15%;
+      opacity: 1;
+    }
+  }
+  @media all and (min-width: 767px){
+    padding: 1.5rem;
+    &:hover {
+      bottom: 15%;
+      opacity: 1;
+    }
+  }
+
+}
+
+
+  .pic-info-text {
+    color: #fff;
+    text-shadow: 0 1px 1px rgba( 51, 51, 51, 0.75 );
+  }
