@@ -120,9 +120,9 @@
 
       var now  = Date.now(),
           diff = now - then,
-          hrsSince = parseInt((diff/(1000*60*60))/24);
+          hrsSince = ((diff/1000)/60)/60;
 
-          console.log( 'The time difference is: '+ diff/(1000*60*60) + ' minutes');
+          console.log( 'The time difference is: '+ ((diff/1000)/60)/60 + ' hours');
 
           if( hrsSince > maxHrs ){
             return true;
@@ -258,12 +258,20 @@ document.addEventListener("DOMContentLoaded", function(event) {
   chrome.storage.local.get( 'oldData', function(d){
 
     if(d.oldData){
-      if( isLongerThanHrs( d.oldData.timeSaved, 6 ) ){
-        console.log('It\'s been longer than '+6+' hrs');
+      var maxHrs = 0.5;
+
+      /**   Eventually this should be:
+        *     if < 0.5
+        *     
+        */
+
+
+      if( isLongerThanHrs( d.oldData.timeSaved, maxHrs ) ){
+        console.log('It\'s been longer than '+maxHrs+' hrs');
         console.log("=========================\nThis doesnt get called often, so go into the code and see where this is being fired from.\n========================");
         fetchRedditData(parseRedditData);
       }else{
-        console.log('It\'s less than '+6+' hrs');
+        console.log('It\'s less than '+maxHrs+' hrs');
         setStuff(settings( d.oldData ));
       }
     }else{
