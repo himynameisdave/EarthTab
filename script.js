@@ -34,54 +34,71 @@
 
       //  You should just use chrome.storage.local
 
-      if(chrome.storage.sync){
-        // chrome.storage.sync
+      chrome.storage.local.get( 'oldData', function(oldData){
+        console.log(oldData);
 
+        if( isMoreThanSixHrsOld( oldData.timeSaved ) ){
 
-        return null;
+        }
 
-      }else if(chrome.storage.local){
-
-
-
-        return null;
-
-      }else{
-        return null;
-      }
+      });
+      return null;
 
     },
+    /**   @name:   isMoreThanSixHrsOld
+      *   @params: date [number, date]
+      *   @desc:   returns whether the date passed to it is more than six hours ago
+      */
+    isMoreThanSixHrsOld = function( date ){
+      var now = Date.now();
+      console.log( date );
+      // Date.parse(  )
+      return true;
+    },
+    /**   @name:   setLocalStorageData
+      *   @params: d [object]
+      *   @desc:   sets the data into localstorage under the oldData namespace
+      */
     setLocalStorageData = function( d ){
 
+      chrome.storage.local.set({'oldData': d}, function(){
+        console.log('Saved settings to localStorage!');
+      });
 
     },
-    /**   @name:   getDataForFirstImage
+    /**   @name:   getDataForTopImage
       *   @params: d [object]
       *   @desc:   sifts through the provided data object for the first
       *            non-moderator post.
       *            returns an object with the important data from that
       */
-    getDataForFirstImage = function( d ){
+    getDataForTopImage = function( d ){
 
       if(!d && typeof d === 'object' ){
-        throw "You didn't provide valid data to getDataForFirstImage()!";
+        throw "You didn't provide valid data to getDataForTopImage()!";
       }
 
       var obj = {},
           isImageFound = false;
 
       d.forEach(function(val, i){
+        /**   If it's not a mod post & we haven't found our image yet
+          */
         if(isValidImagePost(val.data) && !isImageFound){
-
-          console.log(val.data);
-
-          obj.url        = val.data.url;
-          obj.domain     = val.data.domain;
-          obj.title      = val.data.title;
-          obj.redditLink = 'http://www.reddit.com'+val.data.permalink;
-          obj.timeSaved  = Date.now();
+          /**   Top Image object
+            *   This is where all the data used in the application is set.
+            */
+          obj = {
+            author:     val.data.author,              //  {string}  the reddit user
+            created:    val.data.created,             //  {number}  a timestamp of when this post was created
+            domain:     val.data.domain,              //  {string}  a string of the domain of the post
+            title:      stripSquareBrackets(val.data.title),        //  {string}  a sanitized string, title of the post
+            redditLink: 'http://www.reddit.com'+val.data.permalink, //  {string}  link to the reddit post
+            score:      val.data.score,               //  {number}  a timestamp of when this post was created
+            url:        val.data.url,                 //  {string}  the url of the image (not the reddit link)
+            timeSaved:  Date.now()                    //  {number}  a timestamp of when this post was created
+          };
           isImageFound   = true;
-
         }
       });
 
@@ -172,10 +189,11 @@
 
 
 
-
+///////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
 //////////////////////////////////start////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
 
@@ -188,16 +206,20 @@ document.addEventListener("DOMContentLoaded", function(event) {
     //  TODO: make this callback a named function so it can be reused.
     fetchRedditData(function(newData){
 
-      /**    getDataForFirstImage takes the element that gets appended,
+      /**    getDataForTopImage takes the element that gets appended,
         *    as well as the bracket-stripped title from the data.
         */
-      var data = getDataForFirstImage(newData);
+      var data = getDataForTopImage(newData);
 
       /**    setTitle takes the element that gets appended,
         *    as well as the bracket-stripped title from the data.
+        *     TODO: these set commands are ripe to become a ninja function
         */
-      setTitle('.pic-info-text', stripSquareBrackets(data.title));
+      setTitle('.pic-info-text', data.title);
       setLink('.pic-info-text', data.redditLink);
+
+
+      setLocalStorageData( data );
 
 
       switch(data.domain){
@@ -207,11 +229,11 @@ document.addEventListener("DOMContentLoaded", function(event) {
           break;
 
         case 'imgur.com':
-          console.log('imgur.com');
+          // console.log('imgur.com');
           break;
 
         default:
-
+          setBackgroundImage( '.main', data.url );
       }
 
 
@@ -224,7 +246,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
   }else{
 
 
-    // setTitle('.pic-info-text', stripSquareBrackets(data.title));
+    // setTitle('.pic-info-text', data.title);
     //
   }
 
