@@ -19,6 +19,91 @@
         };
         r.send();
     },
+    /**   @name:   parseRedditData
+      *   @params: newData [object]
+      *   @desc:   the callback function for the fetchRedditData above
+      */
+    parseRedditData = function(newData){
+
+      /**    getDataForTopImage takes the element that gets appended,
+        *    as well as the bracket-stripped title from the data.
+        */
+      var data = getDataForTopImage(newData);
+      /**    This will take the data we just grabbed and save it
+        *    into localstorage for us
+        */
+      setLocalStorageData( data );
+      setStuff(settings( data ));
+
+    },
+    setStuff = function( $ ){
+
+      $.setTitle('.pic-info-text');
+      $.setLink('.pic-info-text');
+
+      /**    SHOULD BE IN A filterDomain function
+        */
+      switch($.data.domain){
+
+        case 'i.imgur.com':
+          $.setBackgroundImage( '.main' );
+          break;
+
+        case 'imgur.com':
+          console.log('imgur.com Domain!!!');
+          break;
+
+        default:
+          $.setBackgroundImage( '.main' );
+      }
+
+    },
+    /**   @name:   settings
+      *   @params: data [object]
+      *   @desc:   a function that returns an object that contains all of our info
+      *            as well as methods that interact with that data + the DOM
+      */
+    settings = function( data ){
+
+      var o = {
+        data: data,
+        /**   @name:   setInnerHtml
+          *   @params: el[string, selector], title[string]
+          *   @desc:   takes a selector string and a title and appends that element with the specified content
+          */
+        setInnerHtml: function( el, text ){
+          var element = document.querySelector(el);
+          element.innerHTML = text;
+        },
+        /**   @name:   settings.setTitle
+          *   @params: el[string, selector], title[string]
+          *   @desc:   takes a selector string and a reddit link and appends that element with the specified content
+          */
+        setTitle: function( el ){
+          this.setInnerHtml( el, this.data.title );
+        },
+        /**   @name:   settings.setLink
+          *   @params: el[string, selector]
+          *   @desc:   takes a selector string and a reddit link and appends that element with the specified content
+          */
+        setLink: function( el ){
+          var element = document.querySelector(el);
+          element.href = this.data.redditLink;
+        },
+        /**   @name:   settings.setBackgroundImage
+          *   @params: el [string, selector]
+          *   @desc:   provide a selector and a bg url and
+          *            this function will go set that elements BG image to that URL
+          */
+        setBackgroundImage: function( el ){
+          var element = document.querySelector(el);
+          element.style.backgroundImage = "url("+this.data.bgUrl+")";
+        }
+      };
+
+      return o;
+
+    },
     /**   @name:   getImgurId
       *   @params: imgurUrl [string]
       *   @desc:   returns the id when given an imgur URL
@@ -26,34 +111,25 @@
     getImgurId = function( imgurUrl ){
       return imgurUrl.substr(d.url.lastIndexOf('/') + 1);
     },
-    /**   @name:   getLocalStorageData
-      *   @params:
-      *   @desc:
+    /**   @name:   isLongerThanHrs
+      *   @params: then [number, date], maxHrs [number]
+      *   @desc:   takes the old time and the max # of hours
+      *            returns true if the difference between then and now is > mxhrs
       */
-    getLocalStorageData = function( cb ){
+    isLongerThanHrs = function( then, maxHrs ){
 
-      //  You should just use chrome.storage.local
+      var now  = Date.now(),
+          diff = now - then,
+          hrsSince = parseInt((diff/(1000*60*60))/24);
 
-      chrome.storage.local.get( 'oldData', function(oldData){
-        console.log(oldData);
+          console.log( 'The time difference is: '+ diff/(1000*60*60) + ' minutes');
 
-        if( isMoreThanSixHrsOld( oldData.timeSaved ) ){
+          if( hrsSince > maxHrs ){
+            return true;
+          }else{
+            return false;
+          }
 
-        }
-
-      });
-      return null;
-
-    },
-    /**   @name:   isMoreThanSixHrsOld
-      *   @params: date [number, date]
-      *   @desc:   returns whether the date passed to it is more than six hours ago
-      */
-    isMoreThanSixHrsOld = function( date ){
-      var now = Date.now();
-      console.log( date );
-      // Date.parse(  )
-      return true;
     },
     /**   @name:   setLocalStorageData
       *   @params: d [object]
@@ -68,8 +144,7 @@
     },
     /**   @name:   getDataForTopImage
       *   @params: d [object]
-      *   @desc:   sifts through the provided data object for the first
-      *            non-moderator post.
+      *   @desc:   sifts through the provided data object for the first non-moderator post.
       *            returns an object with the important data from that
       */
     getDataForTopImage = function( d ){
@@ -95,7 +170,8 @@
             title:      stripSquareBrackets(val.data.title),        //  {string}  a sanitized string, title of the post
             redditLink: 'http://www.reddit.com'+val.data.permalink, //  {string}  link to the reddit post
             score:      val.data.score,               //  {number}  a timestamp of when this post was created
-            url:        val.data.url,                 //  {string}  the url of the image (not the reddit link)
+            url:        val.data.url,                 //  {string} DEPRECIATE: the url of the image (not the reddit link)
+            bgUrl:      val.data.url,                 //  {string}  will take the place of data.url
             timeSaved:  Date.now()                    //  {number}  a timestamp of when this post was created
           };
           isImageFound   = true;
@@ -116,31 +192,7 @@
         return true;
       }
     },
-    /**   @name:   setBackgroundImage
-      *   @params: el [string, selector], bgUrl [string]
-      *   @desc:   provide a selector and a bg url and
-      *            this function will go set that elements BG image to that URL
-      */
-    setBackgroundImage = function( el, bgUrl ){
-      var element = document.querySelector(el);
-      element.style.backgroundImage = "url("+bgUrl+")";
-    },
-    /**   @name:   setTitle
-      *   @params: el[string, selector], title[string]
-      *   @desc:   takes a selector string and a title and appends that element with the specified content
-      */
-    setTitle = function( el, title ){
-      var element = document.querySelector(el);
-      element.innerHTML = title;
-    },
-    /**   @name:   setLink
-      *   @params: el[string, selector], title[string]
-      *   @desc:   takes a selector string and a reddit link and appends that element with the specified content
-      */
-    setLink = function(el, link){
-      var element = document.querySelector(el);
-      element.href = link;
-    },
+
     /**   @name:   stripSquareBrackets
       *   @params: title [string]
       *   @desc:   recursively parses the title to remove stupid [stuff][in][square][brackets]
@@ -166,6 +218,11 @@
       *
       *   Mega props to this Stackoverflow post:
       *   http://stackoverflow.com/a/20285053/4060044
+      *
+      *   Usage:
+      *   convertImgToBase64URL('http://i.imgur.com/MJ3Amtx.jpg', function(base64Img){
+      *     console.log(base64Img);
+      *   });
       */
     convertImgToBase64URL = function(url, callback, outputFormat){
       var img = new Image();
@@ -187,8 +244,6 @@
 
 
 
-
-
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
@@ -199,55 +254,22 @@
 
 document.addEventListener("DOMContentLoaded", function(event) {
 
-  var rawRedditData = getLocalStorageData();
 
-  if( !rawRedditData ){
-    //  The main fetching thread
-    //  TODO: make this callback a named function so it can be reused.
-    fetchRedditData(function(newData){
+  chrome.storage.local.get( 'oldData', function(d){
 
-      /**    getDataForTopImage takes the element that gets appended,
-        *    as well as the bracket-stripped title from the data.
-        */
-      var data = getDataForTopImage(newData);
-
-      /**    setTitle takes the element that gets appended,
-        *    as well as the bracket-stripped title from the data.
-        *     TODO: these set commands are ripe to become a ninja function
-        */
-      setTitle('.pic-info-text', data.title);
-      setLink('.pic-info-text', data.redditLink);
-
-
-      setLocalStorageData( data );
-
-
-      switch(data.domain){
-
-        case 'i.imgur.com':
-          setBackgroundImage( '.main', data.url );
-          break;
-
-        case 'imgur.com':
-          // console.log('imgur.com');
-          break;
-
-        default:
-          setBackgroundImage( '.main', data.url );
+    if(d.oldData){
+      if( isLongerThanHrs( d.oldData.timeSaved, 6 ) ){
+        console.log('It\'s been longer than '+6+' hrs');
+        console.log("=========================\nThis doesnt get called often, so go into the code and see where this is being fired from.\n========================");
+        fetchRedditData(parseRedditData);
+      }else{
+        console.log('It\'s less than '+6+' hrs');
+        setStuff(settings( d.oldData ));
       }
+    }else{
+      fetchRedditData(parseRedditData);
+    }
 
-
-
-      // convertImgToBase64URL('http://i.imgur.com/MJ3Amtx.jpg', function(base64Img){
-      //   console.log(base64Img);
-      // });
-
-    });
-  }else{
-
-
-    // setTitle('.pic-info-text', data.title);
-    //
-  }
+  });
 
 });
