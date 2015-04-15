@@ -73,9 +73,14 @@
       d.forEach(function(val, i){
         if(isValidImagePost(val.data) && !isImageFound){
 
-          obj.title    = val.data.title;
-          obj.url      = val.data.url;
-          isImageFound = true;
+          console.log(val.data);
+
+          obj.url        = val.data.url;
+          obj.domain     = val.data.domain;
+          obj.title      = val.data.title;
+          obj.redditLink = 'http://www.reddit.com'+val.data.permalink;
+          obj.timeSaved  = Date.now();
+          isImageFound   = true;
 
         }
       });
@@ -100,19 +105,24 @@
       *            this function will go set that elements BG image to that URL
       */
     setBackgroundImage = function( el, bgUrl ){
-      document.addEventListener("DOMContentLoaded", function(event) {
-        var element = document.querySelector(el);
-        element.style.backgroundImage = "url("+bgURL+")";
-      });
+      var element = document.querySelector(el);
+      element.style.backgroundImage = "url("+bgUrl+")";
     },
     /**   @name:   setTitle
       *   @params: el[string, selector], title[string]
       *   @desc:   takes a selector string and a title and appends that element with the specified content
       */
     setTitle = function( el, title ){
-        console.log("Setting title to: "+title);
-        var element = document.querySelector(el);
-        element.innerHTML = title;
+      var element = document.querySelector(el);
+      element.innerHTML = title;
+    },
+    /**   @name:   setLink
+      *   @params: el[string, selector], title[string]
+      *   @desc:   takes a selector string and a reddit link and appends that element with the specified content
+      */
+    setLink = function(el, link){
+      var element = document.querySelector(el);
+      element.href = link;
     },
     /**   @name:   stripSquareBrackets
       *   @params: title [string]
@@ -132,6 +142,28 @@
           }
       }
       return str;
+    },
+    /**   @name:    convertImgToBase64URL
+      *   @params:  url [string], callback [function], outputFormat [string]
+      *   @desc:    creates a base64 of an image based on a given URL
+      *
+      *   Mega props to this Stackoverflow post:
+      *   http://stackoverflow.com/a/20285053/4060044
+      */
+    convertImgToBase64URL = function(url, callback, outputFormat){
+      var img = new Image();
+          img.crossOrigin = 'Anonymous';
+          img.onload = function(){
+              var canvas = document.createElement('CANVAS'),
+              ctx = canvas.getContext('2d'), dataURL;
+              canvas.height = img.height;
+              canvas.width = img.width;
+              ctx.drawImage(img, 0, 0);
+              dataURL = canvas.toDataURL(outputFormat);
+              callback(dataURL);
+              canvas = null;
+          };
+          img.src = url;
     };
 
 
@@ -153,20 +185,40 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
   if( !rawRedditData ){
     //  The main fetching thread
+    //  TODO: make this callback a named function so it can be reused.
     fetchRedditData(function(newData){
 
-
+      /**    getDataForFirstImage takes the element that gets appended,
+        *    as well as the bracket-stripped title from the data.
+        */
       var data = getDataForFirstImage(newData);
-
-      console.log( stripSquareBrackets(data.title) );
 
       /**    setTitle takes the element that gets appended,
         *    as well as the bracket-stripped title from the data.
         */
       setTitle('.pic-info-text', stripSquareBrackets(data.title));
+      setLink('.pic-info-text', data.redditLink);
+
+
+      switch(data.domain){
+
+        case 'i.imgur.com':
+          setBackgroundImage( '.main', data.url );
+          break;
+
+        case 'imgur.com':
+          console.log('imgur.com');
+          break;
+
+        default:
+
+      }
 
 
 
+      // convertImgToBase64URL('http://i.imgur.com/MJ3Amtx.jpg', function(base64Img){
+      //   console.log(base64Img);
+      // });
 
     });
   }else{
