@@ -1,3 +1,4 @@
+// "use strict";
 /**
   *         EarthTab Chrome Extension
   *
@@ -10,6 +11,7 @@
       *   @params: cb [function]
       *   @desc:   goes and grabs the reddit stuff.
       *            Accepts a callback to handle the data
+      *            TODO: check that this is genric enough to handle any reddit api request
       */
     var fetchRedditData = function( cb ){
         var r = new XMLHttpRequest();
@@ -36,13 +38,18 @@
       setStuff(settings( data ));
 
     },
+    /**   @name:   setStuff
+      *   @params: $[object, data]
+      *   @desc:   setStuf
+      *            TODO: setStuff could totally be a method on the settings object,
+      *                  that way it could just use 'this.domain'
+      */
     setStuff = function( $ ){
 
       $.setTitle('.pic-info-text');
       $.setLink('.pic-info-text');
 
-      /**    SHOULD BE IN A filterDomain function
-        */
+      // filterDomain($.data.domain);
       switch($.data.domain){
 
         case 'i.imgur.com':
@@ -56,6 +63,14 @@
         default:
           $.setBackgroundImage( '.main' );
       }
+
+    },
+    ///////this should happen as soon as we know the domain, not way later....
+    filterDomain = function(domain){
+
+      // get the domain and set it...
+      console.log(domain);
+
 
     },
     /**   @name:   settings
@@ -97,7 +112,12 @@
           */
         setBackgroundImage: function( el ){
           var element = document.querySelector(el);
-          element.style.backgroundImage = "url("+this.data.bgUrl+")";
+          if(this.data.base64Img){
+            element.style.backgroundImage = "url("+this.data.base64Img+")";
+          }else{
+            element.style.backgroundImage = "url("+this.data.bgUrl+")";
+          }
+
         }
       };
 
@@ -131,6 +151,15 @@
           }
 
     },
+    /**   @name:   clearLocalStorage
+      *   @params: {none}
+      *   @desc:   simple utility to clear chrome.localstorage
+      */
+    clearLocalStorage = function(){
+      chrome.storage.local.clear(function(){
+        console.log('Cleared localStorage!');
+      });
+    },
     /**   @name:   setLocalStorageData
       *   @params: d [object]
       *   @desc:   sets the data into localstorage under the oldData namespace
@@ -139,7 +168,32 @@
 
       chrome.storage.local.set({'oldData': d}, function(){
         console.log('Saved settings to localStorage!');
+
+        /**   TODO: this is currently only running for i.imgur domains
+          *         ultimately by this point the domain should be sifted and a proper url extacted, meaning this if just goes
+          */
+        if( d.domain === 'i.imgur.com' ){
+          convertImgToBase64URL( d.url, function(base64data){
+            saveBase64ToLocalStorage( d, base64data );
+          });
+        }
+
       });
+
+    },
+    /**   @name:   saveBase64ToLocalStorage
+      *   @params: d [object]
+      *   @desc:   sifts through the provided data object for the first non-moderator post.
+      *            returns an object with the important data from that
+      */
+    saveBase64ToLocalStorage = function( oldData, n64 ){
+
+      var o = oldData;
+          o.base64Img = n64;
+
+        chrome.storage.local.set( {'oldData': o}, function(d){
+          console.log('Saved the base64 to localStorge for next time!');
+        });
 
     },
     /**   @name:   getDataForTopImage
@@ -175,6 +229,7 @@
             timeSaved:  Date.now()                    //  {number}  a timestamp of when this post was created
           };
           isImageFound   = true;
+
         }
       });
 
@@ -261,14 +316,13 @@ document.addEventListener("DOMContentLoaded", function(event) {
       var maxHrs = 0.5;
 
       /**   Eventually this should be:
-        *     if < 0.5
+        *     if < 0.5 : 
         *     
         */
 
 
       if( isLongerThanHrs( d.oldData.timeSaved, maxHrs ) ){
         console.log('It\'s been longer than '+maxHrs+' hrs');
-        console.log("=========================\nThis doesnt get called often, so go into the code and see where this is being fired from.\n========================");
         fetchRedditData(parseRedditData);
       }else{
         console.log('It\'s less than '+maxHrs+' hrs');

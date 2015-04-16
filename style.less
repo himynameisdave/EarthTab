@@ -1,3 +1,52 @@
+// Quick set height and width to the same size
+.set-w-h( @size ){
+  height: @size;
+  width: @size;
+}
+
+@mq-small:  ~"all and (min-width: 400px) and (min-height: 320px)";
+@mq-medium: ~"all and (min-width: 600px) and (min-height: 460px)";
+@mq-large:  ~"all and (min-width: 800px) and (min-height: 620px)";
+
+@playfair: 'Playfair Display', 'Georgia', Times, serif;
+@raleway: 'Raleway', 'Roboto', Helvetica, sans-serif;
+
+
+@font-face {
+  font-family: 'EarthTab';
+  src:url('fonts/earthtab.eot?-lcbspf');
+  src:url('fonts/earthtab.eot?#iefix-lcbspf') format('embedded-opentype'),
+    url('fonts/earthtab.woff?-lcbspf') format('woff'),
+    url('fonts/earthtab.ttf?-lcbspf') format('truetype'),
+    url('fonts/earthtab.svg?-lcbspf#EarthTab') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+  font-family: 'EarthTab';
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-award:before {
+  content: "\2665";
+}
+
+.icon-time:before {
+  content: "\23f0";
+}
+
+.icon-user:before {
+  content: "\263b";
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -5,7 +54,7 @@
 }
 
 html, body {
-  font-family: "Open Sans", "Roboto", Helvetica, Arial, sans-serif;
+  font-family: @raleway;
   font-weight: 300;
   font-size: 18px;
   height: 100%;
@@ -23,48 +72,78 @@ html, body {
   width: 100%;
 }
 
+/**   .pic-info/inner width sizing:
+  *      @small:  200px/140px
+  *      @400px:  300px/210px
+  *      @600px:  400px/280px
+  *      @800px:  600px/420px
+  */
+
+
 .pic-info {
-  background-color: rgba( 255, 255, 255, 0.1 );
-  padding: 1rem;
+  background-color: rgba( 255, 255, 255, 0.4 );
+  border-radius: 100%;
+  overflow: hidden;
   position: absolute;
-  left: 50%; bottom: 1%;
-  transform: translate(-50%, 0%);
-  width: 95%;
-  opacity: 0.25;
-  //  this should apply to the 
-  transition: opacity 0.475s ease-in-out, bottom 0.85s cubic-bezier(.57,0,.35,1);
-  &:hover {
-    bottom: 10%;
-    opacity: 1;
+  left: 50%; top: 50%;
+  text-align: center;
+  transform: translate( -50%, -50% );
+
+  transition: all 0.45s ease-in-out;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  // this should be getting set on an '.open' class
+  .set-w-h( 200px );
+  @media @mq-small{ .set-w-h( 300px ) }
+  @media @mq-medium{ .set-w-h( 450px ) }
+  @media @mq-large{ .set-w-h( 600px ) }
+}
+
+
+.pic-info-inner {
+  // background: rgba( 51, 51, 51, 0.35 );
+  display: block;
+  transition: all 0.45s ease-in-out;
+
+  // this should be getting set on an '.open' class
+  .set-w-h( 200px * 0.7 );
+  @media @mq-small{ .set-w-h( 300px * 0.7 ) }
+  @media @mq-medium{ .set-w-h( 450px * 0.7 ) }
+  @media @mq-large{ .set-w-h( 600px * 0.7 ) }
+}
+
+.pic-info-text {
+  color: #333;
+  display: block;
+  font-family: @playfair;
+  font-weight: 900;
+  text-decoration: none;
+  font-size: 0.65rem;
+  line-height: 1.25;
+  text-shadow: 0 1px 1px rgba( 200, 200, 200, 0.45 );
+  transition: all 0.45s ease-in-out;
+
+  @media @mq-small{
+    font-size: 0.95rem;
+    line-height: 1.4;
   }
-  @media all and (min-width: 500px){
-    bottom: 0;
-    width: 80%;
-    &:hover {
-      bottom: 15%;
-      opacity: 1;
-    }
+  @media @mq-medium{
+    font-size: 1.25rem;
+    line-height: 1.5;
   }
-  @media all and (min-width: 600px){
-    left: 0%;
-    transform: none;
-    width: 70%;
-    &:hover {
-      bottom: 15%;
-      opacity: 1;
-    }
-  }
-  @media all and (min-width: 767px){
-    padding: 1.5rem;
-    &:hover {
-      bottom: 15%;
-      opacity: 1;
-    }
+  @media @mq-large{
+    font-size: 1.75rem;
+    line-height: 1.6;
   }
 
 }
 
-.pic-info-text {
-  color: #fff;
-  text-shadow: 0 1px 1px rgba( 51, 51, 51, 0.75 );
+.pic-info-line {
+  border: none;
+  border-bottom: 3px solid #333;
+  margin: 1rem auto;
+  width: 100%;
 }
