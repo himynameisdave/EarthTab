@@ -34,6 +34,7 @@
       /**    This will take the data we just grabbed and save it
         *    into localstorage for us
         */
+      clearLocalStorage();//clear localstorage before we do a set
       setLocalStorageData( data );
       setStuff(settings( data ));
 
@@ -47,7 +48,14 @@
     setStuff = function( $ ){
 
       $.setTitle('.pic-info-text');
-      $.setLink('.pic-info-text');
+      //  set reddit link should be able to handle multiple elements
+      $.setRedditLink('.js-score');
+      $.setRedditLink('.js-time-posted');
+      $.setUserLink('.js-username');
+      $.setAuthor('.js-username');
+
+
+      console.log($.data);
 
       // filterDomain($.data.domain);
       switch($.data.domain){
@@ -70,7 +78,6 @@
 
       // get the domain and set it...
       console.log(domain);
-
 
     },
     /**   @name:   settings
@@ -101,9 +108,30 @@
           *   @params: el[string, selector]
           *   @desc:   takes a selector string and a reddit link and appends that element with the specified content
           */
-        setLink: function( el ){
+        setLink: function( el, link ){
           var element = document.querySelector(el);
-          element.href = this.data.redditLink;
+          element.href = link;
+        },
+        /**   @name:   settings.setRedditLink
+          *   @params: el[string, selector]
+          *   @desc:   takes a selector string and a reddit link and appends that element with the specified content
+          */
+        setRedditLink: function( el ){
+          this.setLink( el, this.data.redditLink );
+        },
+        /**   @name:   settings.setAuthor
+          *   @params: el[string, selector]
+          *   @desc:   takes a selector string and a reddit author and appends that element with the specified content
+          */
+        setAuthor: function( el ){
+          this.setInnerHtml( el, this.data.author );
+        },
+        /**   @name:   settings.setUserLink
+          *   @params: el[string, selector]
+          *   @desc:   takes a selector string and a reddit author and appends that element with the specified content
+          */
+        setUserLink: function( el ){
+          this.setLink( el, 'http://www.reddit.com/user/'+this.data.author+'/' );
         },
         /**   @name:   settings.setBackgroundImage
           *   @params: el [string, selector]
@@ -113,16 +141,14 @@
         setBackgroundImage: function( el ){
           var element = document.querySelector(el);
           if(this.data.base64Img){
+            console.log('FOUND A BASE64 IMAGE WHICH IS WHAT WE\'RE USING YAY!' );
             element.style.backgroundImage = "url("+this.data.base64Img+")";
           }else{
             element.style.backgroundImage = "url("+this.data.bgUrl+")";
           }
-
         }
       };
-
       return o;
-
     },
     /**   @name:   getImgurId
       *   @params: imgurUrl [string]
@@ -157,6 +183,7 @@
       */
     clearLocalStorage = function(){
       chrome.storage.local.clear(function(){
+        localStorage.clear();
         console.log('Cleared localStorage!');
       });
     },
@@ -168,32 +195,18 @@
 
       chrome.storage.local.set({'oldData': d}, function(){
         console.log('Saved settings to localStorage!');
-
         /**   TODO: this is currently only running for i.imgur domains
           *         ultimately by this point the domain should be sifted and a proper url extacted, meaning this if just goes
           */
-        if( d.domain === 'i.imgur.com' ){
-          convertImgToBase64URL( d.url, function(base64data){
-            saveBase64ToLocalStorage( d, base64data );
-          });
-        }
+        // if( d.domain === 'i.imgur.com' ){
+          // convertImgToBase64URL( d.url, function(base64data){
+            // saveBase64ToLocalStorage( base64data );
+            // localStorage.setItem("base64", JSON.stringify(chunkBase64(base64data)));
+            // console.log('Saved base64 image to localStorage!');
+          // });
+        // }
 
       });
-
-    },
-    /**   @name:   saveBase64ToLocalStorage
-      *   @params: d [object]
-      *   @desc:   sifts through the provided data object for the first non-moderator post.
-      *            returns an object with the important data from that
-      */
-    saveBase64ToLocalStorage = function( oldData, n64 ){
-
-      var o = oldData;
-          o.base64Img = n64;
-
-        chrome.storage.local.set( {'oldData': o}, function(d){
-          console.log('Saved the base64 to localStorge for next time!');
-        });
 
     },
     /**   @name:   getDataForTopImage
@@ -214,18 +227,21 @@
         /**   If it's not a mod post & we haven't found our image yet
           */
         if(isValidImagePost(val.data) && !isImageFound){
+
+          console.log( val );
           /**   Top Image object
             *   This is where all the data used in the application is set.
             */
           obj = {
             author:     val.data.author,              //  {string}  the reddit user
+            bgUrl:      val.data.url,                 //  {string}  will take the place of data.url
             created:    val.data.created,             //  {number}  a timestamp of when this post was created
             domain:     val.data.domain,              //  {string}  a string of the domain of the post
-            title:      stripSquareBrackets(val.data.title),        //  {string}  a sanitized string, title of the post
             redditLink: 'http://www.reddit.com'+val.data.permalink, //  {string}  link to the reddit post
+            title:      stripSquareBrackets(val.data.title),        //  {string}  a sanitized string, title of the post
             score:      val.data.score,               //  {number}  a timestamp of when this post was created
+            subreddit:  val.data.subreddit,           //  {string}  the subreddit this came from
             url:        val.data.url,                 //  {string} DEPRECIATE: the url of the image (not the reddit link)
-            bgUrl:      val.data.url,                 //  {string}  will take the place of data.url
             timeSaved:  Date.now()                    //  {number}  a timestamp of when this post was created
           };
           isImageFound   = true;
@@ -247,7 +263,6 @@
         return true;
       }
     },
-
     /**   @name:   stripSquareBrackets
       *   @params: title [string]
       *   @desc:   recursively parses the title to remove stupid [stuff][in][square][brackets]
@@ -309,17 +324,11 @@
 
 document.addEventListener("DOMContentLoaded", function(event) {
 
-
   chrome.storage.local.get( 'oldData', function(d){
 
     if(d.oldData){
+
       var maxHrs = 0.5;
-
-      /**   Eventually this should be:
-        *     if < 0.5 : 
-        *     
-        */
-
 
       if( isLongerThanHrs( d.oldData.timeSaved, maxHrs ) ){
         console.log('It\'s been longer than '+maxHrs+' hrs');
