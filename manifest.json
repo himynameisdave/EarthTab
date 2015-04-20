@@ -4,7 +4,8 @@
   "description": "A Chrome extension that scrapes r/earthporn and makes the current top image the background for your new tab page.",
   "version": "0.0.1",
   "permissions": [
-    "storage"
+    "storage",
+    "unlimitedStorage"
   ],
   "chrome_url_overrides": {
     "newtab": "newtab.html"

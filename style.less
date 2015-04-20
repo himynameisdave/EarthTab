@@ -4,6 +4,14 @@
   width: @size;
 }
 
+.visually-hidden() {
+  position: absolute;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  height: 1px; width: 1px;
+  margin: -1px; padding: 0; border: 0;
+}
+
 @mq-small:  ~"all and (min-width: 400px) and (min-height: 320px)";
 @mq-medium: ~"all and (min-width: 600px) and (min-height: 460px)";
 @mq-large:  ~"all and (min-width: 800px) and (min-height: 620px)";
@@ -21,6 +29,28 @@
     url('fonts/earthtab.svg?-lcbspf#EarthTab') format('svg');
   font-weight: normal;
   font-style: normal;
+}
+
+@-webkit-keyframes info-opening {
+  0% {
+    transform: translate(-50%, -50%) rotateY(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotateY(540deg);
+  }
+}
+@keyframes info-opening {
+  0% {
+    transform: translate(-50%, -50%) rotateY(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotateY(540deg);
+  }
+}
+
+.anim-opening {
+  -webkit-animation: info-opening 1s 1;
+  animation: info-opening 1s 1;
 }
 
 [class^="icon-"], [class*=" icon-"] {
@@ -57,6 +87,7 @@ html, body {
   color: #333;
   font-family: @raleway;
   font-weight: 300;
+  line-height: 1.435;
   font-size: 18px;
   height: 100%;
   width: 100%;
@@ -70,6 +101,8 @@ html, body {
   display: block;
   height: 100%;
   position: relative;
+  transition: 0.6s;
+  transform-style: preserve-3d;
   width: 100%;
 }
 
@@ -96,11 +129,38 @@ html, body {
   align-items: center;
   justify-content: center;
 
-  // this should be getting set on an '.open' class
-  .set-w-h( 200px );
-  @media @mq-small{ .set-w-h( 300px ) }
-  @media @mq-medium{ .set-w-h( 450px ) }
-  @media @mq-large{ .set-w-h( 600px ) }
+  &.info-s-open {
+    // this should be getting set on an '.open' class
+    .set-w-h( 200px );
+    @media @mq-small{ .set-w-h( 300px ) }
+    @media @mq-medium{ .set-w-h( 450px ) }
+    @media @mq-large{ .set-w-h( 600px ) }
+    .pic-info-time {
+      .visually-hidden();
+    }
+    .pic-info-inner {
+      .set-w-h( 200px * 0.7 );
+      @media @mq-small{ .set-w-h( 300px * 0.7 ) }
+      @media @mq-medium{ .set-w-h( 450px * 0.7 ) }
+      @media @mq-large{ .set-w-h( 600px * 0.7 ) }
+    }
+  }
+  &.info-s-closed {
+    cursor: pointer;
+    .set-w-h( 100px );
+    @media @mq-small{ .set-w-h( 175px ) }
+    @media @mq-medium{ .set-w-h( 250px ) }
+    @media @mq-large{ .set-w-h( 300px ) }
+    .pic-info-backface {
+      .visually-hidden();
+    }
+    .pic-info-inner {
+      .set-w-h( 100px * 0.7 );
+      @media @mq-small{ .set-w-h( 175px * 0.7 ) }
+      @media @mq-medium{ .set-w-h( 250px * 0.7 ) }
+      @media @mq-large{ .set-w-h( 300px * 0.7 ) }
+    }
+  }
 }
 
 
@@ -108,12 +168,27 @@ html, body {
   // background: rgba( 51, 51, 51, 0.35 );
   display: block;
   transition: all 0.45s ease-in-out;
+}
 
-  // this should be getting set on an '.open' class
-  .set-w-h( 200px * 0.7 );
-  @media @mq-small{ .set-w-h( 300px * 0.7 ) }
-  @media @mq-medium{ .set-w-h( 450px * 0.7 ) }
-  @media @mq-large{ .set-w-h( 600px * 0.7 ) }
+.pic-info-time {
+  font-size: 2rem;
+  font-family: @playfair;
+  font-weight: 900;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: 48%; left: 50%;
+  transform: translate( -50%, -50% );
+  transition: font-size 0.45s ease-in-out;
+  @media @mq-small{
+    font-size: 3rem;
+  }
+  @media @mq-medium{
+    font-size: 4rem;
+  }
+  @media @mq-large{
+    font-size: 5rem;
+  }
 }
 
 .pic-info-text {
@@ -122,15 +197,16 @@ html, body {
   font-family: @playfair;
   font-weight: 900;
   text-decoration: none;
-  font-size: 0.65rem;
+  font-size: 0.675rem;
   line-height: 1.25;
-  letter-spacing: -0.075rem;
+  letter-spacing: -0.025rem;
   text-shadow: 0 1px 1px rgba( 200, 200, 200, 0.45 );
   transition: all 0.45s ease-in-out;
 
   @media @mq-small{
     font-size: 0.95rem;
     line-height: 1.4;
+    letter-spacing: -0.075rem;
   }
   @media @mq-medium{
     font-size: 1.45rem;
@@ -146,9 +222,20 @@ html, body {
 .pic-info-line {
   display: block;
   border-top: none;
-  border-bottom: 3px solid #333;
-  margin: 1.25rem auto 0;
+  border-bottom: 2px solid #333;
+  margin: 0.25rem auto 0;
   width: 100%;
+  transition: margin 0.45s ease-in-out, border-width 0.45s ease-in-out;
+  @media @mq-small{
+    margin-top: 0.5rem;
+  }
+  @media @mq-medium{
+    border-bottom-width: 3px;
+    margin-top: 1rem;
+  }
+  @media @mq-large{
+    margin-top: 1.25rem;
+  }
 }
 
 .pic-info-list {
@@ -160,54 +247,98 @@ html, body {
 }
 
 .pic-info-list-item {
-  border-bottom: 3px solid #333;
+  border-bottom: 2px solid #333;
   clear: both;
   cursor: pointer;
   display: inline-block;
   float: left;
-  padding: 0.5rem 0.5rem 0.75rem 0;
+  margin: 0;
+  padding: .25rem .125rem 0 0;
   user-select: none;
-  transition: color 0.45s ease-in-out, text-shadow 0.45s ease-in-out;
+  transition: color 0.45s ease-in-out, text-shadow 0.45s ease-in-out, padding 0.45s ease-in-out, border-width 0.45s ease-in-out;
+  > * {
+    display: inline-block;
+    vertical-align: top;
+  }
   &:hover {
     color: #f1f1f1;
     text-shadow: 0 0 2px rgba( 20, 20, 20, 0.65 );
-    .icon {
-      width: 45px;
+    .pic-info-icon {
+      width: 25px;
+      @media @mq-small{
+        width: 30px;
+      }
+      @media @mq-medium{
+        width: 45px;
+      }
     }
     .pic-info-list-item-link {
       color: #f1f1f1;
     }
   }
-  > * {
-    display: inline-block;
-    vertical-align: top;
-  }
   &:first-child{
-    .icon{
-      font-size: 1.75rem;
+    .pic-info-icon{
+      @media @mq-medium{
+        font-size: 1.75rem;
+      }
     }
   }
   &:last-child{
     border-bottom: none;
+    display: none;
   }
+  @media @mq-small {
+    padding: .25rem .25rem .25rem 0;
+  }
+  @media @mq-medium {
+    border-bottom: 3px solid #333;
+    padding: .35rem .35rem .5rem 0;
+  }
+  @media @mq-large {
+    padding: .5rem .5rem .75rem 0;
+  }
+}
+
+.pic-info-icon {
+  font-size: 0.85rem;
+  padding: 0;
+  transition: width 0.275s ease-in-out, font-size 0.45s ease-in-out, padding 0.45s ease-in-out;
+  width: 20px;
+  @media @mq-small{
+    font-size: 1rem;
+    padding: 0 0.125rem;
+    width: 25px;
+  }
+  @media @mq-medium{
+    font-size: 1.25rem;
+    padding: 0 0.25rem;
+    width: 40px;
+  }
+  @media @mq-large{
+    font-size: 1.5rem;
+  }
+
 }
 
 .pic-info-list-item-link {
   color: #333;
+  line-height: 1;
   text-decoration: none;
-  transition: color 0.45s ease-in-out;
-  &.js-username {
-    font-size: 1.45rem;
+  font-size: 0.5rem;
+  transition: color 0.45s ease-in-out, font-size 0.45s ease-in-out;
+  @media @mq-small{
+    font-size: 0.85rem;
   }
-}
+  @media @mq-medium{
+    font-size: 1.2rem;
+  }
+  @media @mq-large{
+    font-size: 1.675rem;
+  }
+  &.js-username {
+  }
 
-.icon {
-  font-size: 1.5rem;
-  padding: 0 0.25rem;
-  transition: width 0.275s ease-in-out;
-  width: 40px;
 }
-
 
 
 

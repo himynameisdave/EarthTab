@@ -12,6 +12,7 @@
       *   @desc:   goes and grabs the reddit stuff.
       *            Accepts a callback to handle the data
       *            TODO: check that this is genric enough to handle any reddit api request
+      *                  I think most things coming from reddit in this format follow the data.children thing
       */
     var fetchRedditData = function( cb ){
         var r = new XMLHttpRequest();
@@ -26,7 +27,6 @@
       *   @desc:   the callback function for the fetchRedditData above
       */
     parseRedditData = function(newData){
-
       /**    getDataForTopImage takes the element that gets appended,
         *    as well as the bracket-stripped title from the data.
         */
@@ -36,8 +36,52 @@
         */
       clearLocalStorage();//clear localstorage before we do a set
       setLocalStorageData( data );
-      setStuff(settings( data ));
+      setStuff(settings( data ));//sets DOM elements
 
+    },
+    /**   @name:   getDataForTopImage
+      *   @params: d [object]
+      *   @desc:   sifts through the provided data object for the first non-moderator post.
+      *            returns an object with the important data from that
+      */
+    getDataForTopImage = function( d ){
+
+      if(!d && typeof d === 'object' ){
+        throw "You didn't provide valid data to getDataForTopImage()!";
+      }
+
+      var obj = {},
+          isImageFound = false;
+
+      d.forEach(function(val, i){
+        /**   If it's not a mod post & we haven't found our image yet
+          */
+        if(isValidImagePost(val.data) && !isImageFound){
+          //  TEMPORARY: just accepts i.imgur domains
+          if( filterDomain(val.data.domain) ){
+
+            console.log( val );
+            /**   Top Image object
+              *   This is where all the data used in the application is set.
+              */
+            obj = {
+              author:     val.data.author,              //  {string}  the reddit user
+              bgUrl:      val.data.url,                 //  {string}  will take the place of data.url
+              created:    val.data.created_utc,         //  {number}  a timestamp of when this post was created.
+              domain:     val.data.domain,              //  {string}  a string of the domain of the post
+              redditLink: 'http://www.reddit.com'+val.data.permalink, //  {string}  link to the reddit post
+              title:      stripSquareBrackets(val.data.title),        //  {string}  a sanitized string, title of the post
+              score:      val.data.score,               //  {number}  a timestamp of when this post was created
+              subreddit:  val.data.subreddit,           //  {string}  the subreddit this came from
+              url:        val.data.url,                 //  {string} DEPRECIATE: the url of the image (not the reddit link)
+              timeSaved:  Date.now() / 1000             //  {number}  a timestamp of when this data was stored. divided by 1000 so we get the value in seconds
+            };
+            isImageFound   = true;
+          }
+        }
+      });
+
+      return obj;
     },
     /**   @name:   setStuff
       *   @params: $[object, data]
@@ -47,38 +91,27 @@
       */
     setStuff = function( $ ){
 
+      console.log("setStuff called with this data:", $.data);
+
       $.setTitle('.pic-info-text');
-      //  set reddit link should be able to handle multiple elements
-      $.setRedditLink('.js-score');
-      $.setRedditLink('.js-time-posted');
+      $.setRedditLink( ['.js-score', '.js-time-posted' ]);
       $.setUserLink('.js-username');
       $.setAuthor('.js-username');
+      $.setTimePosted('.js-time-posted');
 
-
-      console.log($.data);
-
-      // filterDomain($.data.domain);
-      switch($.data.domain){
-
-        case 'i.imgur.com':
-          $.setBackgroundImage( '.main' );
-          break;
-
-        case 'imgur.com':
-          console.log('imgur.com Domain!!!');
-          break;
-
-        default:
-          $.setBackgroundImage( '.main' );
-      }
+      $.setBackgroundImage( '.main' );
 
     },
-    ///////this should happen as soon as we know the domain, not way later....
+    /**   @name:   filterDomain
+      *   @params: domain [string]
+      *   @desc:   Right now this just returs true if it's an 'i.imgur domain'
+      *            What this will eventually do is get a proper URL from non-direct image links
+      */
     filterDomain = function(domain){
-
-      // get the domain and set it...
-      console.log(domain);
-
+      if( domain === "i.imgur.com" )
+        return true;
+      else
+        return false;
     },
     /**   @name:   settings
       *   @params: data [object]
@@ -113,11 +146,19 @@
           element.href = link;
         },
         /**   @name:   settings.setRedditLink
-          *   @params: el[string, selector]
+          *   @params: el[string OR array, selector(s)]
           *   @desc:   takes a selector string and a reddit link and appends that element with the specified content
           */
-        setRedditLink: function( el ){
-          this.setLink( el, this.data.redditLink );
+        setRedditLink: function( els ){
+          if( typeof els === 'string' ){
+            this.setLink( els, this.data.redditLink );
+          }else if( typeof els.length !== "undefined" ){
+            for(i=0; i < els.length; i++){ // can use a forEach because 'this' methods are not available to inner function
+              this.setLink( els[i], this.data.redditLink );
+            }
+          }else{
+            throw "An invalid 'els' paramater was passed to this.setRedditLink. Please pass it a selector string or an array of selector strings.";
+          }
         },
         /**   @name:   settings.setAuthor
           *   @params: el[string, selector]
@@ -132,6 +173,17 @@
           */
         setUserLink: function( el ){
           this.setLink( el, 'http://www.reddit.com/user/'+this.data.author+'/' );
+        },
+        /**   @name:   settings.setTimePosted
+          *   @params: el[string, selector]
+          *   @desc:   takes a selector string and the time posted and appends that element with the specified content
+          */
+        setTimePosted: function( el ){
+          var element = document.querySelector(el),
+              now    = Date.now()/1000,
+              posted = this.data.created;
+
+              this.setInnerHtml( el, (getHrsDiff( posted, now ) + ' hours ago') );
         },
         /**   @name:   settings.setBackgroundImage
           *   @params: el [string, selector]
@@ -157,6 +209,14 @@
     getImgurId = function( imgurUrl ){
       return imgurUrl.substr(d.url.lastIndexOf('/') + 1);
     },
+    /**   @name:   getHrsDiff
+      *   @params: oldTime [number, timestamp], newTime [number, timestamp]
+      *   @desc:   returns the number of hours between two given times, rounded down to the nearest hour
+      */
+    getHrsDiff = function( oldTime, newTime ){
+      var diff = newTime - oldTime;
+      return Math.floor((diff/60)/60);
+    },
     /**   @name:   isLongerThanHrs
       *   @params: then [number, date], maxHrs [number]
       *   @desc:   takes the old time and the max # of hours
@@ -164,11 +224,11 @@
       */
     isLongerThanHrs = function( then, maxHrs ){
 
-      var now  = Date.now(),
+      var now  = Date.now() / 1000,
           diff = now - then,
-          hrsSince = ((diff/1000)/60)/60;
+          hrsSince = (diff/60)/60;
 
-          console.log( 'The time difference is: '+ ((diff/1000)/60)/60 + ' hours');
+          console.log( 'The time difference is: '+ (diff/60)/60 + ' hours');
 
           if( hrsSince > maxHrs ){
             return true;
@@ -195,61 +255,27 @@
 
       chrome.storage.local.set({'oldData': d}, function(){
         console.log('Saved settings to localStorage!');
-        /**   TODO: this is currently only running for i.imgur domains
-          *         ultimately by this point the domain should be sifted and a proper url extacted, meaning this if just goes
-          */
-        // if( d.domain === 'i.imgur.com' ){
-          // convertImgToBase64URL( d.url, function(base64data){
-            // saveBase64ToLocalStorage( base64data );
-            // localStorage.setItem("base64", JSON.stringify(chunkBase64(base64data)));
-            // console.log('Saved base64 image to localStorage!');
-          // });
-        // }
 
+          convertImgToBase64URL( d.url, function(base64data){
+            saveBase64ToLocalStorage( d,  base64data );
+          });
       });
 
     },
-    /**   @name:   getDataForTopImage
-      *   @params: d [object]
-      *   @desc:   sifts through the provided data object for the first non-moderator post.
-      *            returns an object with the important data from that
+    /**   @name:   saveBase64ToLocalStorage
+      *   @params: d [object], n64 [string]
+      *   @desc:   takes the old data object, appends the base64 to it, and adds it to localstorage
       */
-    getDataForTopImage = function( d ){
+    saveBase64ToLocalStorage = function( d, n64 ){
 
-      if(!d && typeof d === 'object' ){
-        throw "You didn't provide valid data to getDataForTopImage()!";
-      }
+      var o = d;
+          o.base64Img = n64;
 
-      var obj = {},
-          isImageFound = false;
-
-      d.forEach(function(val, i){
-        /**   If it's not a mod post & we haven't found our image yet
-          */
-        if(isValidImagePost(val.data) && !isImageFound){
-
-          console.log( val );
-          /**   Top Image object
-            *   This is where all the data used in the application is set.
-            */
-          obj = {
-            author:     val.data.author,              //  {string}  the reddit user
-            bgUrl:      val.data.url,                 //  {string}  will take the place of data.url
-            created:    val.data.created,             //  {number}  a timestamp of when this post was created
-            domain:     val.data.domain,              //  {string}  a string of the domain of the post
-            redditLink: 'http://www.reddit.com'+val.data.permalink, //  {string}  link to the reddit post
-            title:      stripSquareBrackets(val.data.title),        //  {string}  a sanitized string, title of the post
-            score:      val.data.score,               //  {number}  a timestamp of when this post was created
-            subreddit:  val.data.subreddit,           //  {string}  the subreddit this came from
-            url:        val.data.url,                 //  {string} DEPRECIATE: the url of the image (not the reddit link)
-            timeSaved:  Date.now()                    //  {number}  a timestamp of when this post was created
-          };
-          isImageFound   = true;
-
-        }
+      chrome.storage.local.set({'oldData': o}, function(){
+        console.log( 'HOLY SHIT WE ACTUALLY STORED THE MUTHERFUCKING BASE64 IMAGE!' );
+        console.log('Saved base64 image to localStorage!');
       });
 
-      return obj;
     },
     /**   @name:   isValidImagePost
       *   @params: post [object]
@@ -288,11 +314,6 @@
       *
       *   Mega props to this Stackoverflow post:
       *   http://stackoverflow.com/a/20285053/4060044
-      *
-      *   Usage:
-      *   convertImgToBase64URL('http://i.imgur.com/MJ3Amtx.jpg', function(base64Img){
-      *     console.log(base64Img);
-      *   });
       */
     convertImgToBase64URL = function(url, callback, outputFormat){
       var img = new Image();
@@ -308,6 +329,24 @@
               canvas = null;
           };
           img.src = url;
+    },
+    /**   @name:   setTime
+      *   @params: title [string]
+      */
+    setTime = function( el, oldTime ){
+      var today = new Date(),
+          h = today.getHours(),
+          m = today.getMinutes();
+          if (m<10) { m = "0"+m; }
+      var time = h+":"+m;
+
+      if(oldTime !== time) {
+        document.querySelector(el).innerHTML = time;
+      }
+      var t = setTimeout(function(){
+        setTime(el, time);
+      },5000);// five seconds is a lot but I'd rather that then taking the performance hit
+
     };
 
 
@@ -324,17 +363,18 @@
 
 document.addEventListener("DOMContentLoaded", function(event) {
 
+  setTime('.pic-info-time');
+
   chrome.storage.local.get( 'oldData', function(d){
 
     if(d.oldData){
-
-      var maxHrs = 0.5;
+      var maxHrs = 1;
 
       if( isLongerThanHrs( d.oldData.timeSaved, maxHrs ) ){
-        console.log('It\'s been longer than '+maxHrs+' hrs');
+        console.log("It's been longer than "+maxHrs+" hr(s)\nFetching new data!");
         fetchRedditData(parseRedditData);
       }else{
-        console.log('It\'s less than '+maxHrs+' hrs');
+        console.log("It's been less than "+maxHrs+" hr(s)\nUsing old data!");
         setStuff(settings( d.oldData ));
       }
     }else{
@@ -342,5 +382,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
     }
 
   });
+
 
 });
