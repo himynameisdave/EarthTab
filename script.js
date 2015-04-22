@@ -1,4 +1,3 @@
-// "use strict";
 /**
   *         EarthTab Chrome Extension
   *
@@ -73,7 +72,7 @@
               title:      stripSquareBrackets(val.data.title),        //  {string}  a sanitized string, title of the post
               score:      val.data.score,               //  {number}  a timestamp of when this post was created
               subreddit:  val.data.subreddit,           //  {string}  the subreddit this came from
-              url:        val.data.url,                 //  {string} DEPRECIATE: the url of the image (not the reddit link)
+              url:        val.data.url,                 //  {string}  the url of the image (not the reddit link)
               timeSaved:  Date.now() / 1000             //  {number}  a timestamp of when this data was stored. divided by 1000 so we get the value in seconds
             };
             isImageFound   = true;
@@ -183,7 +182,7 @@
               now    = Date.now()/1000,
               posted = this.data.created;
 
-              this.setInnerHtml( el, (getHrsDiff( posted, now ) + ' hours ago') );
+              this.setInnerHtml( el, (Math.floor(getHrsDiff( posted, now )) + ' hours ago') );
         },
         /**   @name:   settings.setBackgroundImage
           *   @params: el [string, selector]
@@ -192,12 +191,22 @@
           */
         setBackgroundImage: function( el ){
           var element = document.querySelector(el);
+
+          if( !this.data.base64Img && !this.data.bgUrl )
+            throw "Trying to set background, however could not find a base64Img or bgUrl in the data set!";
+
           if(this.data.base64Img){
-            console.log('FOUND A BASE64 IMAGE WHICH IS WHAT WE\'RE USING YAY!' );
             element.style.backgroundImage = "url("+this.data.base64Img+")";
+            console.log( "Using the base64!" );
+            //TODO: add an async checker for if the bg image has been set
+            addClass( '.main', 'main-visible' );
           }else{
             element.style.backgroundImage = "url("+this.data.bgUrl+")";
+            console.log( "Using the img url!" );
+            //TODO: add an async checker for if the bg image has been set
+            addClass( '.main', 'main-visible' );
           }
+
         }
       };
       return o;
@@ -211,31 +220,26 @@
     },
     /**   @name:   getHrsDiff
       *   @params: oldTime [number, timestamp], newTime [number, timestamp]
-      *   @desc:   returns the number of hours between two given times, rounded down to the nearest hour
+      *   @desc:   returns the number of hours between two given times, NOT ROUNDED
       */
     getHrsDiff = function( oldTime, newTime ){
       var diff = newTime - oldTime;
-      return Math.floor((diff/60)/60);
+      return (diff/60)/60;
     },
     /**   @name:   isLongerThanHrs
       *   @params: then [number, date], maxHrs [number]
       *   @desc:   takes the old time and the max # of hours
       *            returns true if the difference between then and now is > mxhrs
+      *            TODO: see if this function is actually needed - getHrsDiff() may actually be fine on it's own
       */
     isLongerThanHrs = function( then, maxHrs ){
+      var hrsSince = getHrsDiff( then, (Date.now() / 1000) );
+          console.log( 'The time difference is: '+ hrsSince + ' hours');
 
-      var now  = Date.now() / 1000,
-          diff = now - then,
-          hrsSince = (diff/60)/60;
-
-          console.log( 'The time difference is: '+ (diff/60)/60 + ' hours');
-
-          if( hrsSince > maxHrs ){
+          if( hrsSince > maxHrs )
             return true;
-          }else{
+          else
             return false;
-          }
-
     },
     /**   @name:   clearLocalStorage
       *   @params: {none}
@@ -255,10 +259,9 @@
 
       chrome.storage.local.set({'oldData': d}, function(){
         console.log('Saved settings to localStorage!');
-
-          convertImgToBase64URL( d.url, function(base64data){
-            saveBase64ToLocalStorage( d,  base64data );
-          });
+        convertImgToBase64URL( d.url, function(base64data){
+          saveBase64ToLocalStorage( d,  base64data );
+        });
       });
 
     },
@@ -267,12 +270,9 @@
       *   @desc:   takes the old data object, appends the base64 to it, and adds it to localstorage
       */
     saveBase64ToLocalStorage = function( d, n64 ){
-
       var o = d;
           o.base64Img = n64;
-
       chrome.storage.local.set({'oldData': o}, function(){
-        console.log( 'HOLY SHIT WE ACTUALLY STORED THE MUTHERFUCKING BASE64 IMAGE!' );
         console.log('Saved base64 image to localStorage!');
       });
 
@@ -310,7 +310,7 @@
     },
     /**   @name:    convertImgToBase64URL
       *   @params:  url [string], callback [function], outputFormat [string]
-      *   @desc:    creates a base64 of an image based on a given URL
+      *   @desc:    creates a base64 of an image based on a given URL. ASYNC
       *
       *   Mega props to this Stackoverflow post:
       *   http://stackoverflow.com/a/20285053/4060044
@@ -330,24 +330,43 @@
           };
           img.src = url;
     },
-    /**   @name:   setTime
-      *   @params: title [string]
+    /**   @name:    setTime
+      *   @params:  el [string, selector], oldTime [number, time; optional]
+      *   @desc:    recursivly checks the time and alters it in the DOM
+      *             essentially a self-contained worker function
       */
     setTime = function( el, oldTime ){
-      var today = new Date(),
-          h = today.getHours(),
-          m = today.getMinutes();
+      var t = new Date(),
+          h = t.getHours(),
+          m = t.getMinutes();
           if (m<10) { m = "0"+m; }
       var time = h+":"+m;
 
       if(oldTime !== time) {
         document.querySelector(el).innerHTML = time;
       }
-      var t = setTimeout(function(){
+      var timeout = setTimeout(function(){
         setTime(el, time);
       },5000);// five seconds is a lot but I'd rather that then taking the performance hit
-
+    },
+    /**   @name:    addClass
+      *   @params:  el [string, selector], class [string]
+      *   @desc:    simplifies adding a class to an element
+      */
+    addClass = function( el, className ){
+      var element = document.querySelector( el );
+      element.classList.add(className);
+    },
+    /**   @name:    removeClass
+      *   @params:  el [string, selector], class [string]
+      *   @desc:    simplifies removing a class from an element
+      */
+    removeClass = function( el, className ){
+      var element = document.querySelector( el );
+      element.classList.remove(className);
     };
+
+
 
 
 
@@ -363,11 +382,15 @@
 
 document.addEventListener("DOMContentLoaded", function(event) {
 
+  //  Sets the clock
   setTime('.pic-info-time');
 
+  //  Fetch oldData. Async.
   chrome.storage.local.get( 'oldData', function(d){
 
+    //  check if there is any data
     if(d.oldData){
+      //  Set maxHrs allowed before fetching clean data
       var maxHrs = 1;
 
       if( isLongerThanHrs( d.oldData.timeSaved, maxHrs ) ){
@@ -375,13 +398,19 @@ document.addEventListener("DOMContentLoaded", function(event) {
         fetchRedditData(parseRedditData);
       }else{
         console.log("It's been less than "+maxHrs+" hr(s)\nUsing old data!");
+        //  in case we weren't able to save the base64, let's get that whole process started
+        if( !d.oldData.base64Img ){
+          convertImgToBase64URL( d.oldData.url, function(base64data){
+            saveBase64ToLocalStorage( d.oldData,  base64data );
+          });
+        }
         setStuff(settings( d.oldData ));
       }
+
     }else{
       fetchRedditData(parseRedditData);
     }
 
   });
-
 
 });

@@ -101,9 +101,13 @@ html, body {
   display: block;
   height: 100%;
   position: relative;
-  transition: 0.6s;
+  transition: opacity 0.895s ease-in-out;
   transform-style: preserve-3d;
+  opacity: 0;
   width: 100%;
+  &.main-visible {
+    opacity: 1;
+  }
 }
 
 /**   .pic-info/inner width sizing:
@@ -112,8 +116,6 @@ html, body {
   *      @600px:  400px/280px
   *      @800px:  600px/420px
   */
-
-
 .pic-info {
   background-color: rgba( 255, 255, 255, 0.4 );
   border-radius: 100%;
