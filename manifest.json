@@ -8,6 +8,6 @@
     "unlimitedStorage"
   ],
   "chrome_url_overrides": {
-    "newtab": "newtab.html"
+    "newtab": "app/newtab.html"
   }
 }

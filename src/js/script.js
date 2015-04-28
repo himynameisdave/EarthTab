@@ -45,9 +45,8 @@
       */
     getDataForTopImage = function( d ){
 
-      if(!d && typeof d === 'object' ){
+      if(!d && typeof d === 'object' )
         throw "You didn't provide valid data to getDataForTopImage()!";
-      }
 
       var obj = {},
           isImageFound = false;
@@ -80,6 +79,7 @@
         }
       });
 
+      //  TODO: would be better to return the settings function with this object passed to it
       return obj;
     },
     /**   @name:   setStuff

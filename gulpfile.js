@@ -5,22 +5,28 @@ var gulp = require('gulp'),
             });
 
 
-gulp.task( 'default', [ 'compile', 'reload' ]);
+gulp.task( 'compile-css', function(){
 
-
-gulp.task( 'compile', function(){
-
-  return gulp.src('style.less')
+  return gulp.src('./src/css/style.less')
           .pipe($.less())
           .pipe($.autoprefixer())
           .pipe($.minifyCss())
-          .pipe(gulp.dest('./'));
+          .pipe(gulp.dest('./app/css/'));
+
+});
+
+gulp.task( 'compile-js', function(){
+
+  return gulp.src('./src/js/script.js')
+          .pipe($.uglify())
+          .pipe(gulp.dest('./app/js/'))
 
 });
 
 
-gulp.task( 'reload', function(){
+gulp.task( 'default', function(){
 
-  return gulp.watch( 'style.less', ['compile'] );
+  gulp.watch( './src/css/*.less' , ['compile-css'] );
+  gulp.watch( './src/js/script.js' , ['compile-js'] );
 
 })
