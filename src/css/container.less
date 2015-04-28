@@ -1,0 +1,103 @@
+
+
+
+
+.i-container {
+  perspective: 1000;
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate( -50%, -50% );
+  &.i-container-s-open {
+    .i-container-flipper {
+      transform: rotateY(900deg);
+    }
+  }
+  &.i-container-s-closed {
+    .i-container-flipper {
+      transform: rotateY(0deg);
+    }
+  }
+}
+
+.i-container,
+.i-container-front,
+.i-container-back {
+  text-align: center;
+  transition: all 0.45s ease-in-out;
+}
+
+.i-container-s-open {
+  .set-w-h( 200px );
+  @media @mq-small{ .set-w-h( 300px ) }
+  @media @mq-medium{ .set-w-h( 450px ) }
+  @media @mq-large{ .set-w-h( 600px ) }
+  .i-container-front,
+  .i-container-back {
+    .set-w-h( 200px );
+    @media @mq-small{ .set-w-h( 300px ) }
+    @media @mq-medium{ .set-w-h( 450px ) }
+    @media @mq-large{ .set-w-h( 600px ) }
+    .i-container-inner {
+      .set-w-h( 200px * 0.7 );
+      @media @mq-small{ .set-w-h( 300px * 0.7 ) }
+      @media @mq-medium{ .set-w-h( 450px * 0.7 ) }
+      @media @mq-large{ .set-w-h( 600px * 0.7 ) }
+    }
+  }
+}
+
+.i-container-s-closed {
+  .set-w-h( 100px );
+  @media @mq-small{ .set-w-h( 175px ) }
+  @media @mq-medium{ .set-w-h( 250px ) }
+  @media @mq-large{ .set-w-h( 300px ) }
+  .i-container-front,
+  .i-container-back {
+    .set-w-h( 100px );
+    @media @mq-small{ .set-w-h( 175px ) }
+    @media @mq-medium{ .set-w-h( 250px ) }
+    @media @mq-large{ .set-w-h( 300px ) }
+    .i-container-inner {
+      .set-w-h( 100px * 0.7 );
+      @media @mq-small{ .set-w-h( 175px * 0.7 ) }
+      @media @mq-medium{ .set-w-h( 250px * 0.7 ) }
+      @media @mq-large{ .set-w-h( 300px * 0.7 ) }
+    }
+  }
+}
+
+.i-container-flipper {
+  // height: 100%;
+  position: relative;
+  transition-duration: 1.15s;
+  transition-timing-function: cubic-bezier( .53, .02, 0, 1.03 );
+  transform-style: preserve-3d;
+}
+
+.i-container-front,
+.i-container-back {
+  background-color: rgba( 255, 255, 255, 0.4 );
+  border-radius: 100%;
+  backface-visibility: hidden;
+  cursor: pointer;
+  position: absolute;
+  top: 0; left: 0;
+  //  to make the inner perfectly centered (thanks flexbox)
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.i-container-front {
+  transform: rotateY(0deg);
+  z-index: 2;
+}
+
+.i-container-back {
+  transform: rotateY(900deg);
+}
+
+.i-container-inner {
+  overflow: hidden;
+  transition: width 0.45s ease-in-out, height 0.45s ease-in-out;
+}

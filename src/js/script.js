@@ -92,13 +92,12 @@
 
       console.log("setStuff called with this data:", $.data);
 
-      $.setTitle('.pic-info-text');
+      $.setTitle('.js-title');
       $.setRedditLink( ['.js-score', '.js-time-posted' ]);
       $.setUserLink('.js-username');
       $.setAuthor('.js-username');
       $.setTimePosted('.js-time-posted');
-
-      $.setBackgroundImage( '.main' );
+      $.setBackgroundImage( '.js-img' );
 
     },
     /**   @name:   filterDomain
@@ -330,12 +329,33 @@
           };
           img.src = url;
     },
-    /**   @name:    setTime
+    /**   @name:    setupFlipEvent
+      *   @params:  el [string, selector]
+      *   @desc:    sets up the click event listener on a given dom element
+      */
+    setupFlipEvent = function( el ){
+
+      var element = document.querySelector(el);
+
+      element.addEventListener( 'click', function(){
+        if( element.classList.contains('i-container-s-closed') ){
+          removeClass( el, 'i-container-s-closed' );
+          addClass( el, 'i-container-s-open' );
+        }
+        else if( element.classList.contains('i-container-s-open') ){
+          removeClass( el, 'i-container-s-open' );
+          addClass( el, 'i-container-s-closed' );
+        }else{
+          throw "What the whaaaa? http://bit.ly/1IjwmfN";
+        }
+      });
+    },
+    /**   @name:    setClock
       *   @params:  el [string, selector], oldTime [number, time; optional]
       *   @desc:    recursivly checks the time and alters it in the DOM
       *             essentially a self-contained worker function
       */
-    setTime = function( el, oldTime ){
+    setClock = function( el, oldTime ){
       var t = new Date(),
           h = t.getHours(),
           m = t.getMinutes();
@@ -346,7 +366,7 @@
         document.querySelector(el).innerHTML = time;
       }
       var timeout = setTimeout(function(){
-        setTime(el, time);
+        setClock(el, time);
       },5000);// five seconds is a lot but I'd rather that then taking the performance hit
     },
     /**   @name:    addClass
@@ -383,7 +403,10 @@
 document.addEventListener("DOMContentLoaded", function(event) {
 
   //  Sets the clock
-  setTime('.pic-info-time');
+  setClock('.js-time');
+
+  //  Sets up the click event on the flip container
+  setupFlipEvent('.js-flip-container');
 
   //  Fetch oldData. Async.
   chrome.storage.local.get( 'oldData', function(d){
