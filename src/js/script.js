@@ -56,7 +56,7 @@
           */
         if(isValidImagePost(val.data) && !isImageFound){
           //  TEMPORARY: just accepts i.imgur domains
-          if( filterDomain(val.data.domain) ){
+          if( filterDomain( val.data ) ){
 
             console.log( val );
             /**   Top Image object
@@ -100,12 +100,51 @@
       $.setBackgroundImage( '.js-img' );
 
     },
+
+
+
+    fetchImgurData = function( imgurUrl, cb ){
+
+      var clientId = "724b9d5bf9b4b3d",
+          clientSecret = "a8cfce1863b5f32486f4608fb5e8bf2f4b165c1d";
+
+      var endpoint = "https://api.imgur.com/3/image/dlbIxsw",
+          r = new XMLHttpRequest();
+      r.open("get", endpoint, true);
+      r.setRequestHeader("Authorization", "Client-ID "+clientId);
+      r.onload = function(xmlEvent){
+        cb(r.response);
+      };
+      r.send();
+
+
+      // fetchImgurData( "http://imgur.com/dlbIxsw", parseImgurData );
+
+    },
+    parseImgurData = function( imgurData ){
+
+      console.log("Fetched the imgur data successfully!");
+      console.log( imgurData );
+
+    },
     /**   @name:   filterDomain
       *   @params: domain [string]
       *   @desc:   Right now this just returs true if it's an 'i.imgur domain'
       *            What this will eventually do is get a proper URL from non-direct image links
       */
-    filterDomain = function(domain){
+    filterDomain = function( data ){
+
+      var domain = data.domain;
+
+      // if( domain === "imgur.com" ){
+
+      //   console.log("======\nMaking a imgur api request!\n======");
+
+      //   fetchImgurData( data.url, function(d){
+      //     console.log( "fetched imgur data:\n"+d);
+      //   });
+      // }
+
       if( domain === "i.imgur.com" )
         return true;
       else
@@ -401,6 +440,8 @@
 ///////////////////////////////////////////////////////////////////////////
 
 document.addEventListener("DOMContentLoaded", function(event) {
+
+  // clearLocalStorage();
 
   //  Sets the clock
   setClock('.js-time');
