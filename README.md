@@ -36,7 +36,7 @@ Sadly, installing it this way will not allow for automatic updates. Therefore yo
 
 ---
 
-*Created by [Dave Lunny](http://himynameisdave.com) in the beautiful year 2015.*
+*Copyright (c) 2015 [Dave Lunny](http://himynameisdave.com) Licenced under the MIT licence*
 
 
 <!--
