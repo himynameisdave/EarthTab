@@ -10,7 +10,7 @@ gulp.task( 'compile-css', function(){
   return gulp.src('./src/css/style.less')
           .pipe($.less())
           .pipe($.autoprefixer())
-          .pipe($.minifyCss())
+//          .pipe($.minifyCss())
           .pipe(gulp.dest('./app/css/'));
 
 });
@@ -18,7 +18,7 @@ gulp.task( 'compile-css', function(){
 gulp.task( 'compile-js', function(){
 
   return gulp.src('./src/js/script.js')
-          .pipe($.uglify())
+//          .pipe($.uglify())
           .pipe(gulp.dest('./app/js/'))
 
 });
