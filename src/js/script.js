@@ -399,6 +399,10 @@
           h = t.getHours(),
           m = t.getMinutes();
           if (m<10) { m = "0"+m; }
+      if( h > 12 ){
+        h = h - 12;
+      }
+
       var time = h+":"+m;
 
       if(oldTime !== time) {
