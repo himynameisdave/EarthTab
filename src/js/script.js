@@ -13,9 +13,9 @@
       *            TODO: check that this is genric enough to handle any reddit api request
       *                  I think most things coming from reddit in this format follow the data.children thing
       */
-    var fetchRedditData = function( cb ){
+    var fetchRedditData = function( cb, sub ){
         var r = new XMLHttpRequest();
-        r.open("get", "http://www.reddit.com/r/earthporn/.json", true);
+        r.open("get", "http://www.reddit.com/r/"+sub+"/.json", true);
         r.onload = function(xmlEvent){
           cb(JSON.parse(r.response).data.children);
         };
@@ -418,7 +418,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
       if( isLongerThanHrs( d.oldData.timeSaved, maxHrs ) ){
         console.log("It's been longer than "+maxHrs+" hr(s)\nFetching new data!");
-        fetchRedditData(parseRedditData);
+        fetchRedditData(parseRedditData, "earthporn");
       }else{
         console.log("It's been less than "+maxHrs+" hr(s)\nUsing old data!");
         //  in case we weren't able to save the base64, let's get that whole process started
@@ -431,7 +431,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
       }
 
     }else{
-      fetchRedditData(parseRedditData);
+      fetchRedditData(parseRedditData, "earthporn");
     }
 
   });
