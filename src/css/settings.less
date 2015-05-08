@@ -1,0 +1,69 @@
+
+
+.settings-perspective {
+  height: 100%;
+  perspective: 800;
+  position: relative;
+  width: 100%;
+  z-index: -100;
+}
+
+.settings-button-text { .visually-hidden() }
+
+.settings-open-button {
+  background-color: #fff;
+  border: 0;
+  height: 1.5rem;
+  position: absolute;
+  bottom: 5%; right: 5%;
+  width: 1.5rem;
+}
+
+.settings {
+  @transTime: 0.475s;
+  background: rgba( 255, 255, 255, 0.85 );
+  height: 100%;
+  width: 100%;
+  transform-origin: 50% 0;
+  transition: transform @transTime ease-in-out, opacity @transTime ease-in-out;
+
+  &.settings-s-closed {
+    z-index: -9999;
+    //TEMP
+    // display: none;
+    // //TEMP
+    opacity: 0;
+    transform: rotateX(-90deg) translate( 0, -50% );
+  }
+  &.settings-s-open {
+    z-index: 9999;
+    //TEMP
+    // display: block;
+    //TEMP
+    opacity: 1;
+    transform: rotateX(0deg) translate( 0, 0 );
+  }
+}
+
+.settings-close-button {
+
+
+}
+
+.settings-list {
+
+
+}
+
+.settings-list-item {
+
+
+}
+
+.settings-list-heading {
+  margin: 0;
+  padding: 0;
+}
+
+
+

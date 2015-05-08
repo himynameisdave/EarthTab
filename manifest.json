@@ -1,12 +1,19 @@
 {
   "manifest_version": 2,
   "name": "EarthTab",
-  "description": "A Chrome extension that scrapes r/earthporn and makes the current top image the background for your new tab page.",
-  "version": "0.0.1",
+  "author": "Dave Lunny",
+  "description": "Pulls in beautiful images from reddit's SFW Porn network (such as EarthPorn and SpacePorn)",
+  "version": "0.1.0",
+  "minimum_chrome_version": "20",
   "permissions": [
     "storage",
     "unlimitedStorage"
   ],
+  "icons": {
+    "16": "assets/app-icon-128.png",
+    "48": "assets/app-icon-128.png",
+    "128": "assets/app-icon-128.png"
+  },
   "chrome_url_overrides": {
     "newtab": "app/newtab.html"
   }

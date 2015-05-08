@@ -329,26 +329,32 @@
           };
           img.src = url;
     },
-    /**   @name:    setupFlipEvent
-      *   @params:  el [string, selector]
-      *   @desc:    sets up the click event listener on a given dom element
+    /**   @name:    setupClickEvent
+      *   @params:  arr [array, of objects]
+      *   @desc:    Passed an array where all of the objects contain info on what element/how to open them
       */
-    setupFlipEvent = function( el ){
+    setupClickEvents = function( arr ) {
 
-      var element = document.querySelector(el);
+      arr.forEach(function(val, i){
+        var element  = document.querySelector('.'+val.el),
+            targetEl = document.querySelector('.'+val.targetEl);
 
-      element.addEventListener( 'click', function(){
-        if( element.classList.contains('i-container-s-closed') ){
-          removeClass( el, 'i-container-s-closed' );
-          addClass( el, 'i-container-s-open' );
-        }
-        else if( element.classList.contains('i-container-s-open') ){
-          removeClass( el, 'i-container-s-open' );
-          addClass( el, 'i-container-s-closed' );
-        }else{
-          throw "What the whaaaa? http://bit.ly/1IjwmfN";
-        }
+        element.addEventListener('click', function(){
+          if( targetEl.classList.contains( val.close ) ){
+            removeClass( '.'+val.targetEl, val.close );
+            addClass( '.'+val.targetEl, val.open );
+          }
+          else if( targetEl.classList.contains(val.open) ){
+            removeClass( '.'+val.targetEl, val.open );
+            addClass( '.'+val.targetEl, val.close );
+          }else{
+            throw "What the whaaaa? http://bit.ly/1IjwmfN";
+          }
+
+        });
+
       });
+
     },
     /**   @name:    setClock
       *   @params:  el [string, selector], oldTime [number, time; optional]
@@ -405,8 +411,25 @@ document.addEventListener("DOMContentLoaded", function(event) {
   //  Sets the clock
   setClock('.js-time');
 
-  //  Sets up the click event on the flip container
-  setupFlipEvent('.js-flip-container');
+  var clickEvents = [{
+                      el:       'js-flip-container',
+                      targetEl: 'js-flip-container',
+                      open:     'i-container-s-open',
+                      close:    'i-container-s-closed'
+                    },{
+                      el:       'js-open-settings',
+                      targetEl: 'settings',
+                      open:     'settings-s-open',
+                      close:    'settings-s-closed'
+                    },{
+                      el:       'js-close-settings',
+                      targetEl: 'settings',
+                      open:     'settings-s-open',
+                      close:    'settings-s-closed'
+                    }];
+
+
+  setupClickEvents(clickEvents);
 
   //  Fetch oldData. Async.
   chrome.storage.local.get( 'oldData', function(d){

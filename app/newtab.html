@@ -37,9 +37,126 @@
           </div>
         </div>
       </section>
+
+      <button class="settings-open-button js-open-settings">
+        <span class="icon icon-settings"></span>
+        <span class="settings-button-text">Settings</span>
+      </button>
+      <div class="settings-perspective">
+        <section class="settings settings-s-closed">
+          <button class="settings-close-button js-close-settings">
+            <span class="settings-button-text">Close Settings</span>
+          </button>
+          <ul class="settings-list">
+            <li class="settings-list-item">
+              <h2 class="settings-list-heading">
+                What subreddits do you want to pull images from?
+              </h2>
+              <ul class="settings-subreddit-list">
+                <li class="settings-subreddit-list-item">
+                  <label class="settings-subreddit-label" for="sub-earthporn">
+                    <a class="settings-subreddit-label-link" href="http://www.reddit.com/r/EarthPorn/">
+                      EarthPorn
+                    </a>
+                  </label>
+                  <input type="checkbox" class="settings-subreddit-checkbox" name="sub-earthporn" />
+                </li>
+                <li class="settings-subreddit-list-item">
+                  <label class="settings-subreddit-label" for="sub-skyporn">
+                    <a class="settings-subreddit-label-link" href="http://www.reddit.com/r/SkyPorn/">
+                      SkyPorn
+                    </a>
+                  </label>
+                  <input type="checkbox" class="settings-subreddit-checkbox" name="sub-skyporn" />
+                </li>
+                <li class="settings-subreddit-list-item">
+                  <label class="settings-subreddit-label" for="sub-waterporn">
+                    <a class="settings-subreddit-label-link" href="http://www.reddit.com/r/WaterPorn/">
+                      WaterPorn
+                    </a>
+                  </label>
+                  <input type="checkbox" class="settings-subreddit-checkbox" name="sub-waterporn" />
+                </li>
+                <li class="settings-subreddit-list-item">
+                  <label class="settings-subreddit-label" for="sub-desertporn">
+                    <a class="settings-subreddit-label-link" href="http://www.reddit.com/r/DesertPorn/">
+                      DesertPorn
+                    </a>
+                  </label>
+                  <input type="checkbox" class="settings-subreddit-checkbox" name="sub-desertporn" />
+                </li>
+                <li class="settings-subreddit-list-item">
+                  <label class="settings-subreddit-label" for="sub-winterporn">
+                    <a class="settings-subreddit-label-link" href="http://www.reddit.com/r/WinterPorn/">
+                      WinterPorn
+                    </a>
+                  </label>
+                  <input type="checkbox" class="settings-subreddit-checkbox" name="sub-winterporn" />
+                </li>
+                <li class="settings-subreddit-list-item">
+                  <label class="settings-subreddit-label" for="sub-autumnporn">
+                    <a class="settings-subreddit-label-link" href="http://www.reddit.com/r/AutumnPorn/">
+                      AutumnPorn
+                    </a>
+                  </label>
+                  <input type="checkbox" class="settings-subreddit-checkbox" name="sub-autumnporn" />
+                </li>
+                <li class="settings-subreddit-list-item">
+                  <label class="settings-subreddit-label" for="sub-springporn">
+                    <a class="settings-subreddit-label-link" href="http://www.reddit.com/r/SpringPorn/">
+                      SpringPorn
+                    </a>
+                  </label>
+                  <input type="checkbox" class="settings-subreddit-checkbox" name="sub-springporn" />
+                </li>
+                <li class="settings-subreddit-list-item">
+                  <label class="settings-subreddit-label" for="sub-summerporn">
+                    <a class="settings-subreddit-label-link" href="http://www.reddit.com/r/SummerPorn/">
+                      SummerPorn
+                    </a>
+                  </label>
+                  <input type="checkbox" class="settings-subreddit-checkbox" name="sub-summerporn" />
+                </li>
+                <li class="settings-subreddit-list-item">
+                  <label class="settings-subreddit-label" for="sub-weatherporn">
+                    <a class="settings-subreddit-label-link" href="http://www.reddit.com/r/WeatherPorn/">
+                      WeatherPorn
+                    </a>
+                  </label>
+                  <input type="checkbox" class="settings-subreddit-checkbox" name="sub-weatherporn" />
+                </li>
+                <li class="settings-subreddit-list-item">
+                  <label class="settings-subreddit-label" for="sub-lakeporn">
+                    <a class="settings-subreddit-label-link" href="http://www.reddit.com/r/LakePorn/">
+                      LakePorn
+                    </a>
+                  </label>
+                  <input type="checkbox" class="settings-subreddit-checkbox" name="sub-lakeporn" />
+                </li>
+                <li class="settings-subreddit-list-item">
+                  <label class="settings-subreddit-label" for="sub-spaceporn">
+                    <a class="settings-subreddit-label-link" href="http://www.reddit.com/r/SpacePorn/">
+                      SpacePorn
+                    </a>
+                  </label>
+                  <input type="checkbox" class="settings-subreddit-checkbox" name="sub-spaceporn" />
+                </li>
+              </ul>
+            </li>
+            <li class="settings-list-item">
+              <h2 class="settings-list-heading">
+                Update frequency:
+              </h2>
+              <!-- 12hrs, every 15 mins, for fine grained control -->
+              <input type="range" min="0" max="48" />
+            </li>
+          </ul>
+        </section>
+      </div>
     </main>
     <script type="text/javascript" src="js/script.js"></script>
     <!-- I used an icon from The Noun Project: https://thenounproject.com/term/time/7382/ -->
-    <!-- ..or two: https://thenounproject.com/term/award/16634/ -->
+    <!-- ..or two: https://thenounproject.com/term/settings/29364/ -->
+    <!-- ..or all the icons... https://thenounproject.com/term/close/10280/ -->
   </body>
 </html>
