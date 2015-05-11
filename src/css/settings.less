@@ -51,8 +51,14 @@
 }
 
 .settings-list {
-
-
+  .mauto();
+  list-style: none;
+  padding: 0;
+  transition: width 0.425s ease-in-out;
+  width: 95%;
+  @media @mq-small { width: 80%; }
+  @media @mq-medium { width: 65%; }
+  @media @mq-large { width: 50%; }
 }
 
 .settings-list-item {
@@ -64,6 +70,11 @@
   margin: 0;
   padding: 0;
 }
+
+.settings-subreddit-list {
+  list-style: none;
+}
+
 
 
 

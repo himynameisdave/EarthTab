@@ -329,17 +329,22 @@
           };
           img.src = url;
     },
+
+
     /**   @name:    setupClickEvent
-      *   @params:  arr [array, of objects]
+      *   @params:  clickEvents [array, of objects]
       *   @desc:    Passed an array where all of the objects contain info on what element/how to open them
       */
-    setupClickEvents = function( arr ) {
+    setupClickEvents = function( clickEvents ) {
 
-      arr.forEach(function(val, i){
+      clickEvents.forEach(function(val, i){
+
         var element  = document.querySelector('.'+val.el),
             targetEl = document.querySelector('.'+val.targetEl);
 
+
         element.addEventListener('click', function(){
+
           if( targetEl.classList.contains( val.close ) ){
             removeClass( '.'+val.targetEl, val.close );
             addClass( '.'+val.targetEl, val.open );
@@ -351,9 +356,56 @@
             throw "What the whaaaa? http://bit.ly/1IjwmfN";
           }
 
+          //  TODO: HAXOR, should be removed laters
+
+          // if( val.el === 'js-close-settings' ){
+          //   console.log('closing settings');
+          //   toggleContainerVisibility('open');
+          // }
+          // if( val.el === 'js-open-settings' ){
+          //   console.log('opening settings');
+          //   toggleContainerVisibility('close');
+          // }
+
+
         });
 
       });
+
+    },
+
+
+    /**     
+      *
+      */
+    toggleContainerVisibility = function( toggle ){
+
+      //  hella safeguarding
+      if( typeof toggle !== 'string' )
+        throw 'toggleContainerVisibility() needs a string yo!';
+      if( toggle !== 'open' && toggle !== 'close' )
+        throw "You gotta pass 'open' or 'close' to toggleContainerVisibility()";
+
+      var el      = document.querySelector('.i-container'),
+          visible = 'i-container-s-visible',
+          hidden  = 'i-container-s-hidden';
+
+
+      if( toggle === 'close' ){
+        removeClass( el, visible );
+        addClass( el, hidden );
+        setTimeout(function(){
+          el.style.display = 'none';
+        }, 500);//actual anim time is 0.45s in the Less file
+      }
+      if( toggle === 'open' ){
+        console.log('closing the settings, opening the ');
+        el.style.display = 'block';
+        removeClass( el, hidden );
+        addClass( el, visible );
+      }
+
+
 
     },
     /**   @name:    setClock
@@ -380,7 +432,13 @@
       *   @desc:    simplifies adding a class to an element
       */
     addClass = function( el, className ){
-      var element = document.querySelector( el );
+      var element;
+      if( typeof el === 'object' )
+        element = el;
+      else if( typeof el === 'string' )
+        element = document.querySelector( el );
+      else
+        throw "addClass() needs either an element or a selector string!";
       element.classList.add(className);
     },
     /**   @name:    removeClass
@@ -388,7 +446,13 @@
       *   @desc:    simplifies removing a class from an element
       */
     removeClass = function( el, className ){
-      var element = document.querySelector( el );
+      var element;
+      if( typeof el === 'object' )
+        element = el;
+      else if( typeof el === 'string' )
+        element = document.querySelector( el );
+      else
+        throw "removeClass() needs either an element or a selector string!";
       element.classList.remove(className);
     };
 

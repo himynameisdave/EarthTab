@@ -225,6 +225,16 @@
     width: 210px;
   }
 }
+.i-container-s-visible {
+  -webkit-transform: translate(-50%, -50%) scale(1);
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+.i-container-s-hidden {
+  -webkit-transform: translate(-50%, -50%) scale(0);
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+}
 .i-container-flipper {
   position: relative;
   -webkit-transition-duration: 1.15s;
@@ -517,9 +527,36 @@
   -webkit-transform: rotateX(0deg) translate(0, 0);
   transform: rotateX(0deg) translate(0, 0);
 }
+.settings-list {
+  margin-left: auto;
+  margin-right: auto;
+  list-style: none;
+  padding: 0;
+  -webkit-transition: width 0.425s ease-in-out;
+  transition: width 0.425s ease-in-out;
+  width: 95%;
+}
+@media all and (min-width: 400px) and (min-height: 320px) {
+  .settings-list {
+    width: 80%;
+  }
+}
+@media all and (min-width: 600px) and (min-height: 460px) {
+  .settings-list {
+    width: 65%;
+  }
+}
+@media all and (min-width: 800px) and (min-height: 620px) {
+  .settings-list {
+    width: 50%;
+  }
+}
 .settings-list-heading {
   margin: 0;
   padding: 0;
+}
+.settings-subreddit-list {
+  list-style: none;
 }
 * {
   box-sizing: border-box;
