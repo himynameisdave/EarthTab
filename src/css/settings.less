@@ -10,13 +10,21 @@
 
 .settings-button-text { .visually-hidden() }
 
-.settings-open-button {
-  background-color: #fff;
+.settings-button {
+  // background-color: #fff;
   border: 0;
   height: 1.5rem;
   position: absolute;
-  bottom: 5%; right: 5%;
+  top: 5%; right: 5%;
   width: 1.5rem;
+
+  transition: background-color 0.85s ease-out;
+  &.settings-button-s-closed {
+    background-color: #fff;
+  }
+  &.settings-button-s-open {
+    background-color: lime;
+  }
 }
 
 .settings {
@@ -43,11 +51,6 @@
     opacity: 1;
     transform: rotateX(0deg) translate( 0, 0 );
   }
-}
-
-.settings-close-button {
-
-
 }
 
 .settings-list {

@@ -329,54 +329,31 @@
           };
           img.src = url;
     },
-
-
-    /**   @name:    setupClickEvent
-      *   @params:  clickEvents [array, of objects]
-      *   @desc:    Passed an array where all of the objects contain info on what element/how to open them
+    /**   @name:    setupFlipEvent
+      *   @params:  clickEvent [object]
+      *   @desc:    Passed a "click event" object which contains the classes/elements we need to target
       */
-    setupClickEvents = function( clickEvents ) {
+    setupFlipEvent = function( e ){
+      var element = document.querySelector('.'+e.el);
 
-      clickEvents.forEach(function(val, i){
-
-        var element  = document.querySelector('.'+val.el),
-            targetEl = document.querySelector('.'+val.targetEl);
-
-
-        element.addEventListener('click', function(){
-
-          if( targetEl.classList.contains( val.close ) ){
-            removeClass( '.'+val.targetEl, val.close );
-            addClass( '.'+val.targetEl, val.open );
-          }
-          else if( targetEl.classList.contains(val.open) ){
-            removeClass( '.'+val.targetEl, val.open );
-            addClass( '.'+val.targetEl, val.close );
-          }else{
-            throw "What the whaaaa? http://bit.ly/1IjwmfN";
-          }
-
-          //  TODO: HAXOR, should be removed laters
-
-          // if( val.el === 'js-close-settings' ){
-          //   console.log('closing settings');
-          //   toggleContainerVisibility('open');
-          // }
-          // if( val.el === 'js-open-settings' ){
-          //   console.log('opening settings');
-          //   toggleContainerVisibility('close');
-          // }
-
-
-        });
-
-      });
+      element.addEventListener( 'click', function(){
+        if( element.classList.contains(e.close) ){
+          removeClass( element, e.close );
+          addClass( element, e.open );
+        }
+       else if( element.classList.contains(e.open) ){
+          removeClass( element, e.open );
+          addClass( element, e.close );
+        }else{
+          throw "What the whaaaa? http://bit.ly/1IjwmfN";
+        }
+       });
 
     },
-
-
-    /**     
-      *
+    /**   @name:    toggleContainerVisibility
+      *   @params:  clickEvent [object]
+      *   @desc:    Passed a "click event" object which contains the classes/elements we need to target
+      *             TODO: this whole thing seems pretty haxor/overkill
       */
     toggleContainerVisibility = function( toggle ){
 
@@ -401,11 +378,11 @@
       if( toggle === 'open' ){
         console.log('closing the settings, opening the ');
         el.style.display = 'block';
-        removeClass( el, hidden );
-        addClass( el, visible );
+        setTimeout(function(){
+          removeClass( el, hidden );
+          addClass( el, visible );
+        }, 50);
       }
-
-
 
     },
     /**   @name:    setClock
@@ -454,6 +431,13 @@
       else
         throw "removeClass() needs either an element or a selector string!";
       element.classList.remove(className);
+    },
+    /**   @name:    _log
+      *   @params:  data [whatever the user wants to log]
+      *   @desc:    utility logging function
+      */
+    _log = function( data ){
+      console.log(data);
     };
 
 
@@ -475,25 +459,39 @@ document.addEventListener("DOMContentLoaded", function(event) {
   //  Sets the clock
   setClock('.js-time');
 
-  var clickEvents = [{
-                      el:       'js-flip-container',
-                      targetEl: 'js-flip-container',
-                      open:     'i-container-s-open',
-                      close:    'i-container-s-closed'
-                    },{
-                      el:       'js-open-settings',
-                      targetEl: 'settings',
-                      open:     'settings-s-open',
-                      close:    'settings-s-closed'
-                    },{
-                      el:       'js-close-settings',
-                      targetEl: 'settings',
-                      open:     'settings-s-open',
-                      close:    'settings-s-closed'
-                    }];
+  setupFlipEvent({  el:       'js-flip-container',
+                    targetEl: 'js-flip-container',
+                    open:     'i-container-s-open',
+                    close:    'i-container-s-closed'
+                  });
 
 
-  setupClickEvents(clickEvents);
+  var els = {
+    settings: document.querySelector('.settings'),
+    openSettings: document.querySelector('.js-settings-controller')
+  };
+
+  els.openSettings.addEventListener('click', function(){
+
+    if( els.settings.classList.contains( 'settings-s-closed' ) ){
+      removeClass( '.settings', 'settings-s-closed' );
+      addClass( '.settings', 'settings-s-open' );
+      toggleContainerVisibility('close');
+      removeClass( els.openSettings, 'settings-button-s-closed' );
+      addClass( els.openSettings, 'settings-button-s-open' );
+    }
+    else if( els.settings.classList.contains( 'settings-s-open' ) ){
+      removeClass( '.settings', 'settings-s-open' );
+      addClass( '.settings', 'settings-s-closed' );
+      toggleContainerVisibility('open');
+      removeClass( els.openSettings, 'settings-button-s-open' );
+      addClass( els.openSettings, 'settings-button-s-closed' );
+    }else{
+      throw "What the whaaaa? http://bit.ly/1IjwmfN";
+    }
+
+  });
+
 
   //  Fetch oldData. Async.
   chrome.storage.local.get( 'oldData', function(d){
