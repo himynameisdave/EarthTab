@@ -20,6 +20,12 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+.icon-settings-close:before {
+  content: "\e600";
+}
+.icon-settings-open:before {
+  content: "\e601";
+}
 .icon-award:before {
   content: "\2665";
 }
@@ -498,20 +504,47 @@
   border: 0;
 }
 .settings-button {
+  background: transparent;
   border: 0;
   height: 1.5rem;
   position: absolute;
   top: 5%;
   right: 5%;
   width: 1.5rem;
-  -webkit-transition: background-color 0.85s ease-out;
-  transition: background-color 0.85s ease-out;
 }
-.settings-button.settings-button-s-closed {
-  background-color: #fff;
+.settings-button .settings-button-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  -webkit-transition: all 0.45s ease-in-out;
+  transition: all 0.45s ease-in-out;
 }
-.settings-button.settings-button-s-open {
-  background-color: lime;
+.settings-button .settings-button-icon:before {
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+  font-size: 1.5rem;
+  height: 100%;
+  width: 100%;
+}
+.settings-button:focus {
+  outline: none;
+}
+.settings-button.settings-button-s-closed .settings-button-icon.icon-settings-close {
+  -webkit-transform: scale(0);
+  transform: scale(0);
+}
+.settings-button.settings-button-s-closed .settings-button-icon.icon-settings-open {
+  -webkit-transform: scale(1);
+  transform: scale(1);
+}
+.settings-button.settings-button-s-open .settings-button-icon.icon-settings-close {
+  -webkit-transform: scale(1);
+  transform: scale(1);
+}
+.settings-button.settings-button-s-open .settings-button-icon.icon-settings-open {
+  -webkit-transform: scale(0);
+  transform: scale(0);
 }
 .settings {
   background: rgba(255, 255, 255, 0.85);

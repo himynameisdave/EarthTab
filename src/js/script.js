@@ -35,7 +35,7 @@
         */
       clearLocalStorage();//clear localstorage before we do a set
       setLocalStorageData( data );
-      setStuff(settings( data ));//sets DOM elements
+      setStuff(GetData( data ));//sets DOM elements
 
     },
     /**   @name:   getDataForTopImage
@@ -79,13 +79,13 @@
         }
       });
 
-      //  TODO: would be better to return the settings function with this object passed to it
+      //  TODO: would be better to return the GetData function with this object passed to it
       return obj;
     },
     /**   @name:   setStuff
       *   @params: $[object, data]
       *   @desc:   setStuf
-      *            TODO: setStuff could totally be a method on the settings object,
+      *            TODO: setStuff could totally be a method on the GetData object,
       *                  that way it could just use 'this.domain'
       */
     setStuff = function( $ ){
@@ -110,105 +110,6 @@
         return true;
       else
         return false;
-    },
-    /**   @name:   settings
-      *   @params: data [object]
-      *   @desc:   a function that returns an object that contains all of our info
-      *            as well as methods that interact with that data + the DOM
-      */
-    settings = function( data ){
-
-      var o = {
-        data: data,
-        /**   @name:   setInnerHtml
-          *   @params: el[string, selector], title[string]
-          *   @desc:   takes a selector string and a title and appends that element with the specified content
-          */
-        setInnerHtml: function( el, text ){
-          var element = document.querySelector(el);
-          element.innerHTML = text;
-        },
-        /**   @name:   settings.setTitle
-          *   @params: el[string, selector], title[string]
-          *   @desc:   takes a selector string and a reddit link and appends that element with the specified content
-          */
-        setTitle: function( el ){
-          this.setInnerHtml( el, this.data.title );
-        },
-        /**   @name:   settings.setLink
-          *   @params: el[string, selector]
-          *   @desc:   takes a selector string and a reddit link and appends that element with the specified content
-          */
-        setLink: function( el, link ){
-          var element = document.querySelector(el);
-          element.href = link;
-        },
-        /**   @name:   settings.setRedditLink
-          *   @params: el[string OR array, selector(s)]
-          *   @desc:   takes a selector string and a reddit link and appends that element with the specified content
-          */
-        setRedditLink: function( els ){
-          if( typeof els === 'string' ){
-            this.setLink( els, this.data.redditLink );
-          }else if( typeof els.length !== "undefined" ){
-            for(i=0; i < els.length; i++){ // can use a forEach because 'this' methods are not available to inner function
-              this.setLink( els[i], this.data.redditLink );
-            }
-          }else{
-            throw "An invalid 'els' paramater was passed to this.setRedditLink. Please pass it a selector string or an array of selector strings.";
-          }
-        },
-        /**   @name:   settings.setAuthor
-          *   @params: el[string, selector]
-          *   @desc:   takes a selector string and a reddit author and appends that element with the specified content
-          */
-        setAuthor: function( el ){
-          this.setInnerHtml( el, this.data.author );
-        },
-        /**   @name:   settings.setUserLink
-          *   @params: el[string, selector]
-          *   @desc:   takes a selector string and a reddit author and appends that element with the specified content
-          */
-        setUserLink: function( el ){
-          this.setLink( el, 'http://www.reddit.com/user/'+this.data.author+'/' );
-        },
-        /**   @name:   settings.setTimePosted
-          *   @params: el[string, selector]
-          *   @desc:   takes a selector string and the time posted and appends that element with the specified content
-          */
-        setTimePosted: function( el ){
-          var element = document.querySelector(el),
-              now    = Date.now()/1000,
-              posted = this.data.created;
-
-              this.setInnerHtml( el, (Math.floor(getHrsDiff( posted, now )) + ' hours ago') );
-        },
-        /**   @name:   settings.setBackgroundImage
-          *   @params: el [string, selector]
-          *   @desc:   provide a selector and a bg url and
-          *            this function will go set that elements BG image to that URL
-          */
-        setBackgroundImage: function( el ){
-          var element = document.querySelector(el);
-
-          if( !this.data.base64Img && !this.data.bgUrl )
-            throw "Trying to set background, however could not find a base64Img or bgUrl in the data set!";
-
-          if(this.data.base64Img){
-            element.style.backgroundImage = "url("+this.data.base64Img+")";
-            console.log( "Using the base64!" );
-            //TODO: add an async checker for if the bg image has been set
-            addClass( '.main', 'main-visible' );
-          }else{
-            element.style.backgroundImage = "url("+this.data.bgUrl+")";
-            console.log( "Using the img url!" );
-            //TODO: add an async checker for if the bg image has been set
-            addClass( '.main', 'main-visible' );
-          }
-
-        }
-      };
-      return o;
     },
     /**   @name:   getImgurId
       *   @params: imgurUrl [string]
@@ -438,6 +339,113 @@
       */
     _log = function( data ){
       console.log(data);
+    },
+
+
+
+
+
+    /**   @name:   GetData
+      *   @params: data [object]
+      *   @desc:   a function that returns an object that contains all of our info
+      *            as well as methods that interact with that data + the DOM
+      *
+      *            TODO:
+      *            This is a ninja function, I wish the rest of the application was structured like this
+      */
+    GetData = function( data ){
+
+      var o = {
+        data: data,
+        /**   @name:   setInnerHtml
+          *   @params: el[string, selector], title[string]
+          *   @desc:   takes a selector string and a title and appends that element with the specified content
+          */
+        setInnerHtml: function( el, text ){
+          var element = document.querySelector(el);
+          element.innerHTML = text;
+        },
+        /**   @name:   settings.setTitle
+          *   @params: el[string, selector], title[string]
+          *   @desc:   takes a selector string and a reddit link and appends that element with the specified content
+          */
+        setTitle: function( el ){
+          this.setInnerHtml( el, this.data.title );
+        },
+        /**   @name:   settings.setLink
+          *   @params: el[string, selector]
+          *   @desc:   takes a selector string and a reddit link and appends that element with the specified content
+          */
+        setLink: function( el, link ){
+          var element = document.querySelector(el);
+          element.href = link;
+        },
+        /**   @name:   settings.setRedditLink
+          *   @params: el[string OR array, selector(s)]
+          *   @desc:   takes a selector string and a reddit link and appends that element with the specified content
+          */
+        setRedditLink: function( els ){
+          if( typeof els === 'string' ){
+            this.setLink( els, this.data.redditLink );
+          }else if( typeof els.length !== "undefined" ){
+            for(i=0; i < els.length; i++){ // can use a forEach because 'this' methods are not available to inner function
+              this.setLink( els[i], this.data.redditLink );
+            }
+          }else{
+            throw "An invalid 'els' paramater was passed to this.setRedditLink. Please pass it a selector string or an array of selector strings.";
+          }
+        },
+        /**   @name:   settings.setAuthor
+          *   @params: el[string, selector]
+          *   @desc:   takes a selector string and a reddit author and appends that element with the specified content
+          */
+        setAuthor: function( el ){
+          this.setInnerHtml( el, this.data.author );
+        },
+        /**   @name:   settings.setUserLink
+          *   @params: el[string, selector]
+          *   @desc:   takes a selector string and a reddit author and appends that element with the specified content
+          */
+        setUserLink: function( el ){
+          this.setLink( el, 'http://www.reddit.com/user/'+this.data.author+'/' );
+        },
+        /**   @name:   settings.setTimePosted
+          *   @params: el[string, selector]
+          *   @desc:   takes a selector string and the time posted and appends that element with the specified content
+          */
+        setTimePosted: function( el ){
+          var element = document.querySelector(el),
+              now    = Date.now()/1000,
+              posted = this.data.created;
+
+              this.setInnerHtml( el, (Math.floor(getHrsDiff( posted, now )) + ' hours ago') );
+        },
+        /**   @name:   settings.setBackgroundImage
+          *   @params: el [string, selector]
+          *   @desc:   provide a selector and a bg url and
+          *            this function will go set that elements BG image to that URL
+          */
+        setBackgroundImage: function( el ){
+          var element = document.querySelector(el);
+
+          if( !this.data.base64Img && !this.data.bgUrl )
+            throw "Trying to set background, however could not find a base64Img or bgUrl in the data set!";
+
+          if(this.data.base64Img){
+            element.style.backgroundImage = "url("+this.data.base64Img+")";
+            console.log( "Using the base64!" );
+            //TODO: add an async checker for if the bg image has been set
+            addClass( '.main', 'main-visible' );
+          }else{
+            element.style.backgroundImage = "url("+this.data.bgUrl+")";
+            console.log( "Using the img url!" );
+            //TODO: add an async checker for if the bg image has been set
+            addClass( '.main', 'main-visible' );
+          }
+
+        }
+      };
+      return o;
     };
 
 
@@ -512,7 +520,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
             saveBase64ToLocalStorage( d.oldData,  base64data );
           });
         }
-        setStuff(settings( d.oldData ));
+        setStuff(GetData( d.oldData ));
       }
 
     }else{

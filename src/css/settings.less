@@ -11,21 +11,46 @@
 .settings-button-text { .visually-hidden() }
 
 .settings-button {
-  // background-color: #fff;
+  background: transparent;
   border: 0;
   height: 1.5rem;
   position: absolute;
   top: 5%; right: 5%;
   width: 1.5rem;
-
-  transition: background-color 0.85s ease-out;
+  .settings-button-icon {
+    position: absolute;
+    top:0; left:0;
+    height: 100%;
+    width: 100%;
+    transition: all 0.45s ease-in-out;
+    &:before{
+      text-shadow: 0 0 4px rgba( 255, 255, 255, 0.5 );
+      font-size: 1.5rem;
+      height: 100%;
+      width: 100%;
+    }
+  }
+  &:focus {
+    outline: none;
+  }
   &.settings-button-s-closed {
-    background-color: #fff;
+    .settings-button-icon.icon-settings-close{
+      transform: scale(0);
+    }
+    .settings-button-icon.icon-settings-open{
+      transform: scale(1);
+    }
   }
   &.settings-button-s-open {
-    background-color: lime;
+    .settings-button-icon.icon-settings-close{
+      transform: scale(1);
+    }
+    .settings-button-icon.icon-settings-open{
+      transform: scale(0);
+    }
   }
 }
+
 
 .settings {
   @transTime: 0.475s;
