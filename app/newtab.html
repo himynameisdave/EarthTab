@@ -50,14 +50,14 @@
               <h2 class="settings-list-heading">
                 What subreddits do you want to pull images from?
               </h2>
-              <ul class="settings-subreddit-list">
+              <ul class="settings-subreddit-list js-settings-subs">
                 <li class="settings-subreddit-list-item">
                   <label class="settings-subreddit-label" for="sub-earthporn">
                     <a class="settings-subreddit-label-link" href="http://www.reddit.com/r/EarthPorn/">
                       EarthPorn
                     </a>
                   </label>
-                  <input type="checkbox" class="settings-subreddit-checkbox" name="sub-earthporn" />
+                  <input type="checkbox" class="settings-subreddit-checkbox" id="sub-earthporn" name="sub-earthporn" />
                 </li>
                 <li class="settings-subreddit-list-item">
                   <label class="settings-subreddit-label" for="sub-skyporn">
@@ -65,7 +65,7 @@
                       SkyPorn
                     </a>
                   </label>
-                  <input type="checkbox" class="settings-subreddit-checkbox" name="sub-skyporn" />
+                  <input type="checkbox" class="settings-subreddit-checkbox" id="sub-skyporn" name="sub-skyporn" />
                 </li>
                 <li class="settings-subreddit-list-item">
                   <label class="settings-subreddit-label" for="sub-waterporn">
@@ -73,7 +73,7 @@
                       WaterPorn
                     </a>
                   </label>
-                  <input type="checkbox" class="settings-subreddit-checkbox" name="sub-waterporn" />
+                  <input type="checkbox" class="settings-subreddit-checkbox" id="sub-waterporn" name="sub-waterporn" />
                 </li>
                 <li class="settings-subreddit-list-item">
                   <label class="settings-subreddit-label" for="sub-desertporn">
@@ -81,7 +81,7 @@
                       DesertPorn
                     </a>
                   </label>
-                  <input type="checkbox" class="settings-subreddit-checkbox" name="sub-desertporn" />
+                  <input type="checkbox" class="settings-subreddit-checkbox" id="sub-desertporn" name="sub-desertporn" />
                 </li>
                 <li class="settings-subreddit-list-item">
                   <label class="settings-subreddit-label" for="sub-winterporn">
@@ -89,7 +89,7 @@
                       WinterPorn
                     </a>
                   </label>
-                  <input type="checkbox" class="settings-subreddit-checkbox" name="sub-winterporn" />
+                  <input type="checkbox" class="settings-subreddit-checkbox" id="sub-winterporn" name="sub-winterporn" />
                 </li>
                 <li class="settings-subreddit-list-item">
                   <label class="settings-subreddit-label" for="sub-autumnporn">
@@ -97,7 +97,7 @@
                       AutumnPorn
                     </a>
                   </label>
-                  <input type="checkbox" class="settings-subreddit-checkbox" name="sub-autumnporn" />
+                  <input type="checkbox" class="settings-subreddit-checkbox" id="sub-autumnporn" name="sub-autumnporn" />
                 </li>
                 <li class="settings-subreddit-list-item">
                   <label class="settings-subreddit-label" for="sub-springporn">
@@ -105,7 +105,7 @@
                       SpringPorn
                     </a>
                   </label>
-                  <input type="checkbox" class="settings-subreddit-checkbox" name="sub-springporn" />
+                  <input type="checkbox" class="settings-subreddit-checkbox" id="sub-springporn" name="sub-springporn" />
                 </li>
                 <li class="settings-subreddit-list-item">
                   <label class="settings-subreddit-label" for="sub-summerporn">
@@ -113,7 +113,7 @@
                       SummerPorn
                     </a>
                   </label>
-                  <input type="checkbox" class="settings-subreddit-checkbox" name="sub-summerporn" />
+                  <input type="checkbox" class="settings-subreddit-checkbox" id="sub-summerporn" name="sub-summerporn" />
                 </li>
                 <li class="settings-subreddit-list-item">
                   <label class="settings-subreddit-label" for="sub-weatherporn">
@@ -121,7 +121,7 @@
                       WeatherPorn
                     </a>
                   </label>
-                  <input type="checkbox" class="settings-subreddit-checkbox" name="sub-weatherporn" />
+                  <input type="checkbox" class="settings-subreddit-checkbox" id="sub-weatherporn" name="sub-weatherporn" />
                 </li>
                 <li class="settings-subreddit-list-item">
                   <label class="settings-subreddit-label" for="sub-lakeporn">
@@ -129,7 +129,7 @@
                       LakePorn
                     </a>
                   </label>
-                  <input type="checkbox" class="settings-subreddit-checkbox" name="sub-lakeporn" />
+                  <input type="checkbox" class="settings-subreddit-checkbox" id="sub-lakeporn" name="sub-lakeporn" />
                 </li>
                 <li class="settings-subreddit-list-item">
                   <label class="settings-subreddit-label" for="sub-spaceporn">
@@ -137,7 +137,7 @@
                       SpacePorn
                     </a>
                   </label>
-                  <input type="checkbox" class="settings-subreddit-checkbox" name="sub-spaceporn" />
+                  <input type="checkbox" class="settings-subreddit-checkbox" id="sub-spaceporn" name="sub-spaceporn" />
                 </li>
               </ul>
             </li>
@@ -146,7 +146,7 @@
                 Update frequency:
               </h2>
               <!-- 12hrs, every 15 mins, for fine grained control -->
-              <input type="range" min="0" max="48" />
+              <input class="settings-update-frequency js-settings-update-frequency" type="range" min="0" max="48" value="8" data-content="8" />
             </li>
           </ul>
         </section>

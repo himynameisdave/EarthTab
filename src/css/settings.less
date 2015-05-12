@@ -13,9 +13,10 @@
 .settings-button {
   background: transparent;
   border: 0;
+  cursor: pointer;
   height: 1.5rem;
   position: absolute;
-  top: 5%; right: 5%;
+  bottom: 5%; right: 5%;
   width: 1.5rem;
   .settings-button-icon {
     position: absolute;
@@ -24,7 +25,7 @@
     width: 100%;
     transition: all 0.45s ease-in-out;
     &:before{
-      text-shadow: 0 0 4px rgba( 255, 255, 255, 0.5 );
+      text-shadow: 0 0 4px rgba( 255, 255, 255, 0.4 );
       font-size: 1.5rem;
       height: 100%;
       width: 100%;
@@ -54,26 +55,18 @@
 
 .settings {
   @transTime: 0.475s;
-  background: rgba( 255, 255, 255, 0.85 );
+  background: rgba( 255, 255, 255, 0.65 );
   height: 100%;
-  width: 100%;
+  overflow: scroll;
   transform-origin: 50% 0;
-  transition: transform @transTime ease-in-out, opacity @transTime ease-in-out;
-
+  transition: transform @transTime ease-in-out;
+  width: 100%;
   &.settings-s-closed {
     z-index: -9999;
-    //TEMP
-    // display: none;
-    // //TEMP
-    opacity: 0;
-    transform: rotateX(-90deg) translate( 0, -50% );
+    transform: rotateX(-120deg) translate( 0, 0 );
   }
   &.settings-s-open {
     z-index: 9999;
-    //TEMP
-    // display: block;
-    //TEMP
-    opacity: 1;
     transform: rotateX(0deg) translate( 0, 0 );
   }
 }
@@ -81,27 +74,126 @@
 .settings-list {
   .mauto();
   list-style: none;
-  padding: 0;
+  padding: 4rem 0 0;
   transition: width 0.425s ease-in-out;
   width: 95%;
   @media @mq-small { width: 80%; }
-  @media @mq-medium { width: 65%; }
-  @media @mq-large { width: 50%; }
+  @media @mq-medium { width: 70%; }
+  @media @mq-large { width: 60%; }
 }
 
 .settings-list-item {
-
-
+  margin: 0.75rem 0;
 }
 
 .settings-list-heading {
-  margin: 0;
+  margin-top: 3rem;
+  font-family: @playfair;
+  font-size: 1.5rem;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.05rem;
+  margin: 0 0 0.75rem;
   padding: 0;
+  @media @mq-large {
+    font-size: 1.8rem;
+    margin: 0.5rem 0 1.25rem 0;
+  }
 }
 
 .settings-subreddit-list {
   list-style: none;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  // align-items: center;
 }
+
+.settings-subreddit-list-item {
+  border: 1px solid #333;
+  height: 100px;
+  flex-grow: 1;
+  margin: 0.15rem;
+  position: relative;
+  text-align: center;
+  width: 50%;
+  @media @mq-small { width: 33.33332%; }
+  @media @mq-medium { width: 25%; }
+  @media @mq-large { width: 20%; }
+}
+
+.settings-subreddit-label {
+  display: block;
+  position: absolute;
+  top: 0; left:0;
+  height: 100%;
+  text-align: center;
+  width: 100%;
+  z-index: 5;
+
+}
+
+.settings-subreddit-label-link {
+  display: inline-block;
+  text-decoration: none;
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate( -50%, -50% );
+}
+
+.settings-subreddit-checkbox {
+  -webkit-appearance: none;
+  appearance: none;
+  position: absolute;
+  top: 0; left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+
+  background-color: #aaa;
+  transition: background-color 0.45s ease-in-out;
+
+  &:checked {
+    background-color: green;
+  }
+
+}
+
+
+.settings-update-frequency {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 0.375rem;
+  background: #333;
+  width: 100%;
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    background: #f7f7f7;
+    border-radius: 0.375rem;
+    height: 1rem;
+    width: 10%;
+    position: relative;
+    &:before{
+      display: block;
+      content: '8';
+      font-size: 0.85rem;
+      font-weight: bold;
+      position: absolute;
+      text-align: center;
+      height: 100%;
+      width: 100%;
+    }
+  }
+  &:focus {
+    outline: none;
+  }
+}
+
+
+
+
 
 
 

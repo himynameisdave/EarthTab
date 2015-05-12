@@ -36,7 +36,6 @@
       clearLocalStorage();//clear localstorage before we do a set
       setLocalStorageData( data );
       setStuff(GetData( data ));//sets DOM elements
-
     },
     /**   @name:   getDataForTopImage
       *   @params: d [object]
@@ -154,6 +153,7 @@
     /**   @name:   setLocalStorageData
       *   @params: d [object]
       *   @desc:   sets the data into localstorage under the oldData namespace
+      *             TODO: this name is too generic!
       */
     setLocalStorageData = function( d ){
 
@@ -251,6 +251,35 @@
        });
 
     },
+
+    /**   @name:    setupToggleSettingsEvent
+      *   @params:  els [object]
+      *   @desc:    accepts an object of elements and goes and sets the toggle event
+      */
+    setupToggleSettingsEvent = function( els ){
+
+      els.openSettings.addEventListener('click', function(){
+
+        if( els.settings.classList.contains( 'settings-s-closed' ) ){
+          removeClass( '.settings', 'settings-s-closed' );
+          addClass( '.settings', 'settings-s-open' );
+          removeClass( els.openSettings, 'settings-button-s-closed' );
+          addClass( els.openSettings, 'settings-button-s-open' );
+          toggleContainerVisibility('close');
+        }
+        else if( els.settings.classList.contains( 'settings-s-open' ) ){
+          removeClass( '.settings', 'settings-s-open' );
+          addClass( '.settings', 'settings-s-closed' );
+          toggleContainerVisibility('open');
+          removeClass( els.openSettings, 'settings-button-s-open' );
+          addClass( els.openSettings, 'settings-button-s-closed' );
+        }else{
+          throw "What the whaaaa? http://bit.ly/1IjwmfN";
+        }
+
+      });
+
+    },
     /**   @name:    toggleContainerVisibility
       *   @params:  clickEvent [object]
       *   @desc:    Passed a "click event" object which contains the classes/elements we need to target
@@ -268,15 +297,14 @@
           visible = 'i-container-s-visible',
           hidden  = 'i-container-s-hidden';
 
-
-      if( toggle === 'close' ){
+      if( toggle === 'close' && el.classList.contains( visible ) ){
         removeClass( el, visible );
         addClass( el, hidden );
         setTimeout(function(){
           el.style.display = 'none';
         }, 500);//actual anim time is 0.45s in the Less file
       }
-      if( toggle === 'open' ){
+      if( toggle === 'open' && el.classList.contains( hidden ) ){
         console.log('closing the settings, opening the ');
         el.style.display = 'block';
         setTimeout(function(){
@@ -342,9 +370,113 @@
     },
 
 
+    /**   @name:    buildDefaultSettings
+      *   @params:  subList [array]
+      *   @desc:    accepts an array of the sub-reddits to use, and builds out the default settings object
+      */
+    buildDefaultSettings = function( subList ){
+
+      var settings = {
+        updateFrequency: 8,
+        subs: []
+      };
+
+      subList.forEach(function( val, i ){
+        var subName = 'sub-'+val.toLowerCase();
+        settings.subs[i] = {};
+        settings.subs[i].name  = val;
+        settings.subs[i].subName  = subName;
+        settings.subs[i].active   = true;
+        settings.subs[i].html     = "<li class='settings-subreddit-list-item bg-'"+subName+">"+
+                                    "<label class='settings-subreddit-label' for='"+subName+"'>"+
+                                    "<a class='settings-subreddit-label-link' href='http://www.reddit.com/r/"+val+"/'>"+
+                                    val+"</a>"+
+                                    "</label>"+
+                                    "<input type='checkbox' class='settings-subreddit-checkbox' id='"+subName+"' name='"+subName+"' checked/>"+
+                                    "</li>";
+
+      });
+      return settings;
+    },
 
 
 
+
+    /**   @name:    parseSettings
+      *   @params:  settings [object]
+      *   @desc:    does two things for now:
+      *               1. inject the subreddits
+      *               2. inject the frequency range input
+      */
+    parseSettings = function( settings ){
+
+      setFrequency( settings, '.js-settings-update-frequency' );
+      injectSubs( settings, '.js-settings-subs', showSettingsAvailable);
+
+    },
+    /**   @name:    updateSettings
+      *   @params:  settings [object], cb [callback function]
+      *   @desc:    updateSettings goes into chrome storage and saves the new settings
+      */
+    updateSettings = function( settings, cb ){
+      chrome.storage.local.set({'settings': settings}, cb);
+    },
+
+    /**   @name:    injectSubs
+      *   @params:  settings [object], el [selector, string], cb [function]
+      *   @desc:    injectSubs adds the subs html to the given element
+                    has a callback so that when it's done it's shit it can call "showSettingsAvailable"
+      */
+    injectSubs = function( settings, el, cb ){
+      ////
+      //  TODO this whole sanitizing the element/selector thing is ripe for a DRY function
+      //
+      var element;
+      if( typeof el === 'string' )
+        element = document.querySelector(el);
+      if( typeof el === 'object' )
+        element = el;
+
+      settings.subs.forEach(function( val, i ){
+
+
+        // console.log('About to print #'+i);
+        // _log( val.html );
+
+      });
+      //now we call our callback
+      cb();
+
+    },
+    /**   @name:    setFrequency
+      *   @params:  settings [object], els [selector, string]
+      *   @desc:    sets the update frequency meter based on the settings
+      */
+    setFrequency = function( settings, el ){
+      var element,
+          val = settings.updateFrequency;
+      if( typeof el === 'string' )
+        element = document.querySelector(el);
+      if( typeof el === 'object' )
+        element = el;
+
+      element.value = val;
+
+    },
+
+    /**   @name:    showSettingsAvailable
+      *   @params:  [none?]
+      *   @desc:    sets the settings to "available" 
+      */
+    showSettingsAvailable = function(){
+
+
+    },
+
+
+///
+//      TODO: make the settings methods like the GetData one below
+///////////////////
     /**   @name:   GetData
       *   @params: data [object]
       *   @desc:   a function that returns an object that contains all of our info
@@ -431,8 +563,12 @@
           if( !this.data.base64Img && !this.data.bgUrl )
             throw "Trying to set background, however could not find a base64Img or bgUrl in the data set!";
 
+
+            _log(document.styleSheets);
+
           if(this.data.base64Img){
-            element.style.backgroundImage = "url("+this.data.base64Img+")";
+            // element.style.backgroundImage = "url("+this.data.base64Img+")";
+            document.styleSheets[1].addRule( el, "background-image: url("+this.data.base64Img+")" );
             console.log( "Using the base64!" );
             //TODO: add an async checker for if the bg image has been set
             addClass( '.main', 'main-visible' );
@@ -479,27 +615,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
     openSettings: document.querySelector('.js-settings-controller')
   };
 
-  els.openSettings.addEventListener('click', function(){
-
-    if( els.settings.classList.contains( 'settings-s-closed' ) ){
-      removeClass( '.settings', 'settings-s-closed' );
-      addClass( '.settings', 'settings-s-open' );
-      toggleContainerVisibility('close');
-      removeClass( els.openSettings, 'settings-button-s-closed' );
-      addClass( els.openSettings, 'settings-button-s-open' );
-    }
-    else if( els.settings.classList.contains( 'settings-s-open' ) ){
-      removeClass( '.settings', 'settings-s-open' );
-      addClass( '.settings', 'settings-s-closed' );
-      toggleContainerVisibility('open');
-      removeClass( els.openSettings, 'settings-button-s-open' );
-      addClass( els.openSettings, 'settings-button-s-closed' );
-    }else{
-      throw "What the whaaaa? http://bit.ly/1IjwmfN";
-    }
-
-  });
-
+  setupToggleSettingsEvent( els );
 
   //  Fetch oldData. Async.
   chrome.storage.local.get( 'oldData', function(d){
@@ -528,5 +644,36 @@ document.addEventListener("DOMContentLoaded", function(event) {
     }
 
   });
+
+
+  //  TODO: should this be combined with above?
+  chrome.storage.local.get( 'settings', function(d){
+
+    if(d.settings) {
+      _log('Using old data for settings');
+      parseSettings(d.settings);
+    }else{
+      var subList = [ 'EarthPorn',
+                      'SkyPorn',
+                      'WaterPorn',
+                      'DesertPorn',
+                      'WinerPorn',
+                      'AutumnPorn',
+                      'SpringPorn',
+                      'SummerPorn',
+                      'WeatherPorn',
+                      'LakepPorn',
+                      'SpacePorn'
+                    ];
+      _log('Using new data for settings');
+      var newData = buildDefaultSettings(subList);
+      updateSettings(newData, function(){
+        _log('Updated the settings!');
+        parseSettings(newData);
+      });
+    }
+  });
+
+
 
 });
