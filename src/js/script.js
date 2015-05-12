@@ -333,6 +333,23 @@
         setClock(el, time);
       },5000);// five seconds is a lot but I'd rather that then taking the performance hit
     },
+    /**   @name:    resolveElement
+      *   @params:  el [string, selector OR DOM element object]
+      *   @desc:    handy utility that returns the actual element, whether passed a selector string or actual element
+      */
+    resolveElement = function( el ){
+      var element;
+      if( typeof el === 'string' )
+        element = 
+
+      document.querySelector(el);
+      else if( typeof el === 'object' )
+        //  TODO: check that it's a real DOM object
+        element = el;
+      else
+        throw "Not a real element!\nPlease pass either a selector string or element object!"
+      return element;
+    },
     /**   @name:    addClass
       *   @params:  el [string, selector], class [string]
       *   @desc:    simplifies adding a class to an element
@@ -410,7 +427,7 @@
       */
     parseSettings = function( settings ){
 
-      setFrequency( settings, '.js-settings-update-frequency' );
+      setFrequency( settings.updateFrequency, '.js-settings-update-frequency' );
       injectSubs( settings, '.js-settings-subs', showSettingsAsAvailable);
 
     },
@@ -454,19 +471,41 @@
 
     },
     /**   @name:    setFrequency
-      *   @params:  settings [object], els [selector, string]
+      *   @params:  frequency[number], els [selector, string], cb[callback function]
       *   @desc:    sets the update frequency meter based on the settings
+      *             accepts a callback that will reset the "beingChanged" flag on the event listener
       */
-    setFrequency = function( settings, el ){
+    setFrequency = function( frequency, el, cb ){
+
+      _log('Setting frequency to '+frequency);
+
       var element,
-          val = settings.updateFrequency;
+          innerFrequencyEl = ".js-settings-update-frequency::-webkit-slider-thumb:before";
+
       if( typeof el === 'string' )
         element = document.querySelector(el);
-      if( typeof el === 'object' )
-        element = el;
+      else
+        throw "You must pass a selector string to the ";
 
-      element.value = val;
+      if( typeof frequency !== 'number' )
+        frequency = element.value;
 
+      var val = convertFrequencyToHrs(frequency);
+
+      //  adds value to the css content element
+      document.styleSheets[1].addRule( innerFrequencyEl, "content: '"+val+"'" );
+
+      if( cb ){
+        cb();
+      }
+
+    },
+    /**   @name:    convertFrequencyToHrs
+      *   @params:  frequency[number]
+      *   @desc:    quickly converts our base48 number to hrs string
+      */
+    convertFrequencyToHrs = function( frequency ){
+      return frequency * 0.25 + 'hrs';
     },
 
     /**   @name:    showSettingsAsAvailable
@@ -475,9 +514,27 @@
       */
     showSettingsAsAvailable = function(){
 
-      _log('Callback called successfully!');
+      setupFrequencyChangeListener( '.js-settings-update-frequency' );
 
     },
+    setupFrequencyChangeListener = function( el ){
+
+      var element = resolveElement(el),
+          beingChanged = false;
+
+      element.addEventListener('change', function(){
+        var val = element.value;
+        if(!beingChanged){
+          beingChanged = true;
+          setFrequency( val, el, function(){
+            beingChanged = false;
+          });
+        }
+
+      });
+
+    },
+
 
 
 ///

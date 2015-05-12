@@ -87,17 +87,16 @@
 }
 
 .settings-list-heading {
-  margin-top: 3rem;
   font-family: @playfair;
   font-size: 1.5rem;
   font-weight: 900;
   line-height: 1.1;
   letter-spacing: -0.05rem;
-  margin: 0 0 0.75rem;
+  margin: 0.25rem 0 1rem 0;
   padding: 0;
   @media @mq-large {
     font-size: 1.8rem;
-    margin: 0.5rem 0 1.25rem 0;
+    margin: 1rem 0 1.75rem 0;
   }
 }
 
@@ -139,7 +138,7 @@
   color: #fff;
   display: inline-block;
   font-family: @raleway;
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: bold;
   position: absolute;
   top: 50%; left: 50%;
@@ -173,7 +172,9 @@
   appearance: none;
   background-repeat: no-repeat;
   background-position: 50% 50%;
-  background-size: cover;//cover pretty much
+  background-size: 150%;//cover pretty much
+  cursor: pointer;
+  overflow: hidden;
   position: absolute;
   top: 0; left: 0;
   height: 100%;
@@ -181,33 +182,33 @@
   z-index: 1;
 
 
-
-  // background-color: #aaa;
-  transition: background-size 0.285s ease-in-out;
+  -webkit-filter: blur(5px) grayscale(100%);
+  transition: background-size 0.285s ease-in-out, -webkit-filter 0.285s ease-in-out;
 
   &:checked {
-    
+    background-size: 200%;
+    -webkit-filter: blur(0) grayscale(0);
   }
-
+  &:focus{
+    outline: none;
+  }
 }
-
-
-
 
 .settings-update-frequency {
   -webkit-appearance: none;
   appearance: none;
-  border-radius: 0.375rem;
   background: #333;
+  border-radius: 1.25rem;
+  box-shadow: inset 2px 2px 6px 1px darken(#333, 2%);
   width: 100%;
   &::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    background: #f7f7f7;
-    border-radius: 0.375rem;
+    background-image: linear-gradient(#fff, #f7f7f7);
+    border-radius: 100%;
     cursor: pointer;
-    height: 1rem;
-    width: 12%;
+    height: 2rem;
+    width: 2rem;
     padding-left: 0.15rem;
     padding-right: 0.15rem;
     position: relative;
@@ -217,7 +218,7 @@
       color: #333;
       font-size: 0.6rem;
       font-weight: bold;
-      line-height: 1.5;
+      line-height: 2.5;
       position: absolute;
       top: 50%; left: 50%;
       transform: translate( -50%, -50% );
