@@ -387,7 +387,7 @@
         settings.subs[i].name  = val;
         settings.subs[i].subName  = subName;
         settings.subs[i].active   = true;
-        settings.subs[i].html     = "<li class='settings-subreddit-list-item bg-'"+subName+">"+
+        settings.subs[i].html     = "<li class='settings-subreddit-list-item bg-"+subName+"'>"+
                                     "<label class='settings-subreddit-label' for='"+subName+"'>"+
                                     "<a class='settings-subreddit-label-link' href='http://www.reddit.com/r/"+val+"/'>"+
                                     val+"</a>"+
@@ -411,7 +411,7 @@
     parseSettings = function( settings ){
 
       setFrequency( settings, '.js-settings-update-frequency' );
-      injectSubs( settings, '.js-settings-subs', showSettingsAvailable);
+      injectSubs( settings, '.js-settings-subs', showSettingsAsAvailable);
 
     },
     /**   @name:    updateSettings
@@ -425,25 +425,30 @@
     /**   @name:    injectSubs
       *   @params:  settings [object], el [selector, string], cb [function]
       *   @desc:    injectSubs adds the subs html to the given element
-                    has a callback so that when it's done it's shit it can call "showSettingsAvailable"
+                    has a callback so that when it's done it's shit it can call "showSettingsAsAvailable"
       */
     injectSubs = function( settings, el, cb ){
       ////
       //  TODO this whole sanitizing the element/selector thing is ripe for a DRY function
       //
-      var element;
+      var element,
+          subsListHtml = '';
       if( typeof el === 'string' )
         element = document.querySelector(el);
       if( typeof el === 'object' )
         element = el;
 
+      _log(element);
+
       settings.subs.forEach(function( val, i ){
 
-
-        // console.log('About to print #'+i);
-        // _log( val.html );
+        subsListHtml += val.html;
 
       });
+
+      //  appending it
+      element.innerHTML = subsListHtml;
+
       //now we call our callback
       cb();
 
@@ -464,12 +469,13 @@
 
     },
 
-    /**   @name:    showSettingsAvailable
+    /**   @name:    showSettingsAsAvailable
       *   @params:  [none?]
-      *   @desc:    sets the settings to "available" 
+      *   @desc:    sets the settings to "available"
       */
-    showSettingsAvailable = function(){
+    showSettingsAsAvailable = function(){
 
+      _log('Callback called successfully!');
 
     },
 
@@ -563,19 +569,13 @@
           if( !this.data.base64Img && !this.data.bgUrl )
             throw "Trying to set background, however could not find a base64Img or bgUrl in the data set!";
 
-
-            _log(document.styleSheets);
-
           if(this.data.base64Img){
-            // element.style.backgroundImage = "url("+this.data.base64Img+")";
             document.styleSheets[1].addRule( el, "background-image: url("+this.data.base64Img+")" );
             console.log( "Using the base64!" );
-            //TODO: add an async checker for if the bg image has been set
             addClass( '.main', 'main-visible' );
           }else{
             element.style.backgroundImage = "url("+this.data.bgUrl+")";
             console.log( "Using the img url!" );
-            //TODO: add an async checker for if the bg image has been set
             addClass( '.main', 'main-visible' );
           }
 
@@ -647,6 +647,10 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
 
   //  TODO: should this be combined with above?
+
+  /**     This should save the settings to a more accessible place
+    *     Otherwise this call is going to be repeated
+    */
   chrome.storage.local.get( 'settings', function(d){
 
     if(d.settings) {
@@ -657,12 +661,12 @@ document.addEventListener("DOMContentLoaded", function(event) {
                       'SkyPorn',
                       'WaterPorn',
                       'DesertPorn',
-                      'WinerPorn',
+                      'WinterPorn',
                       'AutumnPorn',
                       'SpringPorn',
                       'SummerPorn',
                       'WeatherPorn',
-                      'LakepPorn',
+                      'LakePorn',
                       'SpacePorn'
                     ];
       _log('Using new data for settings');
