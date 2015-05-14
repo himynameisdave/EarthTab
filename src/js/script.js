@@ -242,7 +242,7 @@
           removeClass( element, e.close );
           addClass( element, e.open );
         }
-       else if( element.classList.contains(e.open) ){
+        else if( element.classList.contains(e.open) ){
           removeClass( element, e.open );
           addClass( element, e.close );
         }else{
@@ -340,14 +340,12 @@
     resolveElement = function( el ){
       var element;
       if( typeof el === 'string' )
-        element = 
-
-      document.querySelector(el);
+        element = document.querySelector(el);
       else if( typeof el === 'object' )
         //  TODO: check that it's a real DOM object
         element = el;
       else
-        throw "Not a real element!\nPlease pass either a selector string or element object!"
+        throw "Not a real element!\nPlease pass either a selector string or element object!";
       return element;
     },
     /**   @name:    addClass
@@ -386,157 +384,269 @@
       console.log(data);
     },
 
+    GetSettings = function(){
+      return {
 
-    /**   @name:    buildDefaultSettings
-      *   @params:  subList [array]
-      *   @desc:    accepts an array of the sub-reddits to use, and builds out the default settings object
-      */
-    buildDefaultSettings = function( subList ){
+        Settings: {},
 
-      var settings = {
-        updateFrequency: 8,
-        subs: []
-      };
+        init: function(){
+          var This = this;//  this is weird but makes sense
 
-      subList.forEach(function( val, i ){
-        var subName = 'sub-'+val.toLowerCase();
-        settings.subs[i] = {};
-        settings.subs[i].name  = val;
-        settings.subs[i].subName  = subName;
-        settings.subs[i].active   = true;
-        settings.subs[i].html     = "<li class='settings-subreddit-list-item bg-"+subName+"'>"+
-                                    "<label class='settings-subreddit-label' for='"+subName+"'>"+
-                                    "<a class='settings-subreddit-label-link' href='http://www.reddit.com/r/"+val+"/'>"+
-                                    val+"</a>"+
-                                    "</label>"+
-                                    "<input type='checkbox' class='settings-subreddit-checkbox' id='"+subName+"' name='"+subName+"' checked/>"+
-                                    "</li>";
+          this.fetchOldSettings(function(d){
+            _log("Fetched old data, also here's this:");
 
-      });
-      return settings;
-    },
-
-
-
-
-    /**   @name:    parseSettings
-      *   @params:  settings [object]
-      *   @desc:    does two things for now:
-      *               1. inject the subreddits
-      *               2. inject the frequency range input
-      */
-    parseSettings = function( settings ){
-
-      setFrequency( settings.updateFrequency, '.js-settings-update-frequency' );
-      injectSubs( settings, '.js-settings-subs', showSettingsAsAvailable);
-
-    },
-    /**   @name:    updateSettings
-      *   @params:  settings [object], cb [callback function]
-      *   @desc:    updateSettings goes into chrome storage and saves the new settings
-      */
-    updateSettings = function( settings, cb ){
-      chrome.storage.local.set({'settings': settings}, cb);
-    },
-
-    /**   @name:    injectSubs
-      *   @params:  settings [object], el [selector, string], cb [function]
-      *   @desc:    injectSubs adds the subs html to the given element
-                    has a callback so that when it's done it's shit it can call "showSettingsAsAvailable"
-      */
-    injectSubs = function( settings, el, cb ){
-      ////
-      //  TODO this whole sanitizing the element/selector thing is ripe for a DRY function
-      //
-      var element,
-          subsListHtml = '';
-      if( typeof el === 'string' )
-        element = document.querySelector(el);
-      if( typeof el === 'object' )
-        element = el;
-
-      _log(element);
-
-      settings.subs.forEach(function( val, i ){
-
-        subsListHtml += val.html;
-
-      });
-
-      //  appending it
-      element.innerHTML = subsListHtml;
-
-      //now we call our callback
-      cb();
-
-    },
-    /**   @name:    setFrequency
-      *   @params:  frequency[number], els [selector, string], cb[callback function]
-      *   @desc:    sets the update frequency meter based on the settings
-      *             accepts a callback that will reset the "beingChanged" flag on the event listener
-      */
-    setFrequency = function( frequency, el, cb ){
-
-      _log('Setting frequency to '+frequency);
-
-      var element,
-          innerFrequencyEl = ".js-settings-update-frequency::-webkit-slider-thumb:before";
-
-      if( typeof el === 'string' )
-        element = document.querySelector(el);
-      else
-        throw "You must pass a selector string to the ";
-
-      if( typeof frequency !== 'number' )
-        frequency = element.value;
-
-      var val = convertFrequencyToHrs(frequency);
-
-      //  adds value to the css content element
-      document.styleSheets[1].addRule( innerFrequencyEl, "content: '"+val+"'" );
-
-      if( cb ){
-        cb();
-      }
-
-    },
-    /**   @name:    convertFrequencyToHrs
-      *   @params:  frequency[number]
-      *   @desc:    quickly converts our base48 number to hrs string
-      */
-    convertFrequencyToHrs = function( frequency ){
-      return frequency * 0.25 + 'hrs';
-    },
-
-    /**   @name:    showSettingsAsAvailable
-      *   @params:  [none?]
-      *   @desc:    sets the settings to "available"
-      */
-    showSettingsAsAvailable = function(){
-
-      setupFrequencyChangeListener( '.js-settings-update-frequency' );
-
-    },
-    setupFrequencyChangeListener = function( el ){
-
-      var element = resolveElement(el),
-          beingChanged = false;
-
-      element.addEventListener('change', function(){
-        var val = element.value;
-        if(!beingChanged){
-          beingChanged = true;
-          setFrequency( val, el, function(){
-            beingChanged = false;
+            if(d.settings) {
+              _log('Using old data for settings');
+              This.Settings = d.settings;
+              //  the real question is do you really need to pass stuff to parseSettings
+              This.parseSettings();
+            }else{
+              _log('Using new data for settings');
+              var newSettings = This.buildDefaultSettings();
+              This.updateSettings( newSettings, function(d){
+                _log('Updated the localStorage Settings!');
+                This.Settings = newSettings;
+                This.parseSettings();
+              });
+            }
           });
-        }
+        },
 
-      });
+        fetchOldSettings: function( cb ){
+          chrome.storage.local.get( 'settings', cb );
+        },
+        /**   @name:    updateSettings
+          *   @params:  settings [object], cb [callback function]
+          *   @desc:    updateSettings goes into chrome storage and saves the new settings
+          */
+        updateSettings: function( settings, cb ){
+          chrome.storage.local.set({'settings': settings}, cb);
+        },
+        /**   @name:    parseSettings
+          *   @params:  [none]
+          *   @desc:    does two things for now:
+          *               1. inject the subreddits
+          *               2. inject the frequency range input
+          */
+        parseSettings: function(){
 
+          //  setting the frequency initially, using whatever is in Settings as our value
+          this.setFrequency( this.Settings.updateFrequency, '.js-settings-update-frequency' );
+          this.injectSubs( '.js-settings-subs' );
+          this.setupFrequencyChangeListener( '.js-settings-update-frequency' );
+          this.setupCheckboxChangeListener();
+
+        },
+        /**   @name:    buildDefaultSettings
+          *   @params:  [none]
+          *   @desc:    builds out a default settings object
+          */
+        buildDefaultSettings: function(){
+          var s = {
+            updateFrequency: 8,
+            subs: []
+          },
+          This = this;
+
+          this.subList.forEach(function( val, i ){
+            var subName = 'sub-'+val.toLowerCase();
+            s.subs[i] = {};
+            s.subs[i].name  = val;
+            s.subs[i].subName  =  subName;
+            s.subs[i].active   =  true;
+            s.subs[i].html = This.generateSubListItemHtml(s.subs[i]);
+          });
+          return s;
+        },
+        /**   @name:    generateSubListItemHtml
+          *   @params:  sub[object]
+          *   @desc:    generates the markup for a given sub object (like from $ettings.subs[i])
+          *             TODO: is this really the best way to deal with this?!
+          */
+        generateSubListItemHtml: function( sub ){
+          var subName = sub.subName,
+              properName = sub.name,
+              isActive = sub.active,
+              li = "";
+              li += "<li class='settings-subreddit-list-item bg-"+subName+"'>";
+              li += "<label class='settings-subreddit-label' for='"+subName+"'>";
+              li += "<a class='settings-subreddit-label-link' href='http://www.reddit.com/r/"+properName+"/'>"+properName+"</a>";
+              li += "</label>";
+              li += "<input type='checkbox' class='settings-subreddit-checkbox' id='"+subName+"' name='"+subName+"'";
+              if(isActive){
+                li += " checked";
+              }
+              li += " /></li>";
+
+          return li;
+        },
+        /**   @name:    injectSubs
+          *   @params:  el [selector, string], cb [function]
+          *   @desc:    injectSubs adds the subs html to the given element
+                        has a callback so that when it's done it's shit it can call "showSettingsAsAvailable"
+          */
+        injectSubs: function( el, cb ){
+
+          var element = resolveElement( el ),
+              subsListHtml = '';
+
+          this.Settings.subs.forEach(function( val, i ){
+            subsListHtml += val.html;
+          });
+
+          //  appending it
+          element.innerHTML = subsListHtml;
+
+          //now we call our callback, if it exists
+          if( cb ){ cb();}
+
+        },
+        /**   @name:    convertFrequencyToHrs
+          *   @params:  frequency[number]
+          *   @desc:    quickly converts our "base48" number to hrs string
+          */
+        convertFrequencyToHrs: function( frequency ){
+          return frequency * 0.25;
+        },
+        /**   @name:    setFrequency
+          *   @params:  frequency[number], els [selector, string], cb[callback function]
+          *   @desc:    sets the update frequency meter based on the settings
+          *             accepts a callback that will reset the "beingChanged" flag on the event listener
+          */
+        setFrequency: function( newFrequency, el, cb ){
+
+      //  TODO: this was breaking shit. lets make sure our frequency is saved as a number
+          // if( typeof newFrequency !== 'number' )
+          //   throw "setFrequency requires a number be passed as the first parameter!";
+
+          var element = resolveElement(el),
+              //  TODO: this selector should be based of the element string passed in here...
+              innerFrequencyEl = ".js-settings-update-frequency::-webkit-slider-thumb:before";
+
+          //  actually setting the value of the range <input> element
+          element.value = newFrequency;
+
+          //  adds value to the css content element
+          var val = this.convertFrequencyToHrs(newFrequency);
+          document.styleSheets[1].addRule( innerFrequencyEl, "content: '"+val+"'" );
+
+          //  if there is a callback we call it
+          if( cb ){ cb(); }
+
+        },
+        /**   @name:    setupFrequencyChangeListener
+          *   @params:  el[selector string]
+          *   @desc:    sets the settings to "available"
+          */
+        setupFrequencyChangeListener: function( el ){
+
+          var element = resolveElement(el),
+              beingChanged = false,
+              This = this;
+
+          element.addEventListener('input', function(){
+            var val = parseInt(element.value);
+            if(!beingChanged){
+              beingChanged = true;
+              This.setFrequency( val, el, function(){
+                beingChanged = false;
+                /* Should the below stuff be in the callback also? */
+              });
+
+              //  update the global settings object
+              This.Settings.updateFrequency = element.value;
+              //  Show our save settings alert
+              This.showSaveSettings();
+              //  actually save da new settings
+              This.updateSettings( This.Settings, function(){
+                _log("\nSuccessfully saved settings, using these:");
+                _log( This.Settings );
+              });
+
+            }
+          });
+
+        },
+        /**   @name:    setupCheckboxChangeListener
+          *   @params:  [none]
+          *   @desc:    setupCheckboxChangeListener loops through the sublist and
+          *             sets up all the the change listeners on the checkboxes
+          */
+        setupCheckboxChangeListener: function(  ){
+          var This = this;
+          this.subList.forEach(function( val, i ){
+            var el = document.querySelector( "#sub-" + val.toLowerCase() );
+
+            el.addEventListener('change', function(){
+
+              var isChecked = el.checked,
+                  currentSub = val,
+                  thisSub;
+
+              This.Settings.subs.forEach(function(sub, j){
+                if(sub.name === currentSub){
+                  thisSub = j;
+                }
+              });
+
+              This.Settings.subs[thisSub].active = isChecked;
+              This.Settings.subs[thisSub].html = This.generateSubListItemHtml(This.Settings.subs[thisSub]);
+
+              //  Show our save settings alert
+              This.showSaveSettings();
+              //  actually save da new settings
+              This.updateSettings( This.Settings, function(){
+                _log("\nSuccessfully saved settings, using these:");
+                _log( This.Settings );
+              });
+
+            });
+          });
+        },
+        /**   @name:    showSaveSettings
+          *   @params:  [none]
+          *   @desc:    uses the isSaveAlertVisible to open/close the "Saved Settings" alert
+          */
+        isSaveAlertVisible: false,
+        settingsAlertShowTime: 1250,
+        settingsAlertEl: document.querySelector('.settings-saved-alert'),
+        showSaveSettings: function(){
+          if( !this.isSaveAlertVisible ){
+            var hideClass = 'settings-saved-alert-s-hidden',
+                showClass = 'settings-saved-alert-s-visible',
+                This = this;
+
+            if( this.settingsAlertEl.classList.contains(hideClass) ){
+              removeClass( this.settingsAlertEl, hideClass );
+            }
+            addClass( this.settingsAlertEl, showClass );
+            this.isSaveAlertVisible = true;
+
+            setTimeout(function(){
+              if( This.settingsAlertEl.classList.contains(showClass) ){
+                removeClass( This.settingsAlertEl, showClass );
+                addClass( This.settingsAlertEl, hideClass );
+              }
+              This.isSaveAlertVisible = false;
+            }, This.settingsAlertShowTime);
+
+          }
+        },
+        subList: [  'EarthPorn',
+                    'SkyPorn',
+                    'WaterPorn',
+                    'DesertPorn',
+                    'WinterPorn',
+                    'AutumnPorn',
+                    'SpringPorn',
+                    'SummerPorn',
+                    'WeatherPorn',
+                    'LakePorn',
+                    'SpacePorn'
+                  ]
+
+      };
     },
-
-
-
 ///
 //      TODO: make the settings methods like the GetData one below
 ///////////////////
@@ -655,6 +765,9 @@
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
 
+
+var $ettings;
+
 document.addEventListener("DOMContentLoaded", function(event) {
 
   //  Sets the clock
@@ -702,39 +815,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
   });
 
-
-  //  TODO: should this be combined with above?
-
-  /**     This should save the settings to a more accessible place
-    *     Otherwise this call is going to be repeated
-    */
-  chrome.storage.local.get( 'settings', function(d){
-
-    if(d.settings) {
-      _log('Using old data for settings');
-      parseSettings(d.settings);
-    }else{
-      var subList = [ 'EarthPorn',
-                      'SkyPorn',
-                      'WaterPorn',
-                      'DesertPorn',
-                      'WinterPorn',
-                      'AutumnPorn',
-                      'SpringPorn',
-                      'SummerPorn',
-                      'WeatherPorn',
-                      'LakePorn',
-                      'SpacePorn'
-                    ];
-      _log('Using new data for settings');
-      var newData = buildDefaultSettings(subList);
-      updateSettings(newData, function(){
-        _log('Updated the settings!');
-        parseSettings(newData);
-      });
-    }
-  });
-
+  //  get the whole $ettings ball rolling
+  $ettings = GetSettings();
+  $ettings.init();
 
 
 });

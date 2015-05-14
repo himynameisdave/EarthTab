@@ -43,6 +43,11 @@
         <span class="icon icon-settings-open settings-button-icon"></span>
         <!-- <span class="settings-button-text"></span> -->
       </button>
+      <div class="settings-saved-alert settings-saved-alert-s-hidden">
+        <span class="settings-saved-alert-text">
+          Settings Saved.
+        </span>
+      </div>
       <div class="settings-perspective">
         <section class="settings settings-s-closed">
           <ul class="settings-list">
@@ -65,10 +70,10 @@
             </li>
             <li class="settings-list-item">
               <h2 class="settings-list-heading">
-                Update frequency:
+                Update frequency (in hours):
               </h2>
               <!-- 12hrs, every 15 mins, for fine grained control -->
-              <input class="settings-update-frequency js-settings-update-frequency" type="range" min="1" max="48" value="40" />
+              <input class="settings-update-frequency js-settings-update-frequency" type="range" min="1" max="24" value="4" />
             </li>
           </ul>
         </section>

@@ -1,12 +1,5 @@
 
 
-.settings-perspective {
-  height: 100%;
-  perspective: 800;
-  position: relative;
-  width: 100%;
-  z-index: -100;
-}
 
 .settings-button-text { .visually-hidden() }
 
@@ -52,6 +45,52 @@
   }
 }
 
+.settings-saved-alert {
+  cursor: default;
+  display: block;
+  position: fixed;
+  top: 0;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  text-align: center;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: opacity 1.15s ease-in-out;
+  width: 100%;
+  &.settings-saved-alert-s-hidden {
+    opacity: 0;
+  }
+  &.settings-saved-alert-s-visible {
+    transition-duration: 0.65s;
+    opacity: 1;
+  }
+  .settings-saved-alert-text {
+    color: #333;
+    text-shadow: 0 0 8px #fff;
+    font-family: @raleway;
+    font-size: 0.85rem;
+    font-weight: 900;
+    letter-spacing: -0.05rem;
+    transition: font-size 0.275s ease-in-out;
+    @media @mq-small{
+      font-size: 0.95rem;
+    }
+    @media @mq-medium{
+      font-size: 1.05rem;
+    }
+    @media @mq-large{
+      font-size: 1.25rem;
+    }
+  }
+}
+
+.settings-perspective {
+  height: 100%;
+  perspective: 800;
+  position: relative;
+  width: 100%;
+  z-index: -100;
+}
 
 .settings {
   @transTime: 0.475s;
@@ -207,18 +246,19 @@
     background-image: linear-gradient(#fff, #f7f7f7);
     border-radius: 100%;
     cursor: pointer;
-    height: 2rem;
-    width: 2rem;
-    padding-left: 0.15rem;
-    padding-right: 0.15rem;
+    height: 2.25rem;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
     position: relative;
+    width: 2.25rem;
     &:before{
       display: inline-block;
-      content: '1.25hrs';
+      content: '';
       color: #333;
-      font-size: 0.6rem;
-      font-weight: bold;
+      font-size: 0.785rem;
+      font-weight: 900;
       line-height: 2.5;
+      letter-spacing: -0.05rem;
       position: absolute;
       top: 50%; left: 50%;
       transform: translate( -50%, -50% );

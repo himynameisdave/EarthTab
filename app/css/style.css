@@ -456,13 +456,6 @@
     font-size: 1.675rem;
   }
 }
-.settings-perspective {
-  height: 100%;
-  perspective: 800;
-  position: relative;
-  width: 100%;
-  z-index: -100;
-}
 .settings-button-text {
   position: absolute;
   overflow: hidden;
@@ -511,6 +504,57 @@
 }
 .settings-button.settings-button-s-open .settings-button-icon.icon-settings-open {
   transform: scale(0);
+}
+.settings-saved-alert {
+  cursor: default;
+  display: block;
+  position: fixed;
+  top: 0;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  text-align: center;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: opacity 1.15s ease-in-out;
+  width: 100%;
+}
+.settings-saved-alert.settings-saved-alert-s-hidden {
+  opacity: 0;
+}
+.settings-saved-alert.settings-saved-alert-s-visible {
+  transition-duration: 0.65s;
+  opacity: 1;
+}
+.settings-saved-alert .settings-saved-alert-text {
+  color: #333;
+  text-shadow: 0 0 8px #fff;
+  font-family: 'Raleway', 'Roboto', Helvetica, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 900;
+  letter-spacing: -0.05rem;
+  transition: font-size 0.275s ease-in-out;
+}
+@media all and (min-width: 400px) and (min-height: 320px) {
+  .settings-saved-alert .settings-saved-alert-text {
+    font-size: 0.95rem;
+  }
+}
+@media all and (min-width: 600px) and (min-height: 460px) {
+  .settings-saved-alert .settings-saved-alert-text {
+    font-size: 1.05rem;
+  }
+}
+@media all and (min-width: 800px) and (min-height: 620px) {
+  .settings-saved-alert .settings-saved-alert-text {
+    font-size: 1.25rem;
+  }
+}
+.settings-perspective {
+  height: 100%;
+  perspective: 800;
+  position: relative;
+  width: 100%;
+  z-index: -100;
 }
 .settings {
   background: rgba(255, 255, 255, 0.65);
@@ -679,19 +723,20 @@
   background-image: linear-gradient(#ffffff, #f7f7f7);
   border-radius: 100%;
   cursor: pointer;
-  height: 2rem;
-  width: 2rem;
-  padding-left: 0.15rem;
-  padding-right: 0.15rem;
+  height: 2.25rem;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
   position: relative;
+  width: 2.25rem;
 }
 .settings-update-frequency::-webkit-slider-thumb:before {
   display: inline-block;
-  content: '1.25hrs';
+  content: '';
   color: #333;
-  font-size: 0.6rem;
-  font-weight: bold;
+  font-size: 0.785rem;
+  font-weight: 900;
   line-height: 2.5;
+  letter-spacing: -0.05rem;
   position: absolute;
   top: 50%;
   left: 50%;
