@@ -5,14 +5,11 @@ var gulp = require('gulp'),
             });
 
 
-/**
-  *       Build/production
-  *
-  */
-gulp.task( 'build', ['build-compile-css', 'build-compile-js', 'move-html'] )
+/**     BUILD IT UP!    **/
 
+gulp.task( 'build', ['build:compile-css', 'build:compile-js', 'build:move-html', 'build:move-fonts', 'build:move-images', 'build:zip'] )
 
-gulp.task( 'build-compile-css', function(){
+gulp.task( 'build:compile-css', function(){
 
   return gulp.src('./src/css/style.less')
           .pipe($.less())
@@ -26,7 +23,7 @@ gulp.task( 'build-compile-css', function(){
 
 });
 
-gulp.task( 'build-compile-js', function(){
+gulp.task( 'build:compile-js', function(){
 
   return gulp.src('./src/js/script.js')
           .pipe($.uglify())
@@ -34,42 +31,49 @@ gulp.task( 'build-compile-js', function(){
 
 });
 
-gulp.task( 'move-html', function(){
+gulp.task( 'build:move-html', function(){
 
-  return gulp.src( './app/newtab.html' )
+  return gulp.src([ './src/newtab.html', './src/manifest.json' ])
           .pipe(gulp.dest('./build/'));
 
 });
 
+gulp.task( 'build:move-fonts', function(){
+
+  return gulp.src('./src/fonts/**/*')
+      .pipe(gulp.dest('./build/fonts/'));
+
+});
+
+gulp.task( 'build:move-images', function(){
+
+  return gulp.src('./src/images/**/*')
+    .pipe($.imagemin())
+    .pipe(gulp.dest('./build/images/'));
+
+});
+
+gulp.task( 'build:zip', ['build:compile-css', 'build:compile-js', 'build:move-html', 'build:move-fonts', 'build:move-images'], function(){
+
+  return gulp.src('./build/**/*')
+        .pipe($.zip('EarthTab.zip'))
+        .pipe(gulp.dest('./'));
+
+});
 
 
+/**     DEV IT UP!    **/
 
-
-/**
-  *       Dev/default
-  *
-  */
 gulp.task( 'default', function(){
 
-  gulp.watch( './src/css/*.less' , ['dev-compile-css'] );
-  gulp.watch( './src/js/script.js' , ['dev-compile-js'] );
+  gulp.watch( './src/css/*.less' , ['dev:compile-css'] );
 
 })
 
-gulp.task( 'dev-compile-css', function(){
+gulp.task( 'dev:compile-css', function(){
 
   return gulp.src('./src/css/style.less')
           .pipe($.less())
-          .pipe(gulp.dest('./app/css/'));
+          .pipe(gulp.dest('./src/css/'));
 
 });
-
-gulp.task( 'dev-compile-js', function(){
-
-  return gulp.src('./src/js/script.js')
-  //        .pipe($.uglify())
-          .pipe(gulp.dest('./app/js/'))
-
-});
-
-

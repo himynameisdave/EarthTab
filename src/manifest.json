@@ -1,0 +1,20 @@
+{
+  "manifest_version": 2,
+  "name": "EarthTab",
+  "author": "Dave Lunny",
+  "description": "Pulls in beautiful images from reddit's SFW Porn network (such as EarthPorn and SpacePorn)",
+  "version": "0.1.0",
+  "minimum_chrome_version": "20",
+  "permissions": [
+    "storage",
+    "unlimitedStorage"
+  ],
+  "icons": {
+    "16":  "images/app-icon-128.png",
+    "48":  "images/app-icon-128.png",
+    "128": "images/app-icon-128.png"
+  },
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  }
+}

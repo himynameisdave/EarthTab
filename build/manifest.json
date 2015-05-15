@@ -10,11 +10,11 @@
     "unlimitedStorage"
   ],
   "icons": {
-    "16": "assets/app-icon-128.png",
-    "48": "assets/app-icon-128.png",
-    "128": "assets/app-icon-128.png"
+    "16":  "images/app-icon-128.png",
+    "48":  "images/app-icon-128.png",
+    "128": "images/app-icon-128.png"
   },
   "chrome_url_overrides": {
-    "newtab": "app/newtab.html"
+    "newtab": "newtab.html"
   }
 }
