@@ -1,0 +1,284 @@
+
+
+
+.settings-button-text { .visually-hidden() }
+
+.settings-button {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  height: 1.5rem;
+  position: absolute;
+  bottom: 5%; right: 5%;
+  width: 1.5rem;
+  .settings-button-icon {
+    position: absolute;
+    top:0; left:0;
+    height: 100%;
+    width: 100%;
+    transition: all 0.45s ease-in-out;
+    &:before{
+      text-shadow: 0 0 7px rgba( 255, 255, 255, 0.55 );
+      font-size: 1.5rem;
+      height: 100%;
+      width: 100%;
+    }
+  }
+  &:focus {
+    outline: none;
+  }
+  &.settings-button-s-closed {
+    .settings-button-icon.icon-settings-close{
+      transform: scale(0);
+    }
+    .settings-button-icon.icon-settings-open{
+      transform: scale(1);
+    }
+  }
+  &.settings-button-s-open {
+    .settings-button-icon.icon-settings-close{
+      transform: scale(1);
+    }
+    .settings-button-icon.icon-settings-open{
+      transform: scale(0);
+    }
+  }
+}
+
+.settings-saved-alert {
+  cursor: default;
+  display: block;
+  position: fixed;
+  top: 0;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  text-align: center;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: opacity 1.15s ease-in-out;
+  width: 100%;
+  &.settings-saved-alert-s-hidden {
+    opacity: 0;
+  }
+  &.settings-saved-alert-s-visible {
+    transition-duration: 0.65s;
+    opacity: 1;
+  }
+  .settings-saved-alert-text {
+    color: #333;
+    text-shadow: 0 0 8px #fff;
+    font-family: @raleway;
+    font-size: 0.85rem;
+    font-weight: 900;
+    letter-spacing: -0.05rem;
+    transition: font-size 0.275s ease-in-out;
+    @media @mq-small{
+      font-size: 0.95rem;
+    }
+    @media @mq-medium{
+      font-size: 1.05rem;
+    }
+    @media @mq-large{
+      font-size: 1.25rem;
+    }
+  }
+}
+
+.settings-perspective {
+  height: 100%;
+  perspective: 800;
+  position: relative;
+  width: 100%;
+  z-index: -100;
+}
+
+.settings {
+  @transTime: 0.475s;
+  background: rgba( 255, 255, 255, 0.65 );
+  height: 100%;
+  overflow: scroll;
+  transform-origin: 50% 0;
+  transition: transform @transTime ease-in-out;
+  width: 100%;
+  &.settings-s-closed {
+    z-index: -9999;
+    transform: rotateX(-120deg) translate( 0, 0 );
+  }
+  &.settings-s-open {
+    z-index: 9999;
+    transform: rotateX(0deg) translate( 0, 0 );
+  }
+}
+
+.settings-list {
+  .mauto();
+  list-style: none;
+  padding: 4rem 0;
+  transition: width 0.425s ease-in-out;
+  width: 95%;
+  @media @mq-small { width: 80%; }
+  @media @mq-medium { width: 70%; }
+  @media @mq-large { width: 60%; }
+}
+
+.settings-list-item {
+  margin: 0.75rem 0;
+}
+
+.settings-list-heading {
+  font-family: @playfair;
+  font-size: 1.5rem;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.05rem;
+  margin: 0.25rem 0 1rem 0;
+  padding: 0;
+  @media @mq-large {
+    font-size: 1.8rem;
+    margin: 1rem 0 1.75rem 0;
+  }
+}
+
+.settings-subreddit-list {
+  list-style: none;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.settings-subreddit-list-item {
+  // border: 1px solid #333;
+  cursor: pointer;
+  height: 100px;
+  flex-grow: 1;
+  margin: 0.15rem;
+  position: relative;
+  text-align: center;
+  width: 50%;
+  @media @mq-small { width: 33.33332%; }
+  @media @mq-medium { width: 25%; }
+  @media @mq-large { width: 20%; }
+}
+
+.settings-subreddit-label {
+  display: block;
+  position: absolute;
+  top: 0; left:0;
+  height: 100%;
+  text-align: center;
+  width: 100%;
+  z-index: 5;
+
+}
+
+.settings-subreddit-label-link {
+  text-shadow: 0 0 5px rgba( 51, 51, 51, 0.65 );
+  color: #fff;
+  display: inline-block;
+  font-family: @raleway;
+  font-size: 0.85rem;
+  font-weight: bold;
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate( -50%, -50% );
+  text-align: center;
+  text-decoration: none;
+
+  &:before {
+    background: #fff;
+    box-shadow: 0 0 3px rgba( 51, 51, 51, 0.65 );
+    content: '';
+    display: inline-block;
+    height: 2px;
+    margin-left: auto;
+    margin-right: auto;
+    position: absolute;
+    left: 50%; bottom: -2px;
+    transition: width 0.425s ease-in-out;
+    transform: translate( -50%, -50% );
+    width: 0;
+  }
+  &:hover{
+    &:before{
+      width: 100%;
+    }
+  }
+}
+
+.settings-subreddit-checkbox {
+  -webkit-appearance: none;
+  appearance: none;
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  background-size: 150%;//cover pretty much
+  cursor: pointer;
+  overflow: hidden;
+  position: absolute;
+  top: 0; left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+  -webkit-filter: blur(4px) grayscale(100%);
+  transition: background-size 0.285s ease-in-out, -webkit-filter 0.285s ease-in-out, opacity 0.285s ease-in-out;
+  opacity: 0.8;
+
+  &:checked {
+    background-size: 200%;
+    -webkit-filter: blur(0) grayscale(0);
+    opacity: 1;
+  }
+  &:focus{
+    outline: none;
+  }
+}
+
+.settings-update-frequency {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #333;
+  border-radius: 1.25rem;
+  box-shadow: inset 2px 2px 6px 1px darken(#333, 2%);
+  width: 100%;
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: linear-gradient(#fff, #f7f7f7);
+    border-radius: 100%;
+    cursor: pointer;
+    height: 2.25rem;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+    position: relative;
+    width: 2.25rem;
+    &:before{
+      display: inline-block;
+      content: '';
+      color: #333;
+      font-size: 0.785rem;
+      font-weight: 900;
+      line-height: 2.5;
+      letter-spacing: -0.05rem;
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate( -50%, -50% );
+      text-align: center;
+      height: 100%;
+      width: 100%;
+      vertical-align: middle;
+    }
+  }
+  &:focus {
+    outline: none;
+  }
+}
+
+
+
+
+
+
+
+
