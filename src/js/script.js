@@ -93,6 +93,7 @@
 
       $.setTitle('.js-title');
       $.setRedditLink( ['.js-score', '.js-time-posted' ]);
+      $.setSubreddit('.js-subreddit');
       $.setUserLink('.js-username');
       $.setAuthor('.js-username');
       $.setTimePosted('.js-time-posted');
@@ -741,6 +742,14 @@
           }else{
             throw "An invalid 'els' paramater was passed to this.setRedditLink. Please pass it a selector string or an array of selector strings.";
           }
+        },
+        /**   @name:   setSubreddit
+          *   @params: el[string, selector]
+          *   @desc:   takes a selector string, adds the subreddit name and link to it
+          */
+        setSubreddit: function( el ){
+          this.setInnerHtml(el, this.data.subreddit);
+          this.setLink(el, "http://www.reddit.com/r/"+this.data.subreddit);
         },
         /**   @name:   settings.setAuthor
           *   @params: el[string, selector]

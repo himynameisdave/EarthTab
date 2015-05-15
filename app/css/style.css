@@ -576,7 +576,7 @@
   margin-left: auto;
   margin-right: auto;
   list-style: none;
-  padding: 4rem 0 0;
+  padding: 4rem 0;
   transition: width 0.425s ease-in-out;
   width: 95%;
 }
@@ -702,12 +702,14 @@
   height: 100%;
   width: 100%;
   z-index: 1;
-  -webkit-filter: blur(5px) grayscale(100%);
-  transition: background-size 0.285s ease-in-out, -webkit-filter 0.285s ease-in-out;
+  -webkit-filter: blur(4px) grayscale(100%);
+  transition: background-size 0.285s ease-in-out, -webkit-filter 0.285s ease-in-out, opacity 0.285s ease-in-out;
+  opacity: 0.8;
 }
 .settings-subreddit-checkbox:checked {
   background-size: 200%;
   -webkit-filter: blur(0) grayscale(0);
+  opacity: 1;
 }
 .settings-subreddit-checkbox:focus {
   outline: none;
