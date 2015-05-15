@@ -394,16 +394,32 @@
       console.log(data);
     },
 
+
+
+
+
+
+
+
     GetSettings = function(){
       return {
-
         Settings: {},
-
+        subList: [  'EarthPorn',
+                    'SkyPorn',
+                    'WaterPorn',
+                    'DesertPorn',
+                    'WinterPorn',
+                    'AutumnPorn',
+                    'SpringPorn',
+                    'SummerPorn',
+                    'WeatherPorn',
+                    'LakePorn',
+                    'SpacePorn'
+                  ],
         init: function(){
           var This = this;//  this is weird but makes sense
 
           this.fetchOldSettings(function(d){
-            _log("Fetched old data, also here's this:");
 
             if(d.settings) {
               _log('Using old data for settings');
@@ -421,7 +437,10 @@
             }
           });
         },
-
+        /**   @name:    fetchOldSettings
+          *   @params:  cb [callback function]
+          *   @desc:    grabs old settings from localStorage, accepts a callback
+          */
         fetchOldSettings: function( cb ){
           chrome.storage.local.get( 'settings', cb );
         },
@@ -569,8 +588,8 @@
               This.showSaveSettings();
               //  actually save da new settings
               This.updateSettings( This.Settings, function(){
-                _log("\nSuccessfully saved settings, using these:");
-                _log( This.Settings );
+                _log("\nSuccessfully saved settings!");
+                // _log( This.Settings );
               });
 
             }
@@ -642,21 +661,34 @@
 
           }
         },
-        subList: [  'EarthPorn',
-                    'SkyPorn',
-                    'WaterPorn',
-                    'DesertPorn',
-                    'WinterPorn',
-                    'AutumnPorn',
-                    'SpringPorn',
-                    'SummerPorn',
-                    'WeatherPorn',
-                    'LakePorn',
-                    'SpacePorn'
-                  ]
+        /**   @name:    gimmieARandomActiveSub
+          *   @params:  [none]
+          *   @desc:    loops through the subs, and from the active ones, one is randomly chosen
+          */
+        gimmieARandomActiveSub: function(){
+          var activeSubs = [];
 
+          this.Settings.subs.forEach(function(val, i){
+            if(val.active) {
+              activeSubs.push(val.name);
+            }
+          });
+
+          var ran = Math.floor(Math.random() * activeSubs.length);
+
+          return activeSubs[ran];
+        }
       };
     },
+
+
+
+
+
+
+
+
+
 ///
 //      TODO: make the settings methods like the GetData one below
 ///////////////////
@@ -783,33 +815,46 @@ document.addEventListener("DOMContentLoaded", function(event) {
   //  Sets the clock
   setClock('.js-time');
 
+  //  get the whole $ettings ball rolling
+  $ettings = GetSettings();
+  $ettings.init();
+
+  //  sets up the flip event on the main circle
   setupFlipEvent({  el:       'js-flip-container',
                     targetEl: 'js-flip-container',
                     open:     'i-container-s-open',
                     close:    'i-container-s-closed'
                   });
 
-
+  //  els
   var els = {
     settings: document.querySelector('.settings'),
     openSettings: document.querySelector('.js-settings-controller')
   };
 
+  //  setup the thing to open settings
   setupToggleSettingsEvent( els );
 
   //  Fetch oldData. Async.
   chrome.storage.local.get( 'oldData', function(d){
-
+    var randomSub, maxHrs;
     //  check if there is any data
     if(d.oldData){
-      //  Set maxHrs allowed before fetching clean data
-      var maxHrs = 1;
+
+
+      if($ettings.Settings){
+        // set our maxHrs;
+        maxHrs = $ettings.Settings.updateFrequency * 0.25;
+      }else{
+        throw "$ettings.Settings was not available when we looked for it!";
+      }
 
       if( isLongerThanHrs( d.oldData.timeSaved, maxHrs ) ){
-        console.log("It's been longer than "+maxHrs+" hr(s)\nFetching new data!");
-        fetchRedditData(parseRedditData, "earthporn");
+        _log("It's been longer than "+maxHrs+" hr(s)\nFetching new data!");
+        randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
+        fetchRedditData(parseRedditData, randomSub);
       }else{
-        console.log("It's been less than "+maxHrs+" hr(s)\nUsing old data!");
+        _log("It's been less than "+maxHrs+" hr(s)\nUsing old data!");
         //  in case we weren't able to save the base64, let's get that whole process started
         if( !d.oldData.base64Img ){
           convertImgToBase64URL( d.oldData.url, function(base64data){
@@ -820,14 +865,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
       }
 
     }else{
-      fetchRedditData(parseRedditData, "earthporn");
+      randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
+      fetchRedditData(parseRedditData, randomSub);
     }
 
   });
-
-  //  get the whole $ettings ball rolling
-  $ettings = GetSettings();
-  $ettings.init();
-
-
 });
