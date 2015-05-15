@@ -33,7 +33,7 @@
       /**    This will take the data we just grabbed and save it
         *    into localstorage for us
         */
-      clearLocalStorage();//clear localstorage before we do a set
+      removeItemFromLocalStorage('oldData');//clear localstorage before we do a set
       setLocalStorageData( data );
       setStuff(GetData( data ));//sets DOM elements
     },
@@ -145,9 +145,19 @@
       *   @desc:   simple utility to clear chrome.localstorage
       */
     clearLocalStorage = function(){
+
       chrome.storage.local.clear(function(){
         localStorage.clear();
         console.log('Cleared localStorage!');
+      });
+    },
+    /**   @name:   removeItemFromLocalStorage
+      *   @params: item[string]
+      *   @desc:   removes a specific thing from localStorage
+      */
+    removeItemFromLocalStorage = function( item ){
+      chrome.storage.local.remove( item, function(){
+        _log("Successfully removed "+item+" from localStorage!");
       });
     },
     /**   @name:   setLocalStorageData

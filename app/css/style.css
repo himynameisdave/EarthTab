@@ -619,8 +619,11 @@
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: center;
+  -webkit-user-select: none;
+  user-select: none;
 }
 .settings-subreddit-list-item {
+  cursor: pointer;
   height: 100px;
   flex-grow: 1;
   margin: 0.15rem;
