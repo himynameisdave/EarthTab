@@ -1,7 +1,7 @@
 EarthTab
 ---
 
-A Chrome extension that scrapes [r/earthporn](http://www.reddit.com/r/EarthPorn/) and makes the current top image the background for your new tab page.
+A Chrome extension that scrapes [Reddit's SFW porn network](http://www.reddit.com/r/sfwpornnetwork/wiki/network#wiki_nature) for beautiful images and makes them the background for your New Tab.
 
 ![EarthTab](http://i.imgur.com/pwDlEEg.png)
 
