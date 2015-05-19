@@ -26,6 +26,7 @@ gulp.task( 'build:compile-css', function(){
 gulp.task( 'build:compile-js', function(){
 
   return gulp.src('./src/js/script.js')
+          .pipe($.stripDebug())
           .pipe($.uglify())
           .pipe(gulp.dest('./build/js/'))
 
