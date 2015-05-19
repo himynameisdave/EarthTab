@@ -158,7 +158,7 @@
       */
     removeItemFromLocalStorage = function( item ){
       chrome.storage.local.remove( item, function(){
-        _log("Successfully removed "+item+" from localStorage!");
+        console.log("Successfully removed "+item+" from localStorage!");
       });
     },
     /**   @name:   setLocalStorageData
@@ -335,6 +335,9 @@
           h = t.getHours(),
           m = t.getMinutes();
           if (m<10) { m = "0"+m; }
+          if( h > 12 ){
+            h = h - 12;
+          }
       var time = h+":"+m;
 
       if(oldTime !== time) {
@@ -387,19 +390,6 @@
         throw "removeClass() needs either an element or a selector string!";
       element.classList.remove(className);
     },
-    /**   @name:    _log
-      *   @params:  data [whatever the user wants to log]
-      *   @desc:    utility logging function
-      */
-    _log = function( data ){
-      console.log(data);
-    },
-
-
-
-
-
-
 
 
     GetSettings = function(){
@@ -417,23 +407,26 @@
                     'LakePorn',
                     'SpacePorn'
                   ],
+        finishedInit: false,
         init: function(){
           var This = this;//  this is weird but makes sense
 
           this.fetchOldSettings(function(d){
 
             if(d.settings) {
-              _log('Using old data for settings');
+              console.log('Using old data for settings');
               This.Settings = d.settings;
               //  the real question is do you really need to pass stuff to parseSettings
               This.parseSettings();
+              This.finishedInit = true;
             }else{
-              _log('Using new data for settings');
+              console.log('Using new data for settings');
               var newSettings = This.buildDefaultSettings();
               This.updateSettings( newSettings, function(d){
-                _log('Updated the localStorage Settings!');
+                console.log('Updated the localStorage Settings!');
                 This.Settings = newSettings;
                 This.parseSettings();
+                This.finishedInit = true;
               });
             }
           });
@@ -589,8 +582,8 @@
               This.showSaveSettings();
               //  actually save da new settings
               This.updateSettings( This.Settings, function(){
-                _log("\nSuccessfully saved settings!");
-                // _log( This.Settings );
+                console.log("\nSuccessfully saved settings!");
+                // console.log( This.Settings );
               });
 
             }
@@ -626,8 +619,8 @@
               This.showSaveSettings();
               //  actually save da new settings
               This.updateSettings( This.Settings, function(){
-                _log("\nSuccessfully saved settings, using these:");
-                _log( This.Settings );
+                console.log("\nSuccessfully saved settings, using these:");
+                console.log( This.Settings );
               });
 
             });
@@ -669,6 +662,7 @@
         gimmieARandomActiveSub: function(){
           var activeSubs = [];
 
+          //  Location of an error... becuase this don't exist yet
           this.Settings.subs.forEach(function(val, i){
             if(val.active) {
               activeSubs.push(val.name);
@@ -850,7 +844,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
     //  check if there is any data
     if(d.oldData){
 
-
       if($ettings.Settings){
         // set our maxHrs;
         maxHrs = $ettings.Settings.updateFrequency * 0.25;
@@ -859,11 +852,11 @@ document.addEventListener("DOMContentLoaded", function(event) {
       }
 
       if( isLongerThanHrs( d.oldData.timeSaved, maxHrs ) ){
-        _log("It's been longer than "+maxHrs+" hr(s)\nFetching new data!");
+        console.log("It's been longer than "+maxHrs+" hr(s)\nFetching new data!");
         randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
         fetchRedditData(parseRedditData, randomSub);
       }else{
-        _log("It's been less than "+maxHrs+" hr(s)\nUsing old data!");
+        console.log("It's been less than "+maxHrs+" hr(s)\nUsing old data!");
         //  in case we weren't able to save the base64, let's get that whole process started
         if( !d.oldData.base64Img ){
           convertImgToBase64URL( d.oldData.url, function(base64data){
@@ -874,8 +867,23 @@ document.addEventListener("DOMContentLoaded", function(event) {
       }
 
     }else{
-      randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
-      fetchRedditData(parseRedditData, randomSub);
+
+
+      //  Need to check if $settings.Settings exist
+
+      if($ettings.finishedInit){
+        randomSub = $ettings.gimmieARandomActiveSub().toLowerCase();
+        fetchRedditData(parseRedditData, randomSub);
+      }else{
+        var interval = setInterval(function(){
+          if($ettings.finishedInit){
+            randomSub = $ettings.gimmieARandomActiveSub().toLowerCase();
+            fetchRedditData(parseRedditData, randomSub);
+          }
+          clearInterval(interval);
+        }, 100);
+      }
+
     }
 
   });
