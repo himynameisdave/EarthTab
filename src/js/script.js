@@ -325,6 +325,24 @@
       }
 
     },
+    /**   @name:    forceBGRefresh
+      *   @params:  [none]
+      *   @desc:    function called when a user wants to force reload the bg image
+      *             It picks up from the same place as "this data is too old, lets get new data"
+      */
+    forceBGRefresh = function(){
+      //  remove visible class from main
+      removeClass( '.main', 'main-visible' );
+      //  programatically click the settings to close it
+      //  TODO: not an ideal solution
+      var set = document.querySelector('.js-settings-controller');
+      set.click.apply(set);
+
+      //  no need to check if $ettings exists cause it has to by now
+      var randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
+      //  go fetch some data from that subreddit
+      fetchRedditData(parseRedditData, randomSub);
+    },
     /**   @name:    setClock
       *   @params:  el [string, selector], oldTime [number, time; optional]
       *   @desc:    recursivly checks the time and alters it in the DOM
@@ -852,7 +870,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
                     open:     'i-container-s-open',
                     close:    'i-container-s-closed'
                   });
-
+///////WERID
   //  els
   var els = {
     settings: document.querySelector('.settings'),
@@ -861,6 +879,10 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
   //  setup the thing to open settings
   setupToggleSettingsEvent( els );
+/////////////end WEIRD
+
+  // setup force refresh click event
+  document.querySelector('.js-force-refresh').addEventListener("click", forceBGRefresh);
 
   //  Fetch oldData. Async.
   chrome.storage.local.get( 'oldData', function(d){

@@ -754,6 +754,47 @@
 .settings-update-frequency:focus {
   outline: none;
 }
+.settings-force-refresh-button {
+  -webkit-appearance: none;
+  appearance: none;
+  background: none;
+  border: 1px solid #333;
+  border-radius: 0.35rem;
+  color: #333;
+  cursor: pointer;
+  font-family: 'Playfair Display', 'Georgia', Times, serif;
+  font-size: 1.25rem;
+  font-weight: 900;
+  letter-spacing: -0.05rem;
+  margin: 0.75rem auto;
+  overflow: hidden;
+  padding: 1rem 2rem;
+  position: relative;
+  text-align: center;
+  transition: color 0.45s cubic-bezier(0, 0.56, 0.99, 0.75);
+}
+.settings-force-refresh-button:hover {
+  color: #fff;
+}
+.settings-force-refresh-button:hover:before {
+  transform: translate(0, 0);
+}
+.settings-force-refresh-button:before {
+  background-color: #333;
+  content: '';
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  transform: translate(-100%, 0);
+  transition: transform 0.45s cubic-bezier(0, 0.56, 0.99, 0.75);
+  z-index: -1;
+}
+.settings-force-refresh-button:focus {
+  outline: none;
+}
 .bg-sub-earthporn .settings-subreddit-checkbox {
   background-image: url('../images/sub-previews/earthporn.jpg');
 }
