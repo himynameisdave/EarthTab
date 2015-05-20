@@ -106,6 +106,19 @@
       *            What this will eventually do is get a proper URL from non-direct image links
       */
     filterDomain = function(domain){
+
+
+      // contains ( "media.tumblr.com" )
+
+      // contains ( "drscdn.500px.org" )
+
+      // contains ( "images.nationalgeographic.com" )
+
+      // contains ( "upload.wikimedia.org/" )
+
+      // contains ( "staticflickr.com" )
+
+
       if( domain === "i.imgur.com" )
         return true;
       else
@@ -401,6 +414,13 @@
       else
         throw "Not a real element!\nPlease pass either a selector string or element object!";
       return element;
+    },
+    /**   @name:    isInString
+      *   @params:  str[string], test[string]
+      *   @desc:    takes an OG string and a test, returns true if the test case is in the 'str' string
+      */
+    isInString = function( str, test ){
+      return (str.indexOf( test ) > -1);
     },
     /**   @name:    addClass
       *   @params:  el [string, selector], class [string]
