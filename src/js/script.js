@@ -347,6 +347,21 @@
         setClock(el, time);
       },5000);// five seconds is a lot but I'd rather that then taking the performance hit
     },
+    /**   @name:    truncatePostTime
+      *   @params:  hrs [number]
+      *   @desc:    takes the number of hours since the thing was posted and spits out something more readable (days/weeks/etc)
+      */
+    truncatePostTime = function( hrs ){
+      if( hrs < 24 ){
+        return Math.floor(hrs) + " hrs";
+      }
+      if( hrs >= 24 && hrs < 168 ){
+        return Math.floor(hrs/24) + " days";
+      }
+      if( hrs >= 168 ){
+        return Math.floor(hrs/168) + " weeks";
+      }
+    },
     /**   @name:    resolveElement
       *   @params:  el [string, selector OR DOM element object]
       *   @desc:    handy utility that returns the actual element, whether passed a selector string or actual element
@@ -770,7 +785,7 @@
               now    = Date.now()/1000,
               posted = this.data.created;
 
-              this.setInnerHtml( el, (Math.floor(getHrsDiff( posted, now )) + ' hours ago') );
+              this.setInnerHtml( el, truncatePostTime(getHrsDiff( posted, now )) + " ago" );
         },
         /**   @name:   settings.setBackgroundImage
           *   @params: el [string, selector]
