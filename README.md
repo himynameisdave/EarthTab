@@ -1,13 +1,13 @@
 EarthTab
 ---
 
-Using images from [Reddit's SWF Nature Porn]((http://www.reddit.com/r/sfwpornnetwork/wiki/network#wiki_nature)) network, EarthTab transforms your new tabs into a window transfixed on the Earth's natural beauty.
+EarthTab pulls images from [Reddit's SWF Nature Porn]((http://www.reddit.com/r/sfwpornnetwork/wiki/network#wiki_nature)) network to transform your new tabs into beautiful windows into Earth's natural beauty.
 
 ![EarthTab](http://i.imgur.com/oU21fPt.jpg)
 
 Head on over to the Chrome Web Store to install.
 
-![Chrome Web Store](https://developer.chrome.com/webstore/images/ChromeWebStore_Badge_v2_206x58.png)
+[![Chrome Web Store](https://developer.chrome.com/webstore/images/ChromeWebStore_Badge_v2_206x58.png)](https://chrome.google.com/webstore/detail/acfgpmagealjmbmhobbldfkhbcfnkhpd/preview?hl=en-US&gl=CA)
 
 ---
 
