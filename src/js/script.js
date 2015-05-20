@@ -390,8 +390,10 @@
         throw "removeClass() needs either an element or a selector string!";
       element.classList.remove(className);
     },
-
-
+    /**   @name:    GetSettings
+      *   @params:  [none]
+      *   @desc:    returns an instance of $ettings with saved, closed settings object and methods for dealing with it
+      */
     GetSettings = function(){
       return {
         Settings: {},
@@ -844,6 +846,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
     //  check if there is any data
     if(d.oldData){
 
+      //  check if settings exist yet
+      //  TODO: no fallback if it don't :-\
       if($ettings.Settings){
         // set our maxHrs;
         maxHrs = $ettings.Settings.updateFrequency * 0.25;
@@ -851,26 +855,29 @@ document.addEventListener("DOMContentLoaded", function(event) {
         throw "$ettings.Settings was not available when we looked for it!";
       }
 
+      //  check if it's been longer than the specified number of max hrs
       if( isLongerThanHrs( d.oldData.timeSaved, maxHrs ) ){
         console.log("It's been longer than "+maxHrs+" hr(s)\nFetching new data!");
+        //  grab us a random sub, chosen from the currently selected subs
         randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
+        //  go fetch some data from that subreddit
         fetchRedditData(parseRedditData, randomSub);
       }else{
         console.log("It's been less than "+maxHrs+" hr(s)\nUsing old data!");
         //  in case we weren't able to save the base64, let's get that whole process started
         if( !d.oldData.base64Img ){
+          //  this function is an async function that converts an image url into a base64 image
           convertImgToBase64URL( d.oldData.url, function(base64data){
+            //  saveBase64ToLocalStorage stores our image to the oldData, which is why we need to pass a copy of the old stuff back
             saveBase64ToLocalStorage( d.oldData,  base64data );
           });
         }
+        //  go and set the styles and stuffs, using this old data
         setStuff(GetData( d.oldData ));
       }
 
-    }else{
-
-
-      //  Need to check if $settings.Settings exist
-
+    }// else, if there is no oldData in
+    else{
       if($ettings.finishedInit){
         randomSub = $ettings.gimmieARandomActiveSub().toLowerCase();
         fetchRedditData(parseRedditData, randomSub);

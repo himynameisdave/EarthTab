@@ -1,7 +1,7 @@
 {
   "name": "EarthTab",
   "version": "0.1.0",
-  "description": "A chrome extension that scrapes /r/earthporn and uses the top image as a background for your new tab",
+  "description": "Using images from Reddit's SWF Nature Porn network, EarthTab transforms your new tabs into a window transfixed on the Earth's natural beauty.",
   "main": "gulpfile.js",
   "dependencies": {
     "browserify": "^9.0.8",
