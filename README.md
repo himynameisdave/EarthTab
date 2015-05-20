@@ -7,7 +7,7 @@ EarthTab pulls images from [Reddit's SWF Nature Porn]((http://www.reddit.com/r/s
 
 Head on over to the Chrome Web Store to install.
 
-[![Chrome Web Store](https://developer.chrome.com/webstore/images/ChromeWebStore_Badge_v2_206x58.png)](https://chrome.google.com/webstore/detail/acfgpmagealjmbmhobbldfkhbcfnkhpd/preview?hl=en-US&gl=CA)
+[![Chrome Web Store](https://developer.chrome.com/webstore/images/ChromeWebStore_Badge_v2_206x58.png)](http://bit.ly/earthtab)
 
 ---
 
