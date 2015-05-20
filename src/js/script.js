@@ -54,7 +54,7 @@
         /**   If it's not a mod post & we haven't found our image yet
           */
         if(isValidImagePost(val.data) && !isImageFound){
-          //  TEMPORARY: just accepts i.imgur domains
+          //  make sure that it's coming from a trusted domain
           if( filterDomain(val.data.domain) ){
 
             console.log( val );
@@ -106,10 +106,20 @@
       *            What this will eventually do is get a proper URL from non-direct image links
       */
     filterDomain = function(domain){
-      if( domain === "i.imgur.com" )
+      if( isInString( domain, "i.imgur.com" ) )
         return true;
-      else
-        return false;
+      if( isInString( domain, "media.tumblr.com" ) )
+        return true;
+      if( isInString( domain, "drscdn.500px.org" ) )
+        return true;
+      if( isInString( domain, "staticflickr.com" ) )
+        return true;
+      if( isInString( domain, "images.nationalgeographic.com" ) )
+        return true;
+      if( isInString( domain, "upload.wikimedia.org" ) )
+        return true;
+      //  will have returned true by now if anything was true
+      return false;
     },
     /**   @name:   getImgurId
       *   @params: imgurUrl [string]
@@ -401,6 +411,13 @@
       else
         throw "Not a real element!\nPlease pass either a selector string or element object!";
       return element;
+    },
+    /**   @name:    isInString
+      *   @params:  str[string], test[string]
+      *   @desc:    takes an OG string and a test, returns true if the test case is in the 'str' string
+      */
+    isInString = function( str, test ){
+      return (str.indexOf( test ) > -1);
     },
     /**   @name:    addClass
       *   @params:  el [string, selector], class [string]
