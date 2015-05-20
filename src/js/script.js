@@ -352,14 +352,21 @@
       *   @desc:    takes the number of hours since the thing was posted and spits out something more readable (days/weeks/etc)
       */
     truncatePostTime = function( hrs ){
+      var h, s;
       if( hrs < 24 ){
-        return Math.floor(hrs) + " hrs";
+        h = Math.floor(hrs);
+        s = (h > 1 ? " hrs" : " hr");
+        return h + s;
       }
       if( hrs >= 24 && hrs < 168 ){
-        return Math.floor(hrs/24) + " days";
+        h = Math.floor(hrs/24);
+        s = (h > 1 ? " days" : " day");
+        return h + s;
       }
       if( hrs >= 168 ){
-        return Math.floor(hrs/168) + " weeks";
+        h = Math.floor(hrs/168);
+        s = (h > 1 ? " weeks" : " week");
+        return h + s;
       }
     },
     /**   @name:    resolveElement
