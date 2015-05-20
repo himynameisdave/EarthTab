@@ -1,15 +1,19 @@
 EarthTab
 ---
 
-A Chrome extension that scrapes [Reddit's SFW porn network](http://www.reddit.com/r/sfwpornnetwork/wiki/network#wiki_nature) for beautiful images and makes them the background for your New Tab.
+Using images from [Reddit's SWF Nature Porn]((http://www.reddit.com/r/sfwpornnetwork/wiki/network#wiki_nature)) network, EarthTab transforms your new tabs into a window transfixed on the Earth's natural beauty.
 
-![EarthTab](http://i.imgur.com/pwDlEEg.png)
+![EarthTab](http://i.imgur.com/oU21fPt.jpg)
+
+Head on over to the Chrome Web Store to install.
+
+![Chrome Web Store](https://developer.chrome.com/webstore/images/ChromeWebStore_Badge_v2_206x58.png)
 
 ---
 
-## Install
+## Dev Install
 
-Until I post this bitch to the Chrome Web Store (soon, I promise), you can install it the old school way by following these instructions:
+For all the cool-ass mofos out there, you can backdoor install the app ([until Google stops letting you](http://thenextweb.com/apps/2015/05/13/chrome-will-soon-force-developer-channel-users-to-install-extensions-from-its-web-store-even-on-mac/)) by following these instructions:
 
 #### Download Repo
 
@@ -35,13 +39,8 @@ Click "Load Unpacked Extension", which will pull up a menu where you can select 
 
 All installed! You should now see a beautiful image, along with the time, displayed as your new tab.
 
-Sadly, installing it this way will not allow for automatic updates. Therefore you will have to repeat this process everytime there is an update to the code. This will not be an issue when I (finally) put this up on the Chrome Web Store.
+Sadly, installing it this way will not allow for automatic updates. Therefore you will have to repeat this process everytime there is an update to the code. This will not be an issue for people who install the extension via the Chrome Web Store.
 
 ---
 
-*Copyright (c) 2015 [Dave Lunny](http://himynameisdave.com) Licenced under the MIT licence*
-
-
-<!--
-![would like to actually make this be true](https://developer.chrome.com/webstore/images/ChromeWebStore_Badge_v2_206x58.png)
--->
+*Copyright (c) 2015 [Dave Lunny](http://himynameisdave.com) Licensed under the MIT licence*
