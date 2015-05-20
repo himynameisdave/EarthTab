@@ -14,7 +14,7 @@ gulp.task( 'build:compile-css', function(){
   return gulp.src('./src/css/style.less')
           .pipe($.less())
           .pipe($.autoprefixer({
-            browsers: ['Chrome > 20'],
+            browsers: ['Chrome > 30'],
             cascade: false
           }))
           .pipe($.csscomb())
