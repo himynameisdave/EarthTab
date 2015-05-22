@@ -414,10 +414,6 @@ button {
     font-size: 1.75rem;
   }
 }
-.i-info-list-item:last-child {
-  border-bottom: none;
-  display: none;
-}
 @media all and (min-width: 400px) and (min-height: 320px) {
   .i-info-list-item {
     padding: .25rem .25rem .25rem 0;
@@ -753,17 +749,17 @@ button {
   background-image: linear-gradient(#ffffff, #f7f7f7);
   border-radius: 100%;
   cursor: pointer;
-  height: 2.25rem;
+  height: 2rem;
   padding-left: 0.25rem;
   padding-right: 0.25rem;
   position: relative;
-  width: 2.25rem;
+  width: 2rem;
 }
 .settings-update-frequency::-webkit-slider-thumb:before {
   display: inline-block;
   content: '';
   color: #333;
-  font-size: 0.785rem;
+  font-size: 0.775rem;
   font-weight: 900;
   line-height: 2.5;
   letter-spacing: -0.05rem;
