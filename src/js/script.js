@@ -34,7 +34,7 @@
         *    into localstorage for us
         */
       removeItemFromLocalStorage('oldData');//clear localstorage before we do a set
-      setLocalStorageData( data );
+      saveNewImageInfo( data );
       setStuff(GetData( data ));//sets DOM elements
     },
     /**   @name:   getDataForTopImage
@@ -66,6 +66,7 @@
               bgUrl:      val.data.url,                 //  {string}  will take the place of data.url
               created:    val.data.created_utc,         //  {number}  a timestamp of when this post was created.
               domain:     val.data.domain,              //  {string}  a string of the domain of the post
+              id:         val.data.id,                  //  {string}  a unique string that will be used to test if this image has been used yet or not
               redditLink: 'http://www.reddit.com'+val.data.permalink, //  {string}  link to the reddit post
               title:      stripSquareBrackets(val.data.title),        //  {string}  a sanitized string, title of the post
               score:      val.data.score,               //  {number}  a timestamp of when this post was created
@@ -161,21 +162,88 @@
         console.log("Successfully removed "+item+" from localStorage!");
       });
     },
-    /**   @name:   setLocalStorageData
+
+
+    /**   @name:   saveNewImageInfo
+      *   @params: d [object]
+      *   @desc:   stores the "oldData" in localStorage AND stores the ID in the "usedItems"
+      */
+    saveNewImageInfo = function( d ){
+      //  goes off to store that reddit data in localStorage
+      saveRedditDataToLocalStorage( d );
+
+      var newlyUsedImage = {
+        id: d.id,
+        time: Date.now()/1000
+      };
+
+      chrome.storage.local.get( 'usedImages', function(d){
+        /**   TODO:
+          *       I feel like the use of two setting functions
+          *       below could be merged into one...just saying
+          */
+        //  based on if it's the first one or not, it either pushes the
+        if(Object.keys(d).length){
+          //  dont forget that d is the data object holding our array
+          d.usedImages.push(newlyUsedImage);
+          addNewlyUsedImageToLocalStorage( d.usedImages );
+        }else{
+          //  else just pass the new object down to the initiater
+          addFirstUsedImageToLocalStorage( newlyUsedImage );
+        }
+      });
+    },
+    /**   @name:   saveRedditDataToLocalStorage
       *   @params: d [object]
       *   @desc:   sets the data into localstorage under the oldData namespace
       *             TODO: this name is too generic!
       */
-    setLocalStorageData = function( d ){
-
+    saveRedditDataToLocalStorage = function( d ){
       chrome.storage.local.set({'oldData': d}, function(){
         console.log('Saved settings to localStorage!');
         convertImgToBase64URL( d.url, function(base64data){
           saveBase64ToLocalStorage( d,  base64data );
         });
       });
-
     },
+    /**   @name:   addNewlyUsedImageToLocalStorage
+      *   @params: newlyUpdatedImages[object]
+      *   @desc:   updates the list of used images in localstorage
+      */
+    addNewlyUsedImageToLocalStorage = function( newlyUpdatedImages ){
+      chrome.storage.local.set({'usedImages': newlyUpdatedImages}, function(){
+        console.log('Updated the used images list!');
+      });
+    },
+    /**   @name:   addFirstUsedImageToLocalStorage
+      *   @params: newItem[object]
+      *   @desc:   same as the regular one except that it initiates the usedImages object with the images array in there
+      */
+    addFirstUsedImageToLocalStorage = function( newItem ){
+      var o = [];
+      o.push(newItem);
+      chrome.storage.local.set({'usedImages': o}, function(){
+        console.log('Initiated the used images list!');
+      });
+    },
+
+
+
+
+
+
+    youNeedToGetWithYourShit = function(){
+      chrome.storage.local.get( 'usedImages', function(usedImages){
+        console.log(usedImages);
+      });
+      return "Fetching your data!";
+    },
+
+
+
+
+
+
     /**   @name:   saveBase64ToLocalStorage
       *   @params: d [object], n64 [string]
       *   @desc:   takes the old data object, appends the base64 to it, and adds it to localstorage
@@ -717,18 +785,6 @@
         }
       };
     },
-
-
-
-
-
-
-
-
-
-///
-//      TODO: make the settings methods like the GetData one below
-///////////////////
     /**   @name:   GetData
       *   @params: data [object]
       *   @desc:   a function that returns an object that contains all of our info
