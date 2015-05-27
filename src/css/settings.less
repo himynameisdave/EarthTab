@@ -284,15 +284,23 @@
   color: #333;
   cursor: pointer;
   font-family: @playfair;
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 900;
   letter-spacing: -0.05rem;
   margin: 0.75rem auto;
   overflow: hidden;
-  padding: 1rem 2rem;
+  padding: 0.5rem 1rem;
   position: relative;
   text-align: center;
-  transition: color 0.45s cubic-bezier(0,.56,.99,.75);
+  transition: color 0.45s cubic-bezier(0,.56,.99,.75), font-size 0.45s ease-out, padding 0.45s ease-out;
+  @media @mq-small {
+    font-size: 1.1rem;
+    padding: 0.75rem 1.5rem;
+  }
+  @media @mq-medium {
+    font-size: 1.25rem;
+    padding: 1rem 2rem;
+  }
   &:hover {
     color: #fff;
     &:before{
