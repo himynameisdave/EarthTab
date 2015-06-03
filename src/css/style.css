@@ -1,6 +1,15 @@
-/***
-  *     Should import the following fonts properly
-  */
+@font-face {
+  font-family: 'PlayfairDisplay-Black';
+  src: url('../fonts/playfair/PlayfairDisplay-Black.woff2') format('woff2'), url('../fonts/playfair/PlayfairDisplay-Black.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Raleway-Heavy';
+  src: url('../fonts/raleway/Raleway-Heavy.woff2') format('woff2') url('../fonts/raleway/Raleway-Heavy.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
 @font-face {
   font-family: 'EarthTab';
   src: url('../fonts/icons/earthtab.eot?-lcbspf');
@@ -35,25 +44,41 @@
 .icon-user:before {
   content: "\263b";
 }
-@-webkit-keyframes info-opening {
-  0% {
-    transform: translate(-50%, -50%) rotateY(0deg);
-  }
-  100% {
-    transform: translate(-50%, -50%) rotateY(540deg);
-  }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
-@keyframes info-opening {
-  0% {
-    transform: translate(-50%, -50%) rotateY(0deg);
-  }
-  100% {
-    transform: translate(-50%, -50%) rotateY(540deg);
-  }
+html,
+body {
+  color: #333;
+  font-family: 'Raleway-Heavy', 'Raleway', 'Roboto', Helvetica, sans-serif;
+  font-weight: 300;
+  line-height: 1.435;
+  font-size: 18px;
+  height: 100%;
+  width: 100%;
 }
-.anim-opening {
-  -webkit-animation: info-opening 1s 1;
-  animation: info-opening 1s 1;
+button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+.main {
+  background-image: linear-gradient(to bottom, #ffffff 0%, #f1f1f1 50%, #ffffff 100%);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  display: block;
+  height: 100%;
+  position: relative;
+  transition: opacity 0.365s ease-in-out;
+  transform-style: preserve-3d;
+  opacity: 0;
+  width: 100%;
+}
+.main.main-visible {
+  opacity: 1;
 }
 .i-container {
   perspective: 1000;
@@ -262,7 +287,7 @@
 }
 .i-container-time {
   font-size: 2rem;
-  font-family: 'Playfair Display', 'Georgia', Times, serif;
+  font-family: 'PlayfairDisplay-Black', 'Playfair Display', 'Georgia', Times, serif;
   font-weight: 900;
   margin: 0;
   padding: 0;
@@ -290,7 +315,7 @@
 .i-info-text {
   color: #333;
   display: block;
-  font-family: 'Playfair Display', 'Georgia', Times, serif;
+  font-family: 'PlayfairDisplay-Black', 'Playfair Display', 'Georgia', Times, serif;
   font-weight: 900;
   text-decoration: none;
   font-size: 0.675rem;
@@ -344,7 +369,7 @@
 }
 .i-info-list {
   list-style: none;
-  font-family: 'Raleway', 'Roboto', Helvetica, sans-serif;
+  font-family: 'Raleway-Heavy', 'Raleway', 'Roboto', Helvetica, sans-serif;
   font-weight: 900;
   padding: 0;
   text-align: left;
@@ -388,10 +413,6 @@
   .i-info-list-item:first-child .i-info-icon {
     font-size: 1.75rem;
   }
-}
-.i-info-list-item:last-child {
-  border-bottom: none;
-  display: none;
 }
 @media all and (min-width: 400px) and (min-height: 320px) {
   .i-info-list-item {
@@ -528,7 +549,7 @@
 .settings-saved-alert .settings-saved-alert-text {
   color: #333;
   text-shadow: 0 0 8px #fff;
-  font-family: 'Raleway', 'Roboto', Helvetica, sans-serif;
+  font-family: 'Raleway-Heavy', 'Raleway', 'Roboto', Helvetica, sans-serif;
   font-size: 0.85rem;
   font-weight: 900;
   letter-spacing: -0.05rem;
@@ -599,7 +620,7 @@
   margin: 0.75rem 0;
 }
 .settings-list-heading {
-  font-family: 'Playfair Display', 'Georgia', Times, serif;
+  font-family: 'PlayfairDisplay-Black', 'Playfair Display', 'Georgia', Times, serif;
   font-size: 1.5rem;
   font-weight: 900;
   line-height: 1.1;
@@ -660,9 +681,9 @@
   text-shadow: 0 0 5px rgba(51, 51, 51, 0.65);
   color: #fff;
   display: inline-block;
-  font-family: 'Raleway', 'Roboto', Helvetica, sans-serif;
+  font-family: 'Raleway-Heavy', 'Raleway', 'Roboto', Helvetica, sans-serif;
   font-size: 0.85rem;
-  font-weight: bold;
+  font-weight: 900;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -728,17 +749,17 @@
   background-image: linear-gradient(#ffffff, #f7f7f7);
   border-radius: 100%;
   cursor: pointer;
-  height: 2.25rem;
+  height: 2rem;
   padding-left: 0.25rem;
   padding-right: 0.25rem;
   position: relative;
-  width: 2.25rem;
+  width: 2rem;
 }
 .settings-update-frequency::-webkit-slider-thumb:before {
   display: inline-block;
   content: '';
   color: #333;
-  font-size: 0.785rem;
+  font-size: 0.775rem;
   font-weight: 900;
   line-height: 2.5;
   letter-spacing: -0.05rem;
@@ -762,7 +783,7 @@
   border-radius: 0.35rem;
   color: #333;
   cursor: pointer;
-  font-family: 'Playfair Display', 'Georgia', Times, serif;
+  font-family: 'PlayfairDisplay-Black', 'Playfair Display', 'Georgia', Times, serif;
   font-size: 1.25rem;
   font-weight: 900;
   letter-spacing: -0.05rem;
@@ -827,40 +848,4 @@
 }
 .bg-sub-spaceporn .settings-subreddit-checkbox {
   background-image: url('../images/sub-previews/spaceporn.jpg');
-}
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-html,
-body {
-  color: #333;
-  font-family: 'Raleway', 'Roboto', Helvetica, sans-serif;
-  font-weight: 300;
-  line-height: 1.435;
-  font-size: 18px;
-  height: 100%;
-  width: 100%;
-}
-button {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-}
-.main {
-  background-image: linear-gradient(to bottom, #ffffff 0%, #f1f1f1 50%, #ffffff 100%);
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: 50% 50%;
-  display: block;
-  height: 100%;
-  position: relative;
-  transition: opacity 0.365s ease-in-out;
-  transform-style: preserve-3d;
-  opacity: 0;
-  width: 100%;
-}
-.main.main-visible {
-  opacity: 1;
 }

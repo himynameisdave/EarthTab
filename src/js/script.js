@@ -92,7 +92,8 @@
       console.log("setStuff called with this data:", $.data);
 
       $.setTitle('.js-title');
-      $.setRedditLink( ['.js-score', '.js-time-posted' ]);
+      // $.setRedditLink( ['.js-score', '.js-time-posted' ]);
+      $.setRedditLink( '.js-time-posted' );
       $.setSubreddit('.js-subreddit');
       $.setUserLink('.js-username');
       $.setAuthor('.js-username');
@@ -593,7 +594,7 @@
 
           //  adds value to the css content element
           var val = this.convertFrequencyToHrs(newFrequency);
-          document.styleSheets[1].addRule( innerFrequencyEl, "content: '"+val+"'" );
+          document.styleSheets[0].addRule( innerFrequencyEl, "content: '"+val+"'" );
 
           //  if there is a callback we call it
           if( cb ){ cb(); }
@@ -824,7 +825,7 @@
             throw "Trying to set background, however could not find a base64Img or bgUrl in the data set!";
 
           if(this.data.base64Img){
-            document.styleSheets[1].addRule( el, "background-image: url("+this.data.base64Img+")" );
+            document.styleSheets[0].addRule( el, "background-image: url("+this.data.base64Img+")" );
             console.log( "Using the base64!" );
             addClass( '.main', 'main-visible' );
           }else{
