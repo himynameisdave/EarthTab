@@ -29,58 +29,93 @@
       /**    getDataForTopImage takes the element that gets appended,
         *    as well as the bracket-stripped title from the data.
         */
-      var data = getDataForTopImage(newData);
-      /**    This will take the data we just grabbed and save it
-        *    into localstorage for us
-        */
-      removeItemFromLocalStorage('oldData');//clear localstorage before we do a set
-      saveNewImageInfo( data );
-      setStuff(GetData( data ));//sets DOM elements
+      getDataForTopImage(newData, function(data){
+        /**    This will take the data we just grabbed and save it
+          *    into localstorage for us
+          */
+        removeItemFromLocalStorage('oldData');//clear localstorage before we do a set
+        saveNewImageInfo( data );
+        setStuff(GetData( data ));//sets DOM elements
+      });
     },
     /**   @name:   getDataForTopImage
-      *   @params: d [object]
+      *   @params: d [object], cb[function, callback]
       *   @desc:   sifts through the provided data object for the first non-moderator post.
       *            returns an object with the important data from that
       */
-    getDataForTopImage = function( d ){
+    getDataForTopImage = function( d, cb ){
 
       if(!d && typeof d === 'object' )
         throw "You didn't provide valid data to getDataForTopImage()!";
 
+      var obj = {};
+
+      getUsedImages(function(usedImages){
+        obj = loopThruRedditDataForTopImg( d, usedImages );
+        cb( obj );
+      });
+
+    },
+    /**   @name:   loopThruRedditDataForTopImg
+      *   @params: redditData[object], usedImages[array]
+      *   @desc:   handles the loop through stuff that
+      */
+    loopThruRedditDataForTopImg = function( redditData, usedImages ){
+
       var obj = {},
           isImageFound = false;
 
-      d.forEach(function(val, i){
-        /**   If it's not a mod post & we haven't found our image yet
-          */
+      redditData.forEach(function(val, i){
+        // If it's not a mod post & we haven't found our image yet
         if(isValidImagePost(val.data) && !isImageFound){
-          //  TEMPORARY: just accepts i.imgur domains
+          // if( filterDomain(val.data.domain) && !isUsedImage(val.data.id, usedImages) ){
           if( filterDomain(val.data.domain) ){
+            if( !isUsedImage(val.data, usedImages) ){
 
-            console.log( val );
-            /**   Top Image object
-              *   This is where all the data used in the application is set.
-              */
-            obj = {
-              author:     val.data.author,              //  {string}  the reddit user
-              bgUrl:      val.data.url,                 //  {string}  will take the place of data.url
-              created:    val.data.created_utc,         //  {number}  a timestamp of when this post was created.
-              domain:     val.data.domain,              //  {string}  a string of the domain of the post
-              id:         val.data.id,                  //  {string}  a unique string that will be used to test if this image has been used yet or not
-              redditLink: 'http://www.reddit.com'+val.data.permalink, //  {string}  link to the reddit post
-              title:      stripSquareBrackets(val.data.title),        //  {string}  a sanitized string, title of the post
-              score:      val.data.score,               //  {number}  a timestamp of when this post was created
-              subreddit:  val.data.subreddit,           //  {string}  the subreddit this came from
-              url:        val.data.url,                 //  {string}  the url of the image (not the reddit link)
-              timeSaved:  Date.now() / 1000             //  {number}  a timestamp of when this data was stored. divided by 1000 so we get the value in seconds
-            };
-            isImageFound   = true;
+              console.log( val );
+              /**   Top Image object
+                *   This is where all the data used in the application is set.
+                */
+              obj = {
+                author:     val.data.author,              //  {string}  the reddit user
+                bgUrl:      val.data.url,                 //  {string}  will take the place of data.url
+                created:    val.data.created_utc,         //  {number}  a timestamp of when this post was created.
+                domain:     val.data.domain,              //  {string}  a string of the domain of the post
+                id:         val.data.id,                  //  {string}  a unique string that will be used to test if this image has been used yet or not
+                redditLink: 'http://www.reddit.com'+val.data.permalink, //  {string}  link to the reddit post
+                title:      stripSquareBrackets(val.data.title),        //  {string}  a sanitized string, title of the post
+                score:      val.data.score,               //  {number}  a timestamp of when this post was created
+                subreddit:  val.data.subreddit,           //  {string}  the subreddit this came from
+                url:        val.data.url,                 //  {string}  the url of the image (not the reddit link)
+                timeSaved:  Date.now() / 1000             //  {number}  a timestamp of when this data was stored. divided by 1000 so we get the value in seconds
+              };
+              isImageFound   = true;
+            }
           }
         }
       });
 
-      //  TODO: would be better to return the GetData function with this object passed to it
       return obj;
+
+    },
+    /**   @name:   isUsedImage
+      *   @params: currentImage[object], imgs[array]
+      *   @desc:   does the actual looping through the old images and determines if the passed curentImage is used or not
+      */
+    isUsedImage = function( currentImage, imgs ){
+      var imageBeenUsed = false;
+
+      if( imgs.usedImages && imgs.usedImages.length > 0 ){
+        imgs.usedImages.forEach(function( val ){
+          console.log( "An old used image is: "+val.id+" and the currentImage we're testing against is: "+currentImage.id );
+          if( val.id === currentImage.id ){
+            console.warn("Found an image that has been used before!");
+            imageBeenUsed = true;
+          }
+        });
+      }
+
+      return imageBeenUsed;
     },
     /**   @name:   setStuff
       *   @params: $[object, data]
@@ -174,10 +209,12 @@
 
       var newlyUsedImage = {
         id: d.id,
+        redditLink: d.redditLink,
+        url: d.url,
         time: Date.now()/1000
       };
 
-      chrome.storage.local.get( 'usedImages', function(d){
+      getUsedImages( function(d){
         /**   TODO:
           *       I feel like the use of two setting functions
           *       below could be merged into one...just saying
@@ -226,24 +263,16 @@
         console.log('Initiated the used images list!');
       });
     },
-
-
-
-
-
-
-    youNeedToGetWithYourShit = function(){
-      chrome.storage.local.get( 'usedImages', function(usedImages){
-        console.log(usedImages);
-      });
-      return "Fetching your data!";
+    /**   @name:   getUsedImages
+      *   @params: cb[function, callback]
+      *   @desc:   wrapper for grabbing the old used image list from localStorage
+      */
+    getUsedImages = function( cb ){
+      if( typeof cb === 'function' )
+        chrome.storage.local.get( 'usedImages', cb);
+      else
+        throw "Must pass a valid callback function to getUsedImages!";
     },
-
-
-
-
-
-
     /**   @name:   saveBase64ToLocalStorage
       *   @params: d [object], n64 [string]
       *   @desc:   takes the old data object, appends the base64 to it, and adds it to localstorage
@@ -926,16 +955,13 @@ document.addEventListener("DOMContentLoaded", function(event) {
                     open:     'i-container-s-open',
                     close:    'i-container-s-closed'
                   });
-///////WERID
-  //  els
-  var els = {
-    settings: document.querySelector('.settings'),
-    openSettings: document.querySelector('.js-settings-controller')
-  };
 
   //  setup the thing to open settings
-  setupToggleSettingsEvent( els );
-/////////////end WEIRD
+  setupToggleSettingsEvent({
+    settings: document.querySelector('.settings'),
+    openSettings: document.querySelector('.js-settings-controller')
+  });
+
 
   // setup force refresh click event
   document.querySelector('.js-force-refresh').addEventListener("click", forceBGRefresh);
