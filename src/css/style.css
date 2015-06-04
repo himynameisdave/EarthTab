@@ -71,6 +71,7 @@
 .i-container,
 .i-container-front,
 .i-container-back {
+  cursor: pointer;
   text-align: center;
   transition: all 0.45s ease-in-out;
 }
@@ -261,6 +262,11 @@
   transition: width 0.45s ease-in-out, height 0.45s ease-in-out;
 }
 .i-container-time {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
   font-size: 2rem;
   font-family: 'Playfair Display', 'Georgia', Times, serif;
   font-weight: 900;
