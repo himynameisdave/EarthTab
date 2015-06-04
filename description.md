@@ -15,6 +15,7 @@ You can set which specific nature subreddits you would like to pull images from,
 RELEASE NOTES:
 
 - v0.2.0 (Beta): now pulls images from different domains (not just i.imgur) (May 20th/2015)
+- v0.3.0 (Beta): images no longer show up more than once (June 4th/2015)
 
 ========================
 
