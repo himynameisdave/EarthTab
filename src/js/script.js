@@ -29,57 +29,98 @@
       /**    getDataForTopImage takes the element that gets appended,
         *    as well as the bracket-stripped title from the data.
         */
-      var data = getDataForTopImage(newData);
-      /**    This will take the data we just grabbed and save it
-        *    into localstorage for us
-        */
-      removeItemFromLocalStorage('oldData');//clear localstorage before we do a set
-      setLocalStorageData( data );
-      setStuff(GetData( data ));//sets DOM elements
+      getDataForTopImage(newData, function(data){
+        /**    This will take the data we just grabbed and save it
+          *    into localstorage for us
+          */
+        removeItemFromLocalStorage('oldData');//clear localstorage before we do a set
+        saveNewImageInfo( data );
+        setStuff(GetData( data ));//sets DOM elements
+      });
     },
     /**   @name:   getDataForTopImage
-      *   @params: d [object]
+      *   @params: d [object], cb[function, callback]
       *   @desc:   sifts through the provided data object for the first non-moderator post.
       *            returns an object with the important data from that
       */
-    getDataForTopImage = function( d ){
+    getDataForTopImage = function( d, cb ){
 
       if(!d && typeof d === 'object' )
         throw "You didn't provide valid data to getDataForTopImage()!";
 
+      var obj = {};
+
+      getUsedImages(function(usedImages){
+        obj = loopThruRedditDataForTopImg( d, usedImages );
+        cb( obj );
+      });
+
+    },
+    /**   @name:   loopThruRedditDataForTopImg
+      *   @params: redditData[object], usedImages[array]
+      *   @desc:   handles the loop through stuff that
+      */
+    loopThruRedditDataForTopImg = function( redditData, usedImages ){
+
+
+      console.log('\n\n\nloopThruRedditData:\n',usedImages);
+
       var obj = {},
           isImageFound = false;
 
-      d.forEach(function(val, i){
-        /**   If it's not a mod post & we haven't found our image yet
-          */
+      redditData.forEach(function(val, i){
+        // If it's not a mod post & we haven't found our image yet
         if(isValidImagePost(val.data) && !isImageFound){
-          //  TEMPORARY: just accepts i.imgur domains
+          // if( filterDomain(val.data.domain) && !isUsedImage(val.data.id, usedImages) ){
           if( filterDomain(val.data.domain) ){
-
-            console.log( val );
-            /**   Top Image object
-              *   This is where all the data used in the application is set.
-              */
-            obj = {
-              author:     val.data.author,              //  {string}  the reddit user
-              bgUrl:      val.data.url,                 //  {string}  will take the place of data.url
-              created:    val.data.created_utc,         //  {number}  a timestamp of when this post was created.
-              domain:     val.data.domain,              //  {string}  a string of the domain of the post
-              redditLink: 'http://www.reddit.com'+val.data.permalink, //  {string}  link to the reddit post
-              title:      stripSquareBrackets(val.data.title),        //  {string}  a sanitized string, title of the post
-              score:      val.data.score,               //  {number}  a timestamp of when this post was created
-              subreddit:  val.data.subreddit,           //  {string}  the subreddit this came from
-              url:        val.data.url,                 //  {string}  the url of the image (not the reddit link)
-              timeSaved:  Date.now() / 1000             //  {number}  a timestamp of when this data was stored. divided by 1000 so we get the value in seconds
-            };
-            isImageFound   = true;
+            if( !isUsedImage(val.data, usedImages) ){
+              /**   Top Image object
+                *   This is where all the data used in the application is set.
+                */
+              obj = {
+                author:     val.data.author,              //  {string}  the reddit user
+                bgUrl:      val.data.url,                 //  {string}  will take the place of data.url
+                created:    val.data.created_utc,         //  {number}  a timestamp of when this post was created.
+                domain:     val.data.domain,              //  {string}  a string of the domain of the post
+                id:         val.data.id,                  //  {string}  a unique string that will be used to test if this image has been used yet or not
+                redditLink: 'http://www.reddit.com'+val.data.permalink, //  {string}  link to the reddit post
+                title:      stripSquareBrackets(val.data.title),        //  {string}  a sanitized string, title of the post
+                score:      val.data.score,               //  {number}  a timestamp of when this post was created
+                subreddit:  val.data.subreddit,           //  {string}  the subreddit this came from
+                url:        val.data.url,                 //  {string}  the url of the image (not the reddit link)
+                timeSaved:  Date.now() / 1000             //  {number}  a timestamp of when this data was stored. divided by 1000 so we get the value in seconds
+              };
+              isImageFound   = true;
+            }
           }
         }
       });
 
-      //  TODO: would be better to return the GetData function with this object passed to it
       return obj;
+
+    },
+    /**   @name:   isUsedImage
+      *   @params: currentImage[object], imgs[array]
+      *   @desc:   does the actual looping through the old images and determines if the passed curentImage is used or not
+      */
+    isUsedImage = function( currentImage, imgs ){
+      var imageBeenUsed = false;
+
+      if( imgs.usedImages && imgs.usedImages.length > 0 ){
+        imgs.usedImages.forEach(function( val ){
+          if( val.id === currentImage.id ){
+            // console.warn("Found an image that has been used before!");
+            imageBeenUsed = true;
+          }
+
+        });
+      }
+      if(imageBeenUsed ){
+        console.warn("This img has been used!", currentImage);
+      }else{
+        console.info("This img has been not used!", currentImage);
+      }
+      return imageBeenUsed;
     },
     /**   @name:   setStuff
       *   @params: $[object, data]
@@ -162,20 +203,81 @@
         console.log("Successfully removed "+item+" from localStorage!");
       });
     },
-    /**   @name:   setLocalStorageData
+
+
+    /**   @name:   saveNewImageInfo
+      *   @params: d [object]
+      *   @desc:   stores the "oldData" in localStorage AND stores the ID in the "usedItems"
+      */
+    saveNewImageInfo = function( d ){
+      //  goes off to store that reddit data in localStorage
+      saveRedditDataToLocalStorage( d );
+
+      var newlyUsedImage = {
+        id: d.id,
+        redditLink: d.redditLink,
+        url: d.url,
+        time: Date.now()/1000
+      };
+
+      getUsedImages( function(d){
+        /**   TODO:
+          *       I feel like the use of two setting functions
+          *       below could be merged into one...just saying
+          */
+        //  based on if it's the first one or not, it either pushes the
+        if(Object.keys(d).length){
+          //  dont forget that d is the data object holding our array
+          d.usedImages.push(newlyUsedImage);
+          addNewlyUsedImageToLocalStorage( d.usedImages );
+        }else{
+          //  else just pass the new object down to the initiater
+          addFirstUsedImageToLocalStorage( newlyUsedImage );
+        }
+      });
+    },
+    /**   @name:   saveRedditDataToLocalStorage
       *   @params: d [object]
       *   @desc:   sets the data into localstorage under the oldData namespace
       *             TODO: this name is too generic!
       */
-    setLocalStorageData = function( d ){
-
+    saveRedditDataToLocalStorage = function( d ){
       chrome.storage.local.set({'oldData': d}, function(){
         console.log('Saved settings to localStorage!');
         convertImgToBase64URL( d.url, function(base64data){
           saveBase64ToLocalStorage( d,  base64data );
         });
       });
-
+    },
+    /**   @name:   addNewlyUsedImageToLocalStorage
+      *   @params: newlyUpdatedImages[object]
+      *   @desc:   updates the list of used images in localstorage
+      */
+    addNewlyUsedImageToLocalStorage = function( newlyUpdatedImages ){
+      chrome.storage.local.set({'usedImages': newlyUpdatedImages}, function(){
+        console.log('Updated the used images list!');
+      });
+    },
+    /**   @name:   addFirstUsedImageToLocalStorage
+      *   @params: newItem[object]
+      *   @desc:   same as the regular one except that it initiates the usedImages object with the images array in there
+      */
+    addFirstUsedImageToLocalStorage = function( newItem ){
+      var o = [];
+      o.push(newItem);
+      chrome.storage.local.set({'usedImages': o}, function(){
+        console.log('Initiated the used images list!');
+      });
+    },
+    /**   @name:   getUsedImages
+      *   @params: cb[function, callback]
+      *   @desc:   wrapper for grabbing the old used image list from localStorage
+      */
+    getUsedImages = function( cb ){
+      if( typeof cb === 'function' )
+        chrome.storage.local.get( 'usedImages', cb);
+      else
+        throw "Must pass a valid callback function to getUsedImages!";
     },
     /**   @name:   saveBase64ToLocalStorage
       *   @params: d [object], n64 [string]
@@ -718,18 +820,6 @@
         }
       };
     },
-
-
-
-
-
-
-
-
-
-///
-//      TODO: make the settings methods like the GetData one below
-///////////////////
     /**   @name:   GetData
       *   @params: data [object]
       *   @desc:   a function that returns an object that contains all of our info
@@ -821,8 +911,8 @@
         setBackgroundImage: function( el ){
           var element = document.querySelector(el);
 
-          if( !this.data.base64Img && !this.data.bgUrl )
-            throw "Trying to set background, however could not find a base64Img or bgUrl in the data set!";
+          if( !this.data.base64Img && !this.data.bgUrl && !this.data.url )
+            throw "Trying to set background, however could not find a base64Img or bgUrl or url in the data set!";
 
           if(this.data.base64Img){
             document.styleSheets[0].addRule( el, "background-image: url("+this.data.base64Img+")" );
@@ -871,16 +961,13 @@ document.addEventListener("DOMContentLoaded", function(event) {
                     open:     'i-container-s-open',
                     close:    'i-container-s-closed'
                   });
-///////WERID
-  //  els
-  var els = {
-    settings: document.querySelector('.settings'),
-    openSettings: document.querySelector('.js-settings-controller')
-  };
 
   //  setup the thing to open settings
-  setupToggleSettingsEvent( els );
-/////////////end WEIRD
+  setupToggleSettingsEvent({
+    settings: document.querySelector('.settings'),
+    openSettings: document.querySelector('.js-settings-controller')
+  });
+
 
   // setup force refresh click event
   document.querySelector('.js-force-refresh').addEventListener("click", forceBGRefresh);
@@ -889,7 +976,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
   chrome.storage.local.get( 'oldData', function(d){
     var randomSub, maxHrs;
     //  check if there is any data
-    if(d.oldData){
+    //  FIX for #25 - data was found kinda, but no actual url to use
+    if(d.oldData && d.oldData.url){
 
       //  check if settings exist yet
       //  TODO: no fallback if it don't :-\
@@ -939,4 +1027,5 @@ document.addEventListener("DOMContentLoaded", function(event) {
     }
 
   });
+
 });

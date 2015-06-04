@@ -96,6 +96,7 @@ button {
 .i-container,
 .i-container-front,
 .i-container-back {
+  cursor: pointer;
   text-align: center;
   transition: all 0.45s ease-in-out;
 }
@@ -286,6 +287,11 @@ button {
   transition: width 0.45s ease-in-out, height 0.45s ease-in-out;
 }
 .i-container-time {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
   font-size: 2rem;
   font-family: 'PlayfairDisplay-Black', 'Playfair Display', 'Georgia', Times, serif;
   font-weight: 900;
@@ -784,15 +790,27 @@ button {
   color: #333;
   cursor: pointer;
   font-family: 'PlayfairDisplay-Black', 'Playfair Display', 'Georgia', Times, serif;
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 900;
   letter-spacing: -0.05rem;
   margin: 0.75rem auto;
   overflow: hidden;
-  padding: 1rem 2rem;
+  padding: 0.5rem 1rem;
   position: relative;
   text-align: center;
-  transition: color 0.45s cubic-bezier(0, 0.56, 0.99, 0.75);
+  transition: color 0.45s cubic-bezier(0, 0.56, 0.99, 0.75), font-size 0.45s ease-out, padding 0.45s ease-out;
+}
+@media all and (min-width: 400px) and (min-height: 320px) {
+  .settings-force-refresh-button {
+    font-size: 1.1rem;
+    padding: 0.75rem 1.5rem;
+  }
+}
+@media all and (min-width: 600px) and (min-height: 460px) {
+  .settings-force-refresh-button {
+    font-size: 1.25rem;
+    padding: 1rem 2rem;
+  }
 }
 .settings-force-refresh-button:hover {
   color: #fff;
