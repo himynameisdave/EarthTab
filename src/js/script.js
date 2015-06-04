@@ -62,6 +62,9 @@
       */
     loopThruRedditDataForTopImg = function( redditData, usedImages ){
 
+
+      console.log('\n\n\nloopThruRedditData:\n',usedImages);
+
       var obj = {},
           isImageFound = false;
 
@@ -71,8 +74,6 @@
           // if( filterDomain(val.data.domain) && !isUsedImage(val.data.id, usedImages) ){
           if( filterDomain(val.data.domain) ){
             if( !isUsedImage(val.data, usedImages) ){
-
-              console.log( val );
               /**   Top Image object
                 *   This is where all the data used in the application is set.
                 */
@@ -107,14 +108,18 @@
 
       if( imgs.usedImages && imgs.usedImages.length > 0 ){
         imgs.usedImages.forEach(function( val ){
-          console.log( "An old used image is: "+val.id+" and the currentImage we're testing against is: "+currentImage.id );
           if( val.id === currentImage.id ){
-            console.warn("Found an image that has been used before!");
+            // console.warn("Found an image that has been used before!");
             imageBeenUsed = true;
           }
+
         });
       }
-
+      if(imageBeenUsed ){
+        console.warn("This img has been used!", currentImage);
+      }else{
+        console.info("This img has been not used!", currentImage);
+      }
       return imageBeenUsed;
     },
     /**   @name:   setStuff
@@ -905,8 +910,8 @@
         setBackgroundImage: function( el ){
           var element = document.querySelector(el);
 
-          if( !this.data.base64Img && !this.data.bgUrl )
-            throw "Trying to set background, however could not find a base64Img or bgUrl in the data set!";
+          if( !this.data.base64Img && !this.data.bgUrl && !this.data.url )
+            throw "Trying to set background, however could not find a base64Img or bgUrl or url in the data set!";
 
           if(this.data.base64Img){
             document.styleSheets[1].addRule( el, "background-image: url("+this.data.base64Img+")" );
@@ -970,7 +975,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
   chrome.storage.local.get( 'oldData', function(d){
     var randomSub, maxHrs;
     //  check if there is any data
-    if(d.oldData){
+    //  FIX for #25 - data was found kinda, but no actual url to use
+    if(d.oldData && d.oldData.url){
 
       //  check if settings exist yet
       //  TODO: no fallback if it don't :-\
@@ -1020,4 +1026,5 @@ document.addEventListener("DOMContentLoaded", function(event) {
     }
 
   });
+
 });
