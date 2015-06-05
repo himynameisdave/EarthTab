@@ -34,7 +34,7 @@ gulp.task( 'build:compile-js', function(){
 
 gulp.task( 'build:move-html', function(){
 
-  return gulp.src([ './src/newtab.html', './src/manifest.json' ])
+  return gulp.src([ './src/newtab.html', './src/manifest.json', './src/favicon.ico' ])
           .pipe(gulp.dest('./build/'));
 
 });
