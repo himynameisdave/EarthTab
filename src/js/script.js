@@ -594,14 +594,11 @@
           *   @params:  [none]
           *   @desc:    does two things for now:
           *               1. inject the subreddits
-          *               2. inject the frequency range input
+          *               2. inject the frequency range input ///REMOVED
           */
         parseSettings: function(){
 
-          //  setting the frequency initially, using whatever is in Settings as our value
-          this.setFrequency( this.Settings.updateFrequency, '.js-settings-update-frequency' );
           this.injectSubs( '.js-settings-subs' );
-          this.setupFrequencyChangeListener( '.js-settings-update-frequency' );
           this.setupCheckboxChangeListener();
 
         },
@@ -610,8 +607,8 @@
           *   @desc:    builds out a default settings object
           */
         buildDefaultSettings: function(){
+          //  TODO: now that updateFrequency has been removed we could make this just an array
           var s = {
-            updateFrequency: 8,
             subs: []
           },
           This = this;
@@ -667,72 +664,6 @@
 
           //now we call our callback, if it exists
           if( cb ){ cb();}
-
-        },
-        /**   @name:    convertFrequencyToHrs
-          *   @params:  frequency[number]
-          *   @desc:    quickly converts our "base48" number to hrs string
-          */
-        convertFrequencyToHrs: function( frequency ){
-          return frequency * 0.25;
-        },
-        /**   @name:    setFrequency
-          *   @params:  frequency[number], els [selector, string], cb[callback function]
-          *   @desc:    sets the update frequency meter based on the settings
-          *             accepts a callback that will reset the "beingChanged" flag on the event listener
-          */
-        setFrequency: function( newFrequency, el, cb ){
-
-      //  TODO: this was breaking shit. lets make sure our frequency is saved as a number
-          // if( typeof newFrequency !== 'number' )
-          //   throw "setFrequency requires a number be passed as the first parameter!";
-
-          var element = resolveElement(el),
-              //  TODO: this selector should be based of the element string passed in here...
-              innerFrequencyEl = ".js-settings-update-frequency::-webkit-slider-thumb:before";
-
-          //  actually setting the value of the range <input> element
-          element.value = newFrequency;
-
-          //  adds value to the css content element
-          var val = this.convertFrequencyToHrs(newFrequency);
-          document.styleSheets[0].addRule( innerFrequencyEl, "content: '"+val+"'" );
-
-          //  if there is a callback we call it
-          if( cb ){ cb(); }
-
-        },
-        /**   @name:    setupFrequencyChangeListener
-          *   @params:  el[selector string]
-          *   @desc:    sets the settings to "available"
-          */
-        setupFrequencyChangeListener: function( el ){
-
-          var element = resolveElement(el),
-              beingChanged = false,
-              This = this;
-
-          element.addEventListener('input', function(){
-            var val = parseInt(element.value);
-            if(!beingChanged){
-              beingChanged = true;
-              This.setFrequency( val, el, function(){
-                beingChanged = false;
-                /* Should the below stuff be in the callback also? */
-              });
-
-              //  update the global settings object
-              This.Settings.updateFrequency = element.value;
-              //  Show our save settings alert
-              This.showSaveSettings();
-              //  actually save da new settings
-              This.updateSettings( This.Settings, function(){
-                console.log("\nSuccessfully saved settings!");
-                // console.log( This.Settings );
-              });
-
-            }
-          });
 
         },
         /**   @name:    setupCheckboxChangeListener
@@ -979,24 +910,18 @@ document.addEventListener("DOMContentLoaded", function(event) {
     //  FIX for #25 - data was found kinda, but no actual url to use
     if(d.oldData && d.oldData.url){
 
-      //  check if settings exist yet
-      //  TODO: no fallback if it don't :-\
-      if($ettings.Settings){
-        // set our maxHrs;
-        maxHrs = $ettings.Settings.updateFrequency * 0.25;
-      }else{
-        throw "$ettings.Settings was not available when we looked for it!";
-      }
+      //  As of v0.4.0 frequency can no longer be set/is overridden here
+      maxHrs = 0.08334;// 0.08334% of an hour is ~5mins
 
       //  check if it's been longer than the specified number of max hrs
       if( isLongerThanHrs( d.oldData.timeSaved, maxHrs ) ){
-        console.log("It's been longer than "+maxHrs+" hr(s)\nFetching new data!");
+        console.log("It's been longer than 5mins!\nFetching new data!");
         //  grab us a random sub, chosen from the currently selected subs
         randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
         //  go fetch some data from that subreddit
         fetchRedditData(parseRedditData, randomSub);
       }else{
-        console.log("It's been less than "+maxHrs+" hr(s)\nUsing old data!");
+        console.log("It's been less than 5mins!\nUsing old data!");
         //  in case we weren't able to save the base64, let's get that whole process started
         if( !d.oldData.base64Img ){
           //  this function is an async function that converts an image url into a base64 image
