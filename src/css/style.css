@@ -741,46 +741,6 @@ button {
 .settings-subreddit-checkbox:focus {
   outline: none;
 }
-.settings-update-frequency {
-  -webkit-appearance: none;
-  appearance: none;
-  background: #333;
-  border-radius: 1.25rem;
-  box-shadow: inset 2px 2px 6px 1px #2e2e2e;
-  width: 100%;
-}
-.settings-update-frequency::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  background-image: linear-gradient(#ffffff, #f7f7f7);
-  border-radius: 100%;
-  cursor: pointer;
-  height: 2rem;
-  padding-left: 0.25rem;
-  padding-right: 0.25rem;
-  position: relative;
-  width: 2rem;
-}
-.settings-update-frequency::-webkit-slider-thumb:before {
-  display: inline-block;
-  content: '';
-  color: #333;
-  font-size: 0.775rem;
-  font-weight: 900;
-  line-height: 2.5;
-  letter-spacing: -0.05rem;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  height: 100%;
-  width: 100%;
-  vertical-align: middle;
-}
-.settings-update-frequency:focus {
-  outline: none;
-}
 .settings-force-refresh-button {
   -webkit-appearance: none;
   appearance: none;

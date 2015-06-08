@@ -51,8 +51,7 @@
       var obj = {};
 
       getUsedImages(function(usedImages){
-        obj = loopThruRedditDataForTopImg( d, usedImages );
-        cb( obj );
+        loopThruRedditDataForTopImg( d, usedImages, cb );
       });
 
     },
@@ -60,8 +59,7 @@
       *   @params: redditData[object], usedImages[array]
       *   @desc:   handles the loop through stuff that
       */
-    loopThruRedditDataForTopImg = function( redditData, usedImages ){
-
+    loopThruRedditDataForTopImg = function( redditData, usedImages, cb ){
 
       console.log('\n\n\nloopThruRedditData:\n',usedImages);
 
@@ -96,7 +94,7 @@
         }
       });
 
-      return obj;
+      cb( obj );
 
     },
     /**   @name:   isUsedImage
