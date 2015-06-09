@@ -483,17 +483,7 @@ button {
     font-size: 1.675rem;
   }
 }
-.settings-button-text {
-  position: absolute;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  height: 1px;
-  width: 1px;
-  margin: -1px;
-  padding: 0;
-  border: 0;
-}
-.settings-button {
+.settings-action-button {
   background: transparent;
   border: 0;
   cursor: pointer;
@@ -503,7 +493,11 @@ button {
   right: 5%;
   width: 1.5rem;
 }
-.settings-button .settings-button-icon {
+.settings-action-button:hover .settings-button-icon {
+  color: #f1f1f1;
+}
+.settings-action-button .settings-button-icon {
+  color: #333;
   position: absolute;
   top: 0;
   left: 0;
@@ -511,25 +505,25 @@ button {
   width: 100%;
   transition: all 0.45s ease-in-out;
 }
-.settings-button .settings-button-icon:before {
+.settings-action-button .settings-button-icon:before {
   text-shadow: 0 0 7px rgba(255, 255, 255, 0.55);
   font-size: 1.5rem;
   height: 100%;
   width: 100%;
 }
-.settings-button:focus {
+.settings-action-button:focus {
   outline: none;
 }
-.settings-button.settings-button-s-closed .settings-button-icon.icon-settings-close {
+.settings-action-button.settings-button-s-closed .settings-button-icon.icon-settings-close {
   transform: scale(0);
 }
-.settings-button.settings-button-s-closed .settings-button-icon.icon-settings-open {
+.settings-action-button.settings-button-s-closed .settings-button-icon.icon-settings-open {
   transform: scale(1);
 }
-.settings-button.settings-button-s-open .settings-button-icon.icon-settings-close {
+.settings-action-button.settings-button-s-open .settings-button-icon.icon-settings-close {
   transform: scale(1);
 }
-.settings-button.settings-button-s-open .settings-button-icon.icon-settings-open {
+.settings-action-button.settings-button-s-open .settings-button-icon.icon-settings-open {
   transform: scale(0);
 }
 .settings-saved-alert {
@@ -741,7 +735,7 @@ button {
 .settings-subreddit-checkbox:focus {
   outline: none;
 }
-.settings-force-refresh-button {
+.settings-button {
   -webkit-appearance: none;
   appearance: none;
   background: none;
@@ -749,15 +743,40 @@ button {
   border-radius: 0.35rem;
   color: #333;
   cursor: pointer;
-  font-family: 'PlayfairDisplay-Black', 'Playfair Display', 'Georgia', Times, serif;
   font-size: 1rem;
+  font-family: 'PlayfairDisplay-Black', 'Playfair Display', 'Georgia', Times, serif;
   font-weight: 900;
   letter-spacing: -0.05rem;
   margin: 0.75rem auto;
-  overflow: hidden;
   padding: 0.5rem 1rem;
-  position: relative;
+  overflow: hidden;
   text-align: center;
+}
+.settings-button:hover {
+  color: #f1f1f1;
+}
+.settings-button:hover:before {
+  transform: translate(0, 0);
+}
+.settings-button:before {
+  background-color: #333;
+  content: '';
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  transform: translate(-100%, 0);
+  transition: transform 0.45s cubic-bezier(0, 0.56, 0.99, 0.75);
+  z-index: -1;
+}
+.settings-button:focus {
+  outline: none;
+}
+.settings-force-refresh-button {
+  font-size: 1rem;
+  position: relative;
   transition: color 0.45s cubic-bezier(0, 0.56, 0.99, 0.75), font-size 0.45s ease-out, padding 0.45s ease-out;
 }
 @media all and (min-width: 400px) and (min-height: 320px) {
@@ -771,28 +790,6 @@ button {
     font-size: 1.25rem;
     padding: 1rem 2rem;
   }
-}
-.settings-force-refresh-button:hover {
-  color: #fff;
-}
-.settings-force-refresh-button:hover:before {
-  transform: translate(0, 0);
-}
-.settings-force-refresh-button:before {
-  background-color: #333;
-  content: '';
-  display: block;
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  width: 100%;
-  transform: translate(-100%, 0);
-  transition: transform 0.45s cubic-bezier(0, 0.56, 0.99, 0.75);
-  z-index: -1;
-}
-.settings-force-refresh-button:focus {
-  outline: none;
 }
 .bg-sub-earthporn .settings-subreddit-checkbox {
   background-image: url('../images/sub-previews/earthporn.jpg');
@@ -826,4 +823,102 @@ button {
 }
 .bg-sub-spaceporn .settings-subreddit-checkbox {
   background-image: url('../images/sub-previews/spaceporn.jpg');
+}
+.main-t-light .i-container-front,
+.main-t-light .i-container-back {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+.main-t-light .i-container-time {
+  color: #333;
+}
+.main-t-light .i-info-text {
+  color: #333;
+  text-shadow: 0 1px 1px rgba(200, 200, 200, 0.45);
+}
+.main-t-light .i-info-line {
+  border-color: #333;
+}
+.main-t-light .i-info-list-item,
+.main-t-light .i-info-list-item-link {
+  color: #333;
+  border-color: #333;
+  text-shadow: 0 0 2px rgba(200, 200, 200, 0.65);
+}
+.main-t-light .i-info-list-item:hover .i-info-list-item-link {
+  color: #f1f1f1;
+}
+.main-t-light .settings {
+  background: rgba(255, 255, 255, 0.65);
+}
+.main-t-light .settings-saved-alert {
+  color: #333;
+  text-shadow: 0 0 8px #fff;
+}
+.main-t-light .settings-list-heading {
+  color: #333;
+}
+.main-t-light .settings-action-button .settings-button-icon {
+  color: #333;
+}
+.main-t-light .settings-action-button:hover .settings-button-icon {
+  color: #f1f1f1;
+}
+.main-t-light .settings-button {
+  border-color: #333;
+  color: #333;
+}
+.main-t-light .settings-button:before {
+  background-color: #333;
+}
+.main-t-light .settings-button:hover {
+  color: #f1f1f1;
+}
+.main-t-dark .i-container-front,
+.main-t-dark .i-container-back {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+.main-t-dark .i-container-time {
+  color: #f1f1f1;
+}
+.main-t-dark .i-info-text {
+  color: #f1f1f1;
+  text-shadow: 0 1px 1px rgba(20, 20, 20, 0.65);
+}
+.main-t-dark .i-info-line {
+  border-color: #f1f1f1;
+}
+.main-t-dark .i-info-list-item,
+.main-t-dark .i-info-list-item-link {
+  color: #f1f1f1;
+  border-color: #f1f1f1;
+  text-shadow: 0 0 2px rgba(20, 20, 20, 0.65);
+}
+.main-t-dark .i-info-list-item:hover .i-info-list-item-link {
+  color: #333;
+}
+.main-t-dark .settings {
+  background: rgba(0, 0, 0, 0.65);
+}
+.main-t-dark .settings-saved-alert {
+  color: #f1f1f1;
+  text-shadow: 0 0 8px #000;
+}
+.main-t-dark .settings-list-heading {
+  color: #f1f1f1;
+}
+.main-t-dark .settings-action-button .settings-button-icon {
+  color: #f1f1f1;
+}
+.main-t-dark .settings-action-button:hover .settings-button-icon {
+  color: #333;
+}
+.main-t-dark .settings-button {
+  border-color: #f1f1f1;
+  color: #f1f1f1;
+}
+.main-t-dark .settings-button:before {
+  background-color: #f1f1f1;
+}
+.main-t-dark .settings-button:hover {
+  color: #333;
 }

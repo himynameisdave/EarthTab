@@ -1,15 +1,135 @@
 ///////////////////////////
 //      Two themes,
 //    Light and Dark
+//
 //  Light is the default
 ///////////////////////////
 
 
-.i-container-t-light {
-  //  everything else
+
+
+
+.main-t-light {
+//// i-container light theme
+    .i-container-front,
+    .i-container-back {
+      background-color: rgba( 255, 255, 255, 0.4 );
+    }
+    .i-container-time {
+      color: #333;
+    }
+    .i-info-text {
+      color: #333;
+      text-shadow: 0 1px 1px rgba( 200, 200, 200, 0.45 );
+    }
+    .i-info-line{
+      border-color: #333;
+    }
+    .i-info-list-item,
+    .i-info-list-item-link {
+      color: #333;
+      border-color: #333;
+      text-shadow: 0 0 2px rgba( 200, 200, 200, 0.65 );
+    }
+    .i-info-list-item:hover {
+      .i-info-list-item-link {
+        color: #f1f1f1;
+      }
+    }
+//// settings light theme
+    .settings {
+      background: rgba( 255, 255, 255, 0.65 );
+    }
+    .settings-saved-alert {
+      color: #333;
+      text-shadow: 0 0 8px #fff;
+    }
+    .settings-list-heading {
+      color: #333;
+    }
+    .settings-action-button {
+      .settings-button-icon {
+        color: #333;
+      }
+      &:hover {
+        .settings-button-icon {
+          color: #f1f1f1;
+        }
+      }
+    }
+    .settings-button {
+      border-color: #333;
+      color: #333;
+      &:before {
+        background-color: #333;
+      }
+      &:hover {
+        color: #f1f1f1;
+      }
+    }
 }
 
-.i-container-t-dark {
-  //  everything else
+.main-t-dark {
+//// i-container dark theme
+    .i-container-front,
+    .i-container-back {
+      background-color: rgba( 0, 0, 0, 0.4 );
+    }
+    .i-container-time {
+      color: #f1f1f1;
+    }
+    .i-info-text {
+      color: #f1f1f1;
+      text-shadow: 0 1px 1px rgba( 20, 20, 20, 0.65 );
+    }
+    .i-info-line {
+      border-color: #f1f1f1;
+    }
+    .i-info-list-item,
+    .i-info-list-item-link {
+      color: #f1f1f1;
+      border-color: #f1f1f1;
+      text-shadow: 0 0 2px rgba( 20, 20, 20, 0.65 );
+    }
+    .i-info-list-item:hover {
+      .i-info-list-item-link {
+        color: #333;
+      }
+    }
+//// settings dark theme
+    .settings {
+      background: rgba( 0, 0, 0, 0.65 );
+    }
+    .settings-saved-alert {
+      color: #f1f1f1;
+      text-shadow: 0 0 8px #000;
+    }
+    .settings-list-heading {
+      color: #f1f1f1;
+    }
+    .settings-action-button {
+      .settings-button-icon {
+        color: #f1f1f1;
+      }
+      &:hover {
+        .settings-button-icon {
+          color: #333;
+        }
+      }
+    }
+    .settings-button {
+      border-color: #f1f1f1;
+      color: #f1f1f1;
+      &:before {
+        background-color: #f1f1f1;
+      }
+      &:hover {
+        color: #333;
+      }
+    }
+
 }
+
+
+
 
