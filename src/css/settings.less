@@ -1,9 +1,6 @@
 
 
-
-.settings-button-text { .visually-hidden() }
-
-.settings-button {
+.settings-action-button {
   background: transparent;
   border: 0;
   cursor: pointer;
@@ -11,7 +8,13 @@
   position: absolute;
   bottom: 5%; right: 5%;
   width: 1.5rem;
+  &:hover {
+    .settings-button-icon {
+      color: #f1f1f1;
+    }
+  }
   .settings-button-icon {
+    color: #333;
     position: absolute;
     top:0; left:0;
     height: 100%;
@@ -94,11 +97,11 @@
 
 .settings {
   @transTime: 0.475s;
-  background: rgba( 255, 255, 255, 0.65 );
+  background-color: rgba( 255, 255, 255, 0.65 );
   height: 100%;
   overflow: scroll;
   transform-origin: 50% 0;
-  transition: transform @transTime ease-in-out;
+  transition: transform @transTime ease-in-out, background-color 0.7s ease-in-out;
   width: 100%;
   &.settings-s-closed {
     z-index: -9999;
@@ -224,7 +227,6 @@
   -webkit-filter: blur(4px) grayscale(100%);
   transition: background-size 0.285s ease-in-out, -webkit-filter 0.285s ease-in-out, opacity 0.285s ease-in-out;
   opacity: 0.8;
-
   &:checked {
     background-size: 200%;
     -webkit-filter: blur(0) grayscale(0);
@@ -235,34 +237,25 @@
   }
 }
 
-.settings-force-refresh-button {
+.settings-button {
   -webkit-appearance: none;
   appearance: none;
   background: none;
   border: 1px solid #333;
-  border-radius: 0.35rem;
+  border-radius: 0.45rem;
   color: #333;
   cursor: pointer;
-  font-family: @playfair;
   font-size: 1rem;
+  font-family: @playfair;
   font-weight: 900;
   letter-spacing: -0.05rem;
   margin: 0.75rem auto;
-  overflow: hidden;
   padding: 0.5rem 1rem;
-  position: relative;
+  overflow: hidden;
   text-align: center;
-  transition: color 0.45s cubic-bezier(0,.56,.99,.75), font-size 0.45s ease-out, padding 0.45s ease-out;
-  @media @mq-small {
-    font-size: 1.1rem;
-    padding: 0.75rem 1.5rem;
-  }
-  @media @mq-medium {
-    font-size: 1.25rem;
-    padding: 1rem 2rem;
-  }
+  width: 100%;
   &:hover {
-    color: #fff;
+    color: #f1f1f1;
     &:before{
       transform: translate( 0, 0 );
     }
@@ -281,6 +274,82 @@
   }
   &:focus {
     outline: none;
+  }
+}
+
+.settings-force-refresh-button {
+  font-size: 1rem;
+  position: relative;
+  transition: color 0.45s cubic-bezier(0,.56,.99,.75), font-size 0.45s ease-out, padding 0.45s ease-out, border-color 0.7s ease-in-out;
+  @media @mq-small {
+    font-size: 1.1rem;
+    padding: 0.75rem 1.5rem;
+  }
+  @media @mq-medium {
+    font-size: 1.25rem;
+    padding: 1rem 2rem;
+  }
+}
+
+//  we are actually just using the labels for styling, the radio buttons themselves are hidden
+.settings-theme-option-radio { display: none; pointer-events: none; }
+
+.settings-theme-option-radio + .settings-theme-option-label {
+  .no-touchy();
+  border: 1px solid #333;
+  border-radius: 0.4rem;
+  color: #333;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 1rem;
+  font-family: @playfair;
+  font-weight: 900;
+  letter-spacing: -0.05rem;
+  overflow: hidden;
+  padding: 0.675rem 1.5rem;
+  position: relative;
+  text-align: center;
+  transition: color 0.45s cubic-bezier(0,.56,.99,.75), border-color 0.7s ease-in-out;
+  width: 50%;
+  &:nth-of-type(1) {
+    border-right: 0;
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+    &:before {
+      transform: translate( 250%, 0 );
+    }
+  }
+  &:nth-of-type(2) {
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+    &:before {
+      transform: translate( -150%, 0 );
+    }
+  }
+  &:before {
+    background-color: #333;
+    content: '';
+    display: block;
+    position: absolute;
+    left: 0; top: 0;
+    height: 101%;
+    width: 100%;
+    z-index: -1;
+    transition: transform 0.25s cubic-bezier(0,.56,.99,.75), background-color 0.7s ease-in-out;
+  }
+}
+
+.settings-theme-option-radio:checked + .settings-theme-option-label {
+  color: #f1f1f1;
+  &:nth-of-type(1) {
+    &:before{
+      transform: translate( 0, 0 );
+    }
+  }
+  &:nth-of-type(2) {
+    &:before{
+      transform: translate( 0, 0 );
+    }
   }
 }
 

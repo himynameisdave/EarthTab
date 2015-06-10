@@ -483,17 +483,7 @@ button {
     font-size: 1.675rem;
   }
 }
-.settings-button-text {
-  position: absolute;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  height: 1px;
-  width: 1px;
-  margin: -1px;
-  padding: 0;
-  border: 0;
-}
-.settings-button {
+.settings-action-button {
   background: transparent;
   border: 0;
   cursor: pointer;
@@ -503,7 +493,11 @@ button {
   right: 5%;
   width: 1.5rem;
 }
-.settings-button .settings-button-icon {
+.settings-action-button:hover .settings-button-icon {
+  color: #f1f1f1;
+}
+.settings-action-button .settings-button-icon {
+  color: #333;
   position: absolute;
   top: 0;
   left: 0;
@@ -511,25 +505,25 @@ button {
   width: 100%;
   transition: all 0.45s ease-in-out;
 }
-.settings-button .settings-button-icon:before {
+.settings-action-button .settings-button-icon:before {
   text-shadow: 0 0 7px rgba(255, 255, 255, 0.55);
   font-size: 1.5rem;
   height: 100%;
   width: 100%;
 }
-.settings-button:focus {
+.settings-action-button:focus {
   outline: none;
 }
-.settings-button.settings-button-s-closed .settings-button-icon.icon-settings-close {
+.settings-action-button.settings-button-s-closed .settings-button-icon.icon-settings-close {
   transform: scale(0);
 }
-.settings-button.settings-button-s-closed .settings-button-icon.icon-settings-open {
+.settings-action-button.settings-button-s-closed .settings-button-icon.icon-settings-open {
   transform: scale(1);
 }
-.settings-button.settings-button-s-open .settings-button-icon.icon-settings-close {
+.settings-action-button.settings-button-s-open .settings-button-icon.icon-settings-close {
   transform: scale(1);
 }
-.settings-button.settings-button-s-open .settings-button-icon.icon-settings-open {
+.settings-action-button.settings-button-s-open .settings-button-icon.icon-settings-open {
   transform: scale(0);
 }
 .settings-saved-alert {
@@ -584,11 +578,11 @@ button {
   z-index: -100;
 }
 .settings {
-  background: rgba(255, 255, 255, 0.65);
+  background-color: rgba(255, 255, 255, 0.65);
   height: 100%;
   overflow: scroll;
   transform-origin: 50% 0;
-  transition: transform 0.475s ease-in-out;
+  transition: transform 0.475s ease-in-out, background-color 0.7s ease-in-out;
   width: 100%;
 }
 .settings.settings-s-closed {
@@ -741,24 +735,50 @@ button {
 .settings-subreddit-checkbox:focus {
   outline: none;
 }
-.settings-force-refresh-button {
+.settings-button {
   -webkit-appearance: none;
   appearance: none;
   background: none;
   border: 1px solid #333;
-  border-radius: 0.35rem;
+  border-radius: 0.45rem;
   color: #333;
   cursor: pointer;
-  font-family: 'PlayfairDisplay-Black', 'Playfair Display', 'Georgia', Times, serif;
   font-size: 1rem;
+  font-family: 'PlayfairDisplay-Black', 'Playfair Display', 'Georgia', Times, serif;
   font-weight: 900;
   letter-spacing: -0.05rem;
   margin: 0.75rem auto;
-  overflow: hidden;
   padding: 0.5rem 1rem;
-  position: relative;
+  overflow: hidden;
   text-align: center;
-  transition: color 0.45s cubic-bezier(0, 0.56, 0.99, 0.75), font-size 0.45s ease-out, padding 0.45s ease-out;
+  width: 100%;
+}
+.settings-button:hover {
+  color: #f1f1f1;
+}
+.settings-button:hover:before {
+  transform: translate(0, 0);
+}
+.settings-button:before {
+  background-color: #333;
+  content: '';
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  transform: translate(-100%, 0);
+  transition: transform 0.45s cubic-bezier(0, 0.56, 0.99, 0.75);
+  z-index: -1;
+}
+.settings-button:focus {
+  outline: none;
+}
+.settings-force-refresh-button {
+  font-size: 1rem;
+  position: relative;
+  transition: color 0.45s cubic-bezier(0, 0.56, 0.99, 0.75), font-size 0.45s ease-out, padding 0.45s ease-out, border-color 0.7s ease-in-out;
 }
 @media all and (min-width: 400px) and (min-height: 320px) {
   .settings-force-refresh-button {
@@ -772,27 +792,67 @@ button {
     padding: 1rem 2rem;
   }
 }
-.settings-force-refresh-button:hover {
-  color: #fff;
+.settings-theme-option-radio {
+  display: none;
+  pointer-events: none;
 }
-.settings-force-refresh-button:hover:before {
-  transform: translate(0, 0);
+.settings-theme-option-radio + .settings-theme-option-label {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+  border: 1px solid #333;
+  border-radius: 0.4rem;
+  color: #333;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 1rem;
+  font-family: 'PlayfairDisplay-Black', 'Playfair Display', 'Georgia', Times, serif;
+  font-weight: 900;
+  letter-spacing: -0.05rem;
+  overflow: hidden;
+  padding: 0.675rem 1.5rem;
+  position: relative;
+  text-align: center;
+  transition: color 0.45s cubic-bezier(0, 0.56, 0.99, 0.75), border-color 0.7s ease-in-out;
+  width: 50%;
 }
-.settings-force-refresh-button:before {
+.settings-theme-option-radio + .settings-theme-option-label:nth-of-type(1) {
+  border-right: 0;
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
+}
+.settings-theme-option-radio + .settings-theme-option-label:nth-of-type(1):before {
+  transform: translate(250%, 0);
+}
+.settings-theme-option-radio + .settings-theme-option-label:nth-of-type(2) {
+  border-bottom-left-radius: 0;
+  border-top-left-radius: 0;
+}
+.settings-theme-option-radio + .settings-theme-option-label:nth-of-type(2):before {
+  transform: translate(-150%, 0);
+}
+.settings-theme-option-radio + .settings-theme-option-label:before {
   background-color: #333;
   content: '';
   display: block;
   position: absolute;
   left: 0;
   top: 0;
-  height: 100%;
+  height: 101%;
   width: 100%;
-  transform: translate(-100%, 0);
-  transition: transform 0.45s cubic-bezier(0, 0.56, 0.99, 0.75);
   z-index: -1;
+  transition: transform 0.25s cubic-bezier(0, 0.56, 0.99, 0.75), background-color 0.7s ease-in-out;
 }
-.settings-force-refresh-button:focus {
-  outline: none;
+.settings-theme-option-radio:checked + .settings-theme-option-label {
+  color: #f1f1f1;
+}
+.settings-theme-option-radio:checked + .settings-theme-option-label:nth-of-type(1):before {
+  transform: translate(0, 0);
+}
+.settings-theme-option-radio:checked + .settings-theme-option-label:nth-of-type(2):before {
+  transform: translate(0, 0);
 }
 .bg-sub-earthporn .settings-subreddit-checkbox {
   background-image: url('../images/sub-previews/earthporn.jpg');
@@ -826,4 +886,122 @@ button {
 }
 .bg-sub-spaceporn .settings-subreddit-checkbox {
   background-image: url('../images/sub-previews/spaceporn.jpg');
+}
+.main-t-light .i-container-front,
+.main-t-light .i-container-back {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+.main-t-light .i-container-time {
+  color: #333;
+}
+.main-t-light .i-info-text {
+  color: #333;
+  text-shadow: 0 1px 1px rgba(200, 200, 200, 0.45);
+}
+.main-t-light .i-info-line {
+  border-color: #333;
+}
+.main-t-light .i-info-list-item,
+.main-t-light .i-info-list-item-link {
+  color: #333;
+  border-color: #333;
+  text-shadow: 0 0 2px rgba(200, 200, 200, 0.65);
+}
+.main-t-light .i-info-list-item:hover .i-info-list-item-link {
+  color: #f1f1f1;
+}
+.main-t-light .settings {
+  background: rgba(255, 255, 255, 0.65);
+}
+.main-t-light .settings-saved-alert {
+  color: #333;
+  text-shadow: 0 0 8px #fff;
+}
+.main-t-light .settings-list-heading {
+  color: #333;
+}
+.main-t-light .settings-action-button .settings-button-icon {
+  color: #333;
+}
+.main-t-light .settings-action-button:hover .settings-button-icon {
+  color: #f1f1f1;
+}
+.main-t-light .settings-button {
+  border-color: #333;
+  color: #333;
+}
+.main-t-light .settings-button:before {
+  background-color: #333;
+}
+.main-t-light .settings-button:hover {
+  color: #f1f1f1;
+}
+.main-t-light .settings-theme-option-radio + .settings-theme-option-label {
+  border-color: #333;
+  color: #333;
+}
+.main-t-light .settings-theme-option-radio + .settings-theme-option-label:before {
+  background-color: #333;
+}
+.main-t-light .settings-theme-option-radio:checked + .settings-theme-option-label {
+  color: #f1f1f1;
+}
+.main-t-dark .i-container-front,
+.main-t-dark .i-container-back {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+.main-t-dark .i-container-time {
+  color: #f1f1f1;
+}
+.main-t-dark .i-info-text {
+  color: #f1f1f1;
+  text-shadow: 0 1px 1px rgba(20, 20, 20, 0.65);
+}
+.main-t-dark .i-info-line {
+  border-color: #f1f1f1;
+}
+.main-t-dark .i-info-list-item,
+.main-t-dark .i-info-list-item-link {
+  color: #f1f1f1;
+  border-color: #f1f1f1;
+  text-shadow: 0 0 2px rgba(20, 20, 20, 0.65);
+}
+.main-t-dark .i-info-list-item:hover .i-info-list-item-link {
+  color: #333;
+}
+.main-t-dark .settings {
+  background-color: rgba(0, 0, 0, 0.65);
+}
+.main-t-dark .settings-saved-alert {
+  color: #f1f1f1;
+  text-shadow: 0 0 8px #000;
+}
+.main-t-dark .settings-list-heading {
+  color: #f1f1f1;
+}
+.main-t-dark .settings-action-button .settings-button-icon {
+  color: #f1f1f1;
+}
+.main-t-dark .settings-action-button:hover .settings-button-icon {
+  color: #333;
+}
+.main-t-dark .settings-button {
+  border-color: #f1f1f1;
+  color: #f1f1f1;
+}
+.main-t-dark .settings-button:before {
+  background-color: #f1f1f1;
+}
+.main-t-dark .settings-button:hover {
+  color: #333;
+}
+.main-t-dark .settings-theme-option-radio + .settings-theme-option-label {
+  border-color: #f1f1f1;
+  color: #f1f1f1;
+}
+.main-t-dark .settings-theme-option-radio + .settings-theme-option-label:before {
+  background-color: #f1f1f1;
+}
+.main-t-dark .settings-theme-option-radio:checked + .settings-theme-option-label {
+  color: #333;
 }
