@@ -578,11 +578,11 @@ button {
   z-index: -100;
 }
 .settings {
-  background: rgba(255, 255, 255, 0.65);
+  background-color: rgba(255, 255, 255, 0.65);
   height: 100%;
   overflow: scroll;
   transform-origin: 50% 0;
-  transition: transform 0.475s ease-in-out;
+  transition: transform 0.475s ease-in-out, background-color 0.7s ease-in-out;
   width: 100%;
 }
 .settings.settings-s-closed {
@@ -740,7 +740,7 @@ button {
   appearance: none;
   background: none;
   border: 1px solid #333;
-  border-radius: 0.35rem;
+  border-radius: 0.45rem;
   color: #333;
   cursor: pointer;
   font-size: 1rem;
@@ -751,6 +751,7 @@ button {
   padding: 0.5rem 1rem;
   overflow: hidden;
   text-align: center;
+  width: 100%;
 }
 .settings-button:hover {
   color: #f1f1f1;
@@ -777,7 +778,7 @@ button {
 .settings-force-refresh-button {
   font-size: 1rem;
   position: relative;
-  transition: color 0.45s cubic-bezier(0, 0.56, 0.99, 0.75), font-size 0.45s ease-out, padding 0.45s ease-out;
+  transition: color 0.45s cubic-bezier(0, 0.56, 0.99, 0.75), font-size 0.45s ease-out, padding 0.45s ease-out, border-color 0.7s ease-in-out;
 }
 @media all and (min-width: 400px) and (min-height: 320px) {
   .settings-force-refresh-button {
@@ -790,6 +791,68 @@ button {
     font-size: 1.25rem;
     padding: 1rem 2rem;
   }
+}
+.settings-theme-option-radio {
+  display: none;
+  pointer-events: none;
+}
+.settings-theme-option-radio + .settings-theme-option-label {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+  border: 1px solid #333;
+  border-radius: 0.4rem;
+  color: #333;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 1rem;
+  font-family: 'PlayfairDisplay-Black', 'Playfair Display', 'Georgia', Times, serif;
+  font-weight: 900;
+  letter-spacing: -0.05rem;
+  overflow: hidden;
+  padding: 0.675rem 1.5rem;
+  position: relative;
+  text-align: center;
+  transition: color 0.45s cubic-bezier(0, 0.56, 0.99, 0.75), border-color 0.7s ease-in-out;
+  width: 50%;
+}
+.settings-theme-option-radio + .settings-theme-option-label:nth-of-type(1) {
+  border-right: 0;
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
+}
+.settings-theme-option-radio + .settings-theme-option-label:nth-of-type(1):before {
+  transform: translate(250%, 0);
+}
+.settings-theme-option-radio + .settings-theme-option-label:nth-of-type(2) {
+  border-bottom-left-radius: 0;
+  border-top-left-radius: 0;
+}
+.settings-theme-option-radio + .settings-theme-option-label:nth-of-type(2):before {
+  transform: translate(-150%, 0);
+}
+.settings-theme-option-radio + .settings-theme-option-label:before {
+  background-color: #333;
+  content: '';
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 101%;
+  width: 100%;
+  z-index: -1;
+  transition: transform 0.25s cubic-bezier(0, 0.56, 0.99, 0.75), background-color 0.7s ease-in-out;
+}
+.settings-theme-option-radio:checked + .settings-theme-option-label {
+  color: #f1f1f1;
+}
+.settings-theme-option-radio:checked + .settings-theme-option-label:nth-of-type(1):before {
+  transform: translate(0, 0);
+}
+.settings-theme-option-radio:checked + .settings-theme-option-label:nth-of-type(2):before {
+  transform: translate(0, 0);
 }
 .bg-sub-earthporn .settings-subreddit-checkbox {
   background-image: url('../images/sub-previews/earthporn.jpg');
@@ -873,6 +936,16 @@ button {
 .main-t-light .settings-button:hover {
   color: #f1f1f1;
 }
+.main-t-light .settings-theme-option-radio + .settings-theme-option-label {
+  border-color: #333;
+  color: #333;
+}
+.main-t-light .settings-theme-option-radio + .settings-theme-option-label:before {
+  background-color: #333;
+}
+.main-t-light .settings-theme-option-radio:checked + .settings-theme-option-label {
+  color: #f1f1f1;
+}
 .main-t-dark .i-container-front,
 .main-t-dark .i-container-back {
   background-color: rgba(0, 0, 0, 0.4);
@@ -897,7 +970,7 @@ button {
   color: #333;
 }
 .main-t-dark .settings {
-  background: rgba(0, 0, 0, 0.65);
+  background-color: rgba(0, 0, 0, 0.65);
 }
 .main-t-dark .settings-saved-alert {
   color: #f1f1f1;
@@ -920,5 +993,15 @@ button {
   background-color: #f1f1f1;
 }
 .main-t-dark .settings-button:hover {
+  color: #333;
+}
+.main-t-dark .settings-theme-option-radio + .settings-theme-option-label {
+  border-color: #f1f1f1;
+  color: #f1f1f1;
+}
+.main-t-dark .settings-theme-option-radio + .settings-theme-option-label:before {
+  background-color: #f1f1f1;
+}
+.main-t-dark .settings-theme-option-radio:checked + .settings-theme-option-label {
   color: #333;
 }
