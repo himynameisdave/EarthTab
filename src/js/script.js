@@ -175,20 +175,14 @@
       var diff = newTime - oldTime;
       return (diff/60)/60;
     },
-    /**   @name:   isLongerThanHrs
-      *   @params: then [number, date], maxHrs [number]
-      *   @desc:   takes the old time and the max # of hours
-      *            returns true if the difference between then and now is > mxhrs
-      *            TODO: see if this function is actually needed - getHrsDiff() may actually be fine on it's own
+    /**   @name:   longerThanMins
+      *   @params: then [number, timestamp], maxMins [number]
+      *   @desc:   returns true if more mins have passed since 'then' than specified by 'maxMins'
       */
-    isLongerThanHrs = function( then, maxHrs ){
-      var hrsSince = getHrsDiff( then, (Date.now() / 1000) );
-          console.log( 'The time difference is: '+ hrsSince + ' hours');
-
-          if( hrsSince > maxHrs )
-            return true;
-          else
-            return false;
+    longerThanMins = function( then, maxMins ) {
+      //  difference is then vs now in miliseconds, then divided into 60 for minutes
+      var diff = ((Date.now() / 1000) - then)/60;
+      return diff > maxMins ? true : false;
     },
     /**   @name:   clearLocalStorage
       *   @params: {none}
@@ -964,47 +958,27 @@
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
 
-
+//  Global Settings Object
 var $ettings;
 
 document.addEventListener("DOMContentLoaded", function(event) {
-
-  //  Sets the clock
-  setClock('.js-time');
 
   //  get the whole $ettings ball rolling
   $ettings = GetSettings();
   $ettings.init();
 
-  //  sets up the flip event on the main circle
-  setupFlipEvent({  el:       'js-flip-container',
-                    targetEl: 'js-flip-container',
-                    open:     'i-container-s-open',
-                    close:    'i-container-s-closed'
-                  });
-
-  //  setup the thing to open settings
-  setupToggleSettingsEvent({
-    settings: document.querySelector('.settings'),
-    openSettings: document.querySelector('.js-settings-controller')
-  });
-
-
-  // setup force refresh click event
-  document.querySelector('.js-force-refresh').addEventListener("click", forceBGRefresh);
-
   //  Fetch oldData. Async.
+  //  TODO: This should all just be an init() fn like settings above.
   chrome.storage.local.get( 'oldData', function(d){
-    var randomSub, maxHrs;
+    var randomSub, maxMins;
     //  check if there is any data
     //  FIX for #25 - data was found kinda, but no actual url to use
     if(d.oldData && d.oldData.url){
-
       //  As of v0.4.0 frequency can no longer be set/is overridden here
-      maxHrs = 0.08334;// 0.08334% of an hour is ~5mins
+      maxMins = 5;
+      //  check if it's been longer than 5 mins
+      if( longerThanMins( d.oldData.timeSaved, maxMins ) ){
 
-      //  check if it's been longer than the specified number of max hrs
-      if( isLongerThanHrs( d.oldData.timeSaved, maxHrs ) ){
         console.log("It's been longer than 5mins!\nFetching new data!");
         //  grab us a random sub, chosen from the currently selected subs
         randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
@@ -1042,5 +1016,26 @@ document.addEventListener("DOMContentLoaded", function(event) {
     }
 
   });
+
+  //    DOM Setting Shit
+  //    MOVED down here as that chrome.storage mafack should be async
+  //  Sets the clock
+  setClock('.js-time');
+
+  //  sets up the flip event on the main circle
+  setupFlipEvent({  el:       'js-flip-container',
+                    targetEl: 'js-flip-container',
+                    open:     'i-container-s-open',
+                    close:    'i-container-s-closed'
+                  });
+
+  //  setup the thing to open settings
+  setupToggleSettingsEvent({
+    settings: document.querySelector('.settings'),
+    openSettings: document.querySelector('.js-settings-controller')
+  });
+
+  // setup force refresh click event
+  document.querySelector('.js-force-refresh').onclick = forceBGRefresh;
 
 });
