@@ -1,6 +1,6 @@
 {
   "name": "EarthTab",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "EarthTab pulls images from Reddit's SFW nature porn to transform your new tabs into beautiful windows into Earth's natural beauty.",
   "main": "gulpfile.js",
   "dependencies": {
