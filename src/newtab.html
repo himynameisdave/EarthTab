@@ -11,7 +11,7 @@
     <link rel="stylesheet" type="text/css" href="css/style.css" />
   </head>
   <body>
-    <main class="main js-img">
+    <main class="main main-t-light js-img">
       <section class="js-flip-container i-container i-container-s-closed i-container-s-visible">
         <div class="i-container-flipper">
           <div class="i-container-front">
@@ -41,7 +41,7 @@
           </div>
         </div>
       </section>
-      <button class="settings-button settings-button-s-closed js-settings-controller">
+      <button class="settings-action-button settings-button-s-closed js-settings-controller">
         <span class="icon icon-settings-close settings-button-icon"></span>
         <span class="icon icon-settings-open settings-button-icon"></span>
       </button>
@@ -61,7 +61,13 @@
               </ul>
             </li>
             <li class="settings-list-item">
-              <button class="settings-force-refresh-button js-force-refresh">
+              <input id="theme-light" class="settings-theme-option-radio js-theme" name="theme" type="radio"/><!-- inline-block hax0r
+              --><label for="theme-light" class="settings-theme-option-label">Light Theme</label><!--
+              --><input id="theme-dark" class="settings-theme-option-radio js-theme" name="theme" type="radio" /><!--
+              --><label for="theme-dark" class="settings-theme-option-label">Dark Theme</label>
+            </li>
+            <li class="settings-list-item">
+              <button class="settings-button settings-force-refresh-button js-force-refresh">
                 Force Background Refresh
               </button>
             </li>

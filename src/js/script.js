@@ -33,6 +33,9 @@
         /**    This will take the data we just grabbed and save it
           *    into localstorage for us
           */
+        if( !data || !data.url )
+          throw "Trying to getDataForTopImage inside of parseRedditData but could not find any data!";
+
         removeItemFromLocalStorage('oldData');//clear localstorage before we do a set
         saveNewImageInfo( data );
         setStuff(GetData( data ));//sets DOM elements
@@ -51,6 +54,8 @@
       var obj = {};
 
       getUsedImages(function(usedImages){
+        console.info("\nDone getUsedImages!\n")
+        console.log(d, usedImages);
         loopThruRedditDataForTopImg( d, usedImages, cb );
       });
 
@@ -127,6 +132,10 @@
       *                  that way it could just use 'this.domain'
       */
     setStuff = function( $ ){
+
+      if(!$.data){
+        throw "Could not find any data passed to setStuff";
+      }
 
       console.log("setStuff called with this data:", $.data);
 
@@ -417,7 +426,6 @@
         }, 500);//actual anim time is 0.45s in the Less file
       }
       if( toggle === 'open' && el.classList.contains( hidden ) ){
-        console.log('closing the settings, opening the ');
         el.style.display = 'block';
         setTimeout(function(){
           removeClass( el, hidden );
@@ -559,14 +567,13 @@
             if(d.settings) {
               console.log('Using old data for settings');
               This.Settings = d.settings;
-              //  the real question is do you really need to pass stuff to parseSettings
               This.parseSettings();
               This.finishedInit = true;
             }else{
               console.log('Using new data for settings');
               var newSettings = This.buildDefaultSettings();
               This.updateSettings( newSettings, function(d){
-                console.log('Updated the localStorage Settings!');
+                console.log('Updated the Settings in localStorage!');
                 This.Settings = newSettings;
                 This.parseSettings();
                 This.finishedInit = true;
@@ -597,6 +604,11 @@
         parseSettings: function(){
 
           this.injectSubs( '.js-settings-subs' );
+          //  goes to set up the initial theme based on whatever our theme is
+          this.initTheme();
+          //  handles setting up the theme
+          this.listenForThemeChanges( '.js-theme' );
+          //  handles listening to the checkboxes
           this.setupCheckboxChangeListener();
 
         },
@@ -605,8 +617,8 @@
           *   @desc:    builds out a default settings object
           */
         buildDefaultSettings: function(){
-          //  TODO: now that updateFrequency has been removed we could make this just an array
           var s = {
+            currentTheme: 'light',
             subs: []
           },
           This = this;
@@ -746,6 +758,86 @@
           var ran = Math.floor(Math.random() * activeSubs.length);
 
           return activeSubs[ran];
+        },
+        /**   @name:    initTheme
+          *   @params:  [none]
+          *   @desc:    sets the initial theme based on the currentTheme in Settings
+          */
+        initTheme: function(  ) {
+          if( this.Settings.currentTheme === 'light' ){
+            this.setTheme('main-t-light');
+            //  to ensure the proper theme is actually selected
+            document.querySelector("#theme-light").checked = true;
+          }
+          if( this.Settings.currentTheme === 'dark' ){
+            this.setTheme('main-t-dark');
+            //  to ensure the proper theme is actually selected
+            document.querySelector("#theme-dark").checked = true;
+          }
+        },
+        /**   @name:    setTheme
+          *   @params:  themeClass [string]
+          *   @desc:    takes a theme (as a class) and applies it to the main element
+          */
+        setTheme: function( themeClass ){
+
+          var el = document.querySelector('.main'),
+              light = 'main-t-light',
+              dark  = 'main-t-dark';
+
+          if( themeClass === light ) {
+            if( el.classList.contains(dark) )
+              removeClass( el, dark );
+            if( !el.classList.contains(light) )
+              addClass( el, light );
+            // early return
+            return;
+          }
+          if( themeClass === dark ){
+            if( el.classList.contains(light) )
+              removeClass( el, light );
+            if( !el.classList.contains(dark) )
+              addClass( el, dark );
+            // early return
+            return;
+          }
+          throw "What the whaaaa? http://bit.ly/1IjwmfN";
+        },
+        /**   @name:    listenForThemeChanges
+          *   @params:  element [string]
+          *   @desc:    adds click events to the theme selection radios
+          */
+        listenForThemeChanges: function( element ){
+
+          var els = document.querySelectorAll(element),
+              This = this;
+
+          if( !els )
+            throw "Trying to attach click events to theme radio options but couldn't find those elements!";
+
+          //  TODO: can these be looped thru?
+
+          //  click event for light theme
+          els[0].addEventListener('click', function(e){
+            This.setTheme('main-t-light');
+            This.Settings.currentTheme = 'light';
+
+            This.updateSettings( This.Settings, function(){
+              console.log("\nSuccessfully set theme to Light Theme!");
+              This.showSaveSettings();
+            });
+          });
+          //  click event for dark theme
+          els[1].addEventListener('click', function(e){
+            This.setTheme('main-t-dark');
+            This.Settings.currentTheme = 'dark';
+
+            This.updateSettings( This.Settings, function(){
+              console.log("\nSuccessfully set theme to Dark Theme!");
+              This.showSaveSettings();
+            });
+          });
+
         }
       };
     },
