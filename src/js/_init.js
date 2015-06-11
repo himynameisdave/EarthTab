@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
           }, 100);
         }
         //  go fetch some data from that subreddit
-        fetchRedditData(parseRedditData, "http://www.reddit.com/r/"+randomSub+"/.json");
+        fetchRedditData(parseRedditData, generateRedditUrl( randomSub ));
       }else{
         console.log("It's been less than "+maxMins+" mins!\nUsing old data!");
         //  in case we weren't able to save the base64 last time, let's get that whole process started
@@ -58,12 +58,12 @@ document.addEventListener("DOMContentLoaded", function(event) {
     else{
       if($ettings.finishedInit){
         randomSub = $ettings.gimmieARandomActiveSub().toLowerCase();
-        fetchRedditData(parseRedditData, "http://www.reddit.com/r/"+randomSub+"/.json");
+        fetchRedditData(parseRedditData, generateRedditUrl( randomSub ));
       }else{
         interval = setInterval(function(){
           if($ettings.finishedInit){
             randomSub = $ettings.gimmieARandomActiveSub().toLowerCase();
-            fetchRedditData(parseRedditData, "http://www.reddit.com/r/"+randomSub+"/.json");
+            fetchRedditData(parseRedditData, generateRedditUrl( randomSub ));
             clearInterval(interval);
           }
         }, 100);

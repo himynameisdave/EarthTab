@@ -65,7 +65,7 @@
 
           //  NOT YOUR USUAL fetchRedditData,
           //  this time we pass the fetchRound through to fetchRedditData
-          fetchRedditData( parseRedditData, "http://www.reddit.com/r/"+s+"/.json?count="+count+"&after="+n, fetchRound );
+          fetchRedditData( parseRedditData, generateRedditUrl( s, count, n ), fetchRound );
         }else{
           //clear localstorage before we do a set
           removeItemFromLocalStorage('oldData');
@@ -117,6 +117,19 @@
 
       cb( obj );
 
+    },
+    /**   @name:   generateRedditUrl
+      *   @params: sub[string], count[number/string], after[string]
+      *   @desc:   spits out a reddit json API url based on params given
+      */
+    generateRedditUrl = function( sub, count, after ){
+      if(!count || !after)
+        return "http://www.reddit.com/r/"+sub+"/.json";
+
+      if( count && after )
+        return "http://www.reddit.com/r/"+sub+"/.json?count="+count+"&after="+after;
+      else
+        throw "Must pass both count and after if you're trying to generate that kind of URL.";
     },
     /**   @name:   isUsedImage
       *   @params: currentImage[object], imgs[array]
@@ -274,11 +287,7 @@
       *            or text post. Returns true if it passes these tests.
       */
     isValidImagePost = function( post ){
-      if( post.domain === 'self.EarthPorn' || post.author === 'AutoModerator' || post.distinguished === 'moderator' ){
-        return false;
-      }else{
-        return true;
-      }
+      return post.domain === 'self.EarthPorn' || post.author === 'AutoModerator' || post.distinguished === 'moderator' ? false : true;
     },
     /**   @name:    convertImgToBase64URL
       *   @params:  url [string], callback [function], outputFormat [string]
@@ -401,9 +410,7 @@
       //  no need to check if $ettings exists cause it has to by now
       var randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
       //  go fetch some data from that subreddit
-
-
-      fetchRedditData(parseRedditData, "http://www.reddit.com/r/"+randomSub+"/.json");
+      fetchRedditData(parseRedditData, generateRedditUrl( randomSub ));
     },
     /**   @name:    setClock
       *   @params:  el [string, selector], oldTime [number, time; optional]
@@ -958,7 +965,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
           }, 100);
         }
         //  go fetch some data from that subreddit
-        fetchRedditData(parseRedditData, "http://www.reddit.com/r/"+randomSub+"/.json");
+        fetchRedditData(parseRedditData, generateRedditUrl( randomSub ));
       }else{
         console.log("It's been less than "+maxMins+" mins!\nUsing old data!");
         //  in case we weren't able to save the base64 last time, let's get that whole process started
@@ -977,12 +984,12 @@ document.addEventListener("DOMContentLoaded", function(event) {
     else{
       if($ettings.finishedInit){
         randomSub = $ettings.gimmieARandomActiveSub().toLowerCase();
-        fetchRedditData(parseRedditData, "http://www.reddit.com/r/"+randomSub+"/.json");
+        fetchRedditData(parseRedditData, generateRedditUrl( randomSub ));
       }else{
         interval = setInterval(function(){
           if($ettings.finishedInit){
             randomSub = $ettings.gimmieARandomActiveSub().toLowerCase();
-            fetchRedditData(parseRedditData, "http://www.reddit.com/r/"+randomSub+"/.json");
+            fetchRedditData(parseRedditData, generateRedditUrl( randomSub ));
             clearInterval(interval);
           }
         }, 100);
