@@ -1,8 +1,20 @@
 /**
-  *         EarthTab Chrome Extension
+  *          EarthTab Chrome Extension
   *
-  *   Scrapes /r/earthporn and makes the top image
-  *       your new tab background image
+  *
+  *     EarthTab pulls images from Reddit's SFW
+  *     nature porn to transform your new tabs into
+  *     beautiful windows into Earth's natural beauty.
+  *
+  *     Built by Dave Lunny in the beautiful year 2015.
+  *     http://himynameisdave.com
+  *
+  *     Licensed under the MIT licence.
+  *
+  *     For more information, or to file an issue, please visit:
+  *     https://github.com/himynameisdave/EarthTab
+  *
+  *
   */
 
 
