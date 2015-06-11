@@ -93,5 +93,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
   // setup force refresh click event
   document.querySelector('.js-force-refresh').onclick = forceBGRefresh;
+  //  sets up the clear used images button
+  document.querySelector('.js-clear-used').onclick = clearUsedImages;
 
 });
