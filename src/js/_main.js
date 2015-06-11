@@ -419,7 +419,10 @@
       */
     clearUsedImages = function(){
       $ettings.Settings.usedImages = [];
-      $ettings.showSaveSettings();
+      $ettings.updateSettings( $ettings.Settings, function(){
+        console.log("Sucessfully cleared the used image cache!");
+        $ettings.showSaveSettings();
+      });
     },
     /**   @name:    setClock
       *   @params:  el [string, selector], oldTime [number, time; optional]
