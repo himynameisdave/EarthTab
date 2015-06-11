@@ -99,7 +99,7 @@
               id:         val.data.id,                  //  {string}  a unique string that will be used to test if this image has been used yet or not
               name:       val.data.name,                //  {string}  an also unique string that will be used to build our url when fetching more results
               redditLink: 'http://www.reddit.com'+val.data.permalink, //  {string}  link to the reddit post
-              title:      stripSquareBrackets(val.data.title),        //  {string}  a sanitized string, title of the post
+              title:      val.data.title.replace(/\[.*?\]/g, ''),     //  {string}  a sanitized string, title of the post (strips out "[ ]" shit).
               score:      val.data.score,               //  {number}  a timestamp of when this post was created
               subreddit:  val.data.subreddit,           //  {string}  the subreddit this came from
               url:        val.data.url,                 //  {string}  the url of the image (not the reddit link)
@@ -279,25 +279,6 @@
       }else{
         return true;
       }
-    },
-    /**   @name:   stripSquareBrackets
-      *   @params: title [string]
-      *   @desc:   recursively parses the title to remove stupid [stuff][in][square][brackets]
-      *            CAVEAT: only if it's at the end of the string... could have adverse effects - fine for now
-      */
-    stripSquareBrackets = function( title ){
-      var str = title,
-          i   = str.lastIndexOf('[');
-      if( i > 0 ){
-        var toReplace   = str.slice(i,str.length),
-            strippedStr = str.replace( toReplace, "" );
-          if(strippedStr.lastIndexOf('[') > 0){
-            str = stripSquareBrackets(strippedStr);
-          }else{
-            str = strippedStr;
-          }
-      }
-      return str;
     },
     /**   @name:    convertImgToBase64URL
       *   @params:  url [string], callback [function], outputFormat [string]
