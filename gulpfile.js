@@ -7,7 +7,7 @@ var gulp = require('gulp'),
 
 /**     BUILD IT UP!    **/
 
-gulp.task( 'build', ['build:compile-css', 'build:compile-js', 'build:move-html', 'build:move-fonts', 'build:move-images', 'build:zip'] )
+gulp.task( 'build', ['build:compile-css', 'dev:compile-js', 'build:compile-js', 'build:move-html', 'build:move-fonts', 'build:move-images', 'build:zip'] )
 
 gulp.task( 'build:compile-css', function(){
 
@@ -23,7 +23,7 @@ gulp.task( 'build:compile-css', function(){
 
 });
 
-gulp.task( 'build:compile-js', function(){
+gulp.task( 'build:compile-js', ['dev:compile-js'], function(){
 
   return gulp.src('./src/js/script.js')
           .pipe($.stripDebug())
@@ -68,6 +68,7 @@ gulp.task( 'build:zip', ['build:compile-css', 'build:compile-js', 'build:move-ht
 gulp.task( 'default', function(){
 
   gulp.watch( './src/css/*.less' , ['dev:compile-css'] );
+  gulp.watch( './src/js/*.js' , ['dev:compile-js'] );
 
 })
 
@@ -76,5 +77,13 @@ gulp.task( 'dev:compile-css', function(){
   return gulp.src('./src/css/style.less')
           .pipe($.less())
           .pipe(gulp.dest('./src/css/'));
+
+});
+
+gulp.task( 'dev:compile-js', function(){
+
+  return gulp.src([ './src/js/_main.js', './src/js/settings.js', './src/js/_data.js', './src/js/_init.js' ])
+          .pipe($.concat('script.js'))
+          .pipe(gulp.dest('./src/js/'));
 
 });
