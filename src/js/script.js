@@ -7,39 +7,65 @@
 
 
     /**   @name:   fetchRedditData
-      *   @params: cb [function]
+      *   @params: cb [function], url[string], fetchRound[number]
       *   @desc:   goes and grabs the reddit stuff.
       *            Accepts a callback to handle the data
       *            TODO: check that this is genric enough to handle any reddit api request
       *                  I think most things coming from reddit in this format follow the data.children thing
       */
-    var fetchRedditData = function( cb, sub ){
+    var fetchRedditData = function( cb, url, fetchRound ){
         var r = new XMLHttpRequest();
-        r.open("get", "http://www.reddit.com/r/"+sub+"/.json", true);
+        r.open("get", url , true);
         r.onload = function(xmlEvent){
-          cb(JSON.parse(r.response).data.children);
+          if(!fetchRound)
+            cb(JSON.parse(r.response).data.children);
+          else
+            cb(JSON.parse(r.response).data.children, fetchRound);
         };
         r.send();
     },
     /**   @name:   parseRedditData
-      *   @params: newData [object]
+      *   @params: newData [object], fetchRound[number]
       *   @desc:   the callback function for the fetchRedditData above
+                   fetchRound is the round of fetching we are on (count=25?)
       */
-    parseRedditData = function(newData){
+    parseRedditData = function( newData, fetchRound ){
       //  loops thru the reddit data and supplies a valid top image to be saved and used
-      var newImage = loopThruRedditDataForTopImg( newData );
+      loopThruRedditDataForTopImg( newData, function( newImage ){
 
-      //clear localstorage before we do a set
-      removeItemFromLocalStorage('oldData');
-      saveNewImageInfo( newImage );
-      setStuff(GetData( newImage ));//sets DOM elements
+        //  if loopThruRedditDataForTopImg did not yeild any results, we need to fetch new data
+        if( newImage.error ){
 
+          //  for all the inital ones, fetchRound isn't even passed in, so if that's the case we need to start it
+          if(!fetchRound)
+            fetchRound = 1;
+          else
+            fetchRound++; // increment the fetchRound if it exists
+
+          //  data used to build the URL
+          var n     = newImage.name,
+              s     = newImage.subreddit,
+              count = 25 * fetchRound;
+
+          //  nice little warning
+          console.warn("Failed to find a suitable image in "+count+" images, fetching new Reddit data!");
+
+          //  NOT YOUR USUAL fetchRedditData,
+          //  this time we pass the fetchRound through to fetchRedditData
+          fetchRedditData( parseRedditData, "http://www.reddit.com/r/"+s+"/.json?count="+count+"&after="+n, fetchRound );
+        }else{
+          //clear localstorage before we do a set
+          removeItemFromLocalStorage('oldData');
+          saveNewImageInfo( newImage );
+          setStuff(GetData( newImage ));//sets DOM elements
+        }
+      });
     },
     /**   @name:   loopThruRedditDataForTopImg
       *   @params: redditData[object]
       *   @desc:   handles the loop through stuff that
       */
-    loopThruRedditDataForTopImg = function( redditData ){
+    loopThruRedditDataForTopImg = function( redditData, cb ){
 
       var obj = {},
           isImageFound = false;
@@ -48,31 +74,35 @@
         // If it's not a mod post & we haven't found our image yet
         if(isValidImagePost(val.data) && !isImageFound){
           // if( filterDomain(val.data.domain) && !isUsedImage(val.data.id, usedImages) ){
-          if( filterDomain(val.data.domain) ){
-            if( !isUsedImage(val.data) ){
-              /**   Top Image object
-                *   This is where all the data used in the application is set.
-                */
-              obj = {
-                author:     val.data.author,              //  {string}  the reddit user
-                bgUrl:      val.data.url,                 //  {string}  will take the place of data.url
-                created:    val.data.created_utc,         //  {number}  a timestamp of when this post was created.
-                domain:     val.data.domain,              //  {string}  a string of the domain of the post
-                id:         val.data.id,                  //  {string}  a unique string that will be used to test if this image has been used yet or not
-                redditLink: 'http://www.reddit.com'+val.data.permalink, //  {string}  link to the reddit post
-                title:      stripSquareBrackets(val.data.title),        //  {string}  a sanitized string, title of the post
-                score:      val.data.score,               //  {number}  a timestamp of when this post was created
-                subreddit:  val.data.subreddit,           //  {string}  the subreddit this came from
-                url:        val.data.url,                 //  {string}  the url of the image (not the reddit link)
-                timeSaved:  Date.now() / 1000             //  {number}  a timestamp of when this data was stored. divided by 1000 so we get the value in seconds
-              };
-              isImageFound   = true;
-            }
+          if( filterDomain(val.data.domain) && !isUsedImage(val.data) ){
+            /**   Top Image object
+              *   This is where all the data used in the application is set.
+              */
+            obj = {
+              author:     val.data.author,              //  {string}  the reddit user
+              bgUrl:      val.data.url,                 //  {string}  will take the place of data.url
+              created:    val.data.created_utc,         //  {number}  a timestamp of when this post was created.
+              domain:     val.data.domain,              //  {string}  a string of the domain of the post
+              id:         val.data.id,                  //  {string}  a unique string that will be used to test if this image has been used yet or not
+              name:       val.data.name,                //  {string}  an also unique string that will be used to build our url when fetching more results
+              redditLink: 'http://www.reddit.com'+val.data.permalink, //  {string}  link to the reddit post
+              title:      stripSquareBrackets(val.data.title),        //  {string}  a sanitized string, title of the post
+              score:      val.data.score,               //  {number}  a timestamp of when this post was created
+              subreddit:  val.data.subreddit,           //  {string}  the subreddit this came from
+              url:        val.data.url,                 //  {string}  the url of the image (not the reddit link)
+              timeSaved:  Date.now() / 1000             //  {number}  a timestamp of when this data was stored. divided by 1000 so we get the value in seconds
+            };
+            isImageFound   = true;
           }
+        }
+        if( !obj.url && i === (redditData.length - 1) ){
+          obj.error = true;
+          obj.name = val.data.name;
+          obj.subreddit = val.data.subreddit;
         }
       });
 
-      return obj;
+      cb( obj );
 
     },
     /**   @name:   isUsedImage
@@ -104,9 +134,8 @@
       */
     setStuff = function( $ ){
 
-      if(!$.data){
+      if( !$.data.url )
         throw "Could not find any data passed to setStuff";
-      }
 
       console.log("setStuff called with this data:", $.data);
 
@@ -378,7 +407,9 @@
       //  no need to check if $ettings exists cause it has to by now
       var randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
       //  go fetch some data from that subreddit
-      fetchRedditData(parseRedditData, randomSub);
+
+
+      fetchRedditData(parseRedditData, "http://www.reddit.com/r/"+randomSub+"/.json");
     },
     /**   @name:    setClock
       *   @params:  el [string, selector], oldTime [number, time; optional]
@@ -937,7 +968,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
           }, 100);
         }
         //  go fetch some data from that subreddit
-        fetchRedditData(parseRedditData, randomSub);
+        fetchRedditData(parseRedditData, "http://www.reddit.com/r/"+randomSub+"/.json");
       }else{
         console.log("It's been less than "+maxMins+" mins!\nUsing old data!");
         //  in case we weren't able to save the base64 last time, let's get that whole process started
@@ -956,12 +987,12 @@ document.addEventListener("DOMContentLoaded", function(event) {
     else{
       if($ettings.finishedInit){
         randomSub = $ettings.gimmieARandomActiveSub().toLowerCase();
-        fetchRedditData(parseRedditData, randomSub);
+        fetchRedditData(parseRedditData, "http://www.reddit.com/r/"+randomSub+"/.json");
       }else{
         interval = setInterval(function(){
           if($ettings.finishedInit){
             randomSub = $ettings.gimmieARandomActiveSub().toLowerCase();
-            fetchRedditData(parseRedditData, randomSub);
+            fetchRedditData(parseRedditData, "http://www.reddit.com/r/"+randomSub+"/.json");
             clearInterval(interval);
           }
         }, 100);
