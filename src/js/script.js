@@ -26,47 +26,20 @@
       *   @desc:   the callback function for the fetchRedditData above
       */
     parseRedditData = function(newData){
-      /**    getDataForTopImage takes the element that gets appended,
-        *    as well as the bracket-stripped title from the data.
-        */
-      getDataForTopImage(newData, function(data){
-        /**    This will take the data we just grabbed and save it
-          *    into localstorage for us
-          */
-        if( !data || !data.url )
-          throw "Trying to getDataForTopImage inside of parseRedditData but could not find any data!";
+      //  loops thru the reddit data and supplies a valid top image to be saved and used
+      var newImage = loopThruRedditDataForTopImg( newData );
 
-        removeItemFromLocalStorage('oldData');//clear localstorage before we do a set
-        saveNewImageInfo( data );
-        setStuff(GetData( data ));//sets DOM elements
-      });
-    },
-    /**   @name:   getDataForTopImage
-      *   @params: d [object], cb[function, callback]
-      *   @desc:   sifts through the provided data object for the first non-moderator post.
-      *            returns an object with the important data from that
-      */
-    getDataForTopImage = function( d, cb ){
-
-      if(!d && typeof d === 'object' )
-        throw "You didn't provide valid data to getDataForTopImage()!";
-
-      var obj = {};
-
-      getUsedImages(function(usedImages){
-        console.info("\nDone getUsedImages!\n")
-        console.log(d, usedImages);
-        loopThruRedditDataForTopImg( d, usedImages, cb );
-      });
+      //clear localstorage before we do a set
+      removeItemFromLocalStorage('oldData');
+      saveNewImageInfo( newImage );
+      setStuff(GetData( newImage ));//sets DOM elements
 
     },
     /**   @name:   loopThruRedditDataForTopImg
-      *   @params: redditData[object], usedImages[array]
+      *   @params: redditData[object]
       *   @desc:   handles the loop through stuff that
       */
-    loopThruRedditDataForTopImg = function( redditData, usedImages, cb ){
-
-      console.log('\n\n\nloopThruRedditData:\n',usedImages);
+    loopThruRedditDataForTopImg = function( redditData ){
 
       var obj = {},
           isImageFound = false;
@@ -76,7 +49,7 @@
         if(isValidImagePost(val.data) && !isImageFound){
           // if( filterDomain(val.data.domain) && !isUsedImage(val.data.id, usedImages) ){
           if( filterDomain(val.data.domain) ){
-            if( !isUsedImage(val.data, usedImages) ){
+            if( !isUsedImage(val.data) ){
               /**   Top Image object
                 *   This is where all the data used in the application is set.
                 */
@@ -99,30 +72,28 @@
         }
       });
 
-      cb( obj );
+      return obj;
 
     },
     /**   @name:   isUsedImage
       *   @params: currentImage[object], imgs[array]
       *   @desc:   does the actual looping through the old images and determines if the passed curentImage is used or not
       */
-    isUsedImage = function( currentImage, imgs ){
+    isUsedImage = function( currentImage ){
       var imageBeenUsed = false;
 
-      if( imgs.usedImages && imgs.usedImages.length > 0 ){
-        imgs.usedImages.forEach(function( val ){
-          if( val.id === currentImage.id ){
-            // console.warn("Found an image that has been used before!");
-            imageBeenUsed = true;
-          }
+      if( !$ettings.Settings.usedImages )
+        throw "Trying to test if it's a used image, but couldn't find the list of usedImages";
+      if( $ettings.Settings.usedImages.length <= 0 )
+        return imageBeenUsed; // early return if there are no used images
 
-        });
-      }
-      if(imageBeenUsed ){
-        console.warn("This img has been used!", currentImage);
-      }else{
-        console.info("This img has been not used!", currentImage);
-      }
+      $ettings.Settings.usedImages.forEach(function( val ){
+        if( val.id === currentImage.id ){
+          console.warn("Found an image that has been used before!");
+          imageBeenUsed = true;
+        }
+      });
+
       return imageBeenUsed;
     },
     /**   @name:   setStuff
@@ -204,8 +175,6 @@
         console.log("Successfully removed "+item+" from localStorage!");
       });
     },
-
-
     /**   @name:   saveNewImageInfo
       *   @params: d [object]
       *   @desc:   stores the "oldData" in localStorage AND stores the ID in the "usedItems"
@@ -221,21 +190,16 @@
         time: Date.now()/1000
       };
 
-      getUsedImages( function(d){
-        /**   TODO:
-          *       I feel like the use of two setting functions
-          *       below could be merged into one...just saying
-          */
-        //  based on if it's the first one or not, it either pushes the
-        if(Object.keys(d).length){
-          //  dont forget that d is the data object holding our array
-          d.usedImages.push(newlyUsedImage);
-          addNewlyUsedImageToLocalStorage( d.usedImages );
-        }else{
-          //  else just pass the new object down to the initiater
-          addFirstUsedImageToLocalStorage( newlyUsedImage );
-        }
-      });
+      if( $ettings.Settings ){
+        //  add a newlyUsedImage to the list of usedImages
+        $ettings.Settings.usedImages.push(newlyUsedImage);
+        $ettings.updateSettings($ettings.Settings, function(){
+          console.info("We were able to save the settings with the newlyUsedImage:", $ettings);
+        });
+      }else{
+        throw "$ettings doesnt exist - please use promises so this shit literally never happens...";
+      }
+
     },
     /**   @name:   saveRedditDataToLocalStorage
       *   @params: d [object]
@@ -249,36 +213,6 @@
           saveBase64ToLocalStorage( d,  base64data );
         });
       });
-    },
-    /**   @name:   addNewlyUsedImageToLocalStorage
-      *   @params: newlyUpdatedImages[object]
-      *   @desc:   updates the list of used images in localstorage
-      */
-    addNewlyUsedImageToLocalStorage = function( newlyUpdatedImages ){
-      chrome.storage.local.set({'usedImages': newlyUpdatedImages}, function(){
-        console.log('Updated the used images list!');
-      });
-    },
-    /**   @name:   addFirstUsedImageToLocalStorage
-      *   @params: newItem[object]
-      *   @desc:   same as the regular one except that it initiates the usedImages object with the images array in there
-      */
-    addFirstUsedImageToLocalStorage = function( newItem ){
-      var o = [];
-      o.push(newItem);
-      chrome.storage.local.set({'usedImages': o}, function(){
-        console.log('Initiated the used images list!');
-      });
-    },
-    /**   @name:   getUsedImages
-      *   @params: cb[function, callback]
-      *   @desc:   wrapper for grabbing the old used image list from localStorage
-      */
-    getUsedImages = function( cb ){
-      if( typeof cb === 'function' )
-        chrome.storage.local.get( 'usedImages', cb);
-      else
-        throw "Must pass a valid callback function to getUsedImages!";
     },
     /**   @name:   saveBase64ToLocalStorage
       *   @params: d [object], n64 [string]
@@ -613,7 +547,8 @@
         buildDefaultSettings: function(){
           var s = {
             currentTheme: 'light',
-            subs: []
+            subs: [],
+            usedImages: []
           },
           This = this;
 
@@ -705,6 +640,13 @@
 
             });
           });
+        },
+        /**   @name:    logUsedImages
+          *   @params:  [none]
+          *   @desc:    UTIL for logging all the used images to the console for easy viewing
+          */
+        logUsedImages: function(){
+          console.log(this.Settings.usedImages);
         },
         /**   @name:    showSaveSettings
           *   @params:  [none]
@@ -931,12 +873,16 @@
 
           if(this.data.base64Img){
             document.styleSheets[0].addRule( el, "background-image: url("+this.data.base64Img+")" );
-            console.log( "Using the base64!" );
-            addClass( '.main', 'main-visible' );
+            //  wait 200ms so the bg image can load (?)
+            setTimeout(function(){
+              addClass( '.main', 'main-visible' );
+            }, 200);
           }else{
             element.style.backgroundImage = "url("+this.data.bgUrl+")";
-            console.log( "Using the img url!" );
-            addClass( '.main', 'main-visible' );
+            //  wait 200ms so the bg image can load (?)
+            setTimeout(function(){
+              addClass( '.main', 'main-visible' );
+            }, 200);
           }
 
         }
@@ -970,7 +916,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
   //  Fetch oldData. Async.
   //  TODO: This should all just be an init() fn like settings above.
   chrome.storage.local.get( 'oldData', function(d){
-    var randomSub, maxMins;
+    var randomSub, maxMins, interval;
     //  check if there is any data
     //  FIX for #25 - data was found kinda, but no actual url to use
     if(d.oldData && d.oldData.url){
@@ -978,15 +924,23 @@ document.addEventListener("DOMContentLoaded", function(event) {
       maxMins = 5;
       //  check if it's been longer than 5 mins
       if( longerThanMins( d.oldData.timeSaved, maxMins ) ){
-
-        console.log("It's been longer than 5mins!\nFetching new data!");
+        console.log("It's been longer than "+maxMins+" mins!\nFetching new data!");
         //  grab us a random sub, chosen from the currently selected subs
-        randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
+        if($ettings.finishedInit){
+          randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
+        }else{
+          interval = setInterval(function(){
+            if($ettings.finishedInit){
+              randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
+              clearInterval(interval);
+            }
+          }, 100);
+        }
         //  go fetch some data from that subreddit
         fetchRedditData(parseRedditData, randomSub);
       }else{
-        console.log("It's been less than 5mins!\nUsing old data!");
-        //  in case we weren't able to save the base64, let's get that whole process started
+        console.log("It's been less than "+maxMins+" mins!\nUsing old data!");
+        //  in case we weren't able to save the base64 last time, let's get that whole process started
         if( !d.oldData.base64Img ){
           //  this function is an async function that converts an image url into a base64 image
           convertImgToBase64URL( d.oldData.url, function(base64data){
@@ -1004,12 +958,12 @@ document.addEventListener("DOMContentLoaded", function(event) {
         randomSub = $ettings.gimmieARandomActiveSub().toLowerCase();
         fetchRedditData(parseRedditData, randomSub);
       }else{
-        var interval = setInterval(function(){
+        interval = setInterval(function(){
           if($ettings.finishedInit){
             randomSub = $ettings.gimmieARandomActiveSub().toLowerCase();
             fetchRedditData(parseRedditData, randomSub);
+            clearInterval(interval);
           }
-          clearInterval(interval);
         }, 100);
       }
 
