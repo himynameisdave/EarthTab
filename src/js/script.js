@@ -594,7 +594,8 @@ GetSettings = function(){
       var s = {
         currentTheme: 'light',
         subs: [],
-        usedImages: []
+        usedImages: [],
+        favImgs: []
       },
       This = this;
 
