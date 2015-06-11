@@ -13,8 +13,13 @@ Head on over to the Chrome Web Store to install.
 
 ### Developing
 
-If you would like to develop this app, I've added Gulp to the workflow to make things easier
+Development within the EarthTab repo is a breeze thanks to Gulp, which automagically cleans and compiles everything down to a nice little zip for you (which is what Google uploads to the Chrome Web Store for you).
 
+Once you've got the repo, run `npm i` to install a few Gulp deps.
+
+Running `gulp` simply offers you a watch on the Less files and compiles them for you.
+
+`gulp build` will compile the Less, strip `console.log`'s & uglify from the JS, and will compress everything into a `.zip` file for you.
 
 ---
 

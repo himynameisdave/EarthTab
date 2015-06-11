@@ -7,63 +7,65 @@
 
 
     /**   @name:   fetchRedditData
-      *   @params: cb [function]
+      *   @params: cb [function], url[string], fetchRound[number]
       *   @desc:   goes and grabs the reddit stuff.
       *            Accepts a callback to handle the data
       *            TODO: check that this is genric enough to handle any reddit api request
       *                  I think most things coming from reddit in this format follow the data.children thing
       */
-    var fetchRedditData = function( cb, sub ){
+    var fetchRedditData = function( cb, url, fetchRound ){
         var r = new XMLHttpRequest();
-        r.open("get", "http://www.reddit.com/r/"+sub+"/.json", true);
+        r.open("get", url , true);
         r.onload = function(xmlEvent){
-          cb(JSON.parse(r.response).data.children);
+          if(!fetchRound)
+            cb(JSON.parse(r.response).data.children);
+          else
+            cb(JSON.parse(r.response).data.children, fetchRound);
         };
         r.send();
     },
     /**   @name:   parseRedditData
-      *   @params: newData [object]
+      *   @params: newData [object], fetchRound[number]
       *   @desc:   the callback function for the fetchRedditData above
+                   fetchRound is the round of fetching we are on (count=25?)
       */
-    parseRedditData = function(newData){
-      /**    getDataForTopImage takes the element that gets appended,
-        *    as well as the bracket-stripped title from the data.
-        */
-      getDataForTopImage(newData, function(data){
-        /**    This will take the data we just grabbed and save it
-          *    into localstorage for us
-          */
-        removeItemFromLocalStorage('oldData');//clear localstorage before we do a set
-        saveNewImageInfo( data );
-        setStuff(GetData( data ));//sets DOM elements
+    parseRedditData = function( newData, fetchRound ){
+      //  loops thru the reddit data and supplies a valid top image to be saved and used
+      loopThruRedditDataForTopImg( newData, function( newImage ){
+
+        //  if loopThruRedditDataForTopImg did not yeild any results, we need to fetch new data
+        if( newImage.error ){
+
+          //  for all the inital ones, fetchRound isn't even passed in, so if that's the case we need to start it
+          if(!fetchRound)
+            fetchRound = 1;
+          else
+            fetchRound++; // increment the fetchRound if it exists
+
+          //  data used to build the URL
+          var n     = newImage.name,
+              s     = newImage.subreddit,
+              count = 25 * fetchRound;
+
+          //  nice little warning
+          console.warn("Failed to find a suitable image in "+count+" images, fetching new Reddit data!");
+
+          //  NOT YOUR USUAL fetchRedditData,
+          //  this time we pass the fetchRound through to fetchRedditData
+          fetchRedditData( parseRedditData, "http://www.reddit.com/r/"+s+"/.json?count="+count+"&after="+n, fetchRound );
+        }else{
+          //clear localstorage before we do a set
+          removeItemFromLocalStorage('oldData');
+          saveNewImageInfo( newImage );
+          setStuff(GetData( newImage ));//sets DOM elements
+        }
       });
-    },
-    /**   @name:   getDataForTopImage
-      *   @params: d [object], cb[function, callback]
-      *   @desc:   sifts through the provided data object for the first non-moderator post.
-      *            returns an object with the important data from that
-      */
-    getDataForTopImage = function( d, cb ){
-
-      if(!d && typeof d === 'object' )
-        throw "You didn't provide valid data to getDataForTopImage()!";
-
-      var obj = {};
-
-      getUsedImages(function(usedImages){
-        obj = loopThruRedditDataForTopImg( d, usedImages );
-        cb( obj );
-      });
-
     },
     /**   @name:   loopThruRedditDataForTopImg
-      *   @params: redditData[object], usedImages[array]
+      *   @params: redditData[object]
       *   @desc:   handles the loop through stuff that
       */
-    loopThruRedditDataForTopImg = function( redditData, usedImages ){
-
-
-      console.log('\n\n\nloopThruRedditData:\n',usedImages);
+    loopThruRedditDataForTopImg = function( redditData, cb ){
 
       var obj = {},
           isImageFound = false;
@@ -72,54 +74,56 @@
         // If it's not a mod post & we haven't found our image yet
         if(isValidImagePost(val.data) && !isImageFound){
           // if( filterDomain(val.data.domain) && !isUsedImage(val.data.id, usedImages) ){
-          if( filterDomain(val.data.domain) ){
-            if( !isUsedImage(val.data, usedImages) ){
-              /**   Top Image object
-                *   This is where all the data used in the application is set.
-                */
-              obj = {
-                author:     val.data.author,              //  {string}  the reddit user
-                bgUrl:      val.data.url,                 //  {string}  will take the place of data.url
-                created:    val.data.created_utc,         //  {number}  a timestamp of when this post was created.
-                domain:     val.data.domain,              //  {string}  a string of the domain of the post
-                id:         val.data.id,                  //  {string}  a unique string that will be used to test if this image has been used yet or not
-                redditLink: 'http://www.reddit.com'+val.data.permalink, //  {string}  link to the reddit post
-                title:      stripSquareBrackets(val.data.title),        //  {string}  a sanitized string, title of the post
-                score:      val.data.score,               //  {number}  a timestamp of when this post was created
-                subreddit:  val.data.subreddit,           //  {string}  the subreddit this came from
-                url:        val.data.url,                 //  {string}  the url of the image (not the reddit link)
-                timeSaved:  Date.now() / 1000             //  {number}  a timestamp of when this data was stored. divided by 1000 so we get the value in seconds
-              };
-              isImageFound   = true;
-            }
+          if( filterDomain(val.data.domain) && !isUsedImage(val.data) ){
+            /**   Top Image object
+              *   This is where all the data used in the application is set.
+              */
+            obj = {
+              author:     val.data.author,              //  {string}  the reddit user
+              bgUrl:      val.data.url,                 //  {string}  will take the place of data.url
+              created:    val.data.created_utc,         //  {number}  a timestamp of when this post was created.
+              domain:     val.data.domain,              //  {string}  a string of the domain of the post
+              id:         val.data.id,                  //  {string}  a unique string that will be used to test if this image has been used yet or not
+              name:       val.data.name,                //  {string}  an also unique string that will be used to build our url when fetching more results
+              redditLink: 'http://www.reddit.com'+val.data.permalink, //  {string}  link to the reddit post
+              title:      stripSquareBrackets(val.data.title),        //  {string}  a sanitized string, title of the post
+              score:      val.data.score,               //  {number}  a timestamp of when this post was created
+              subreddit:  val.data.subreddit,           //  {string}  the subreddit this came from
+              url:        val.data.url,                 //  {string}  the url of the image (not the reddit link)
+              timeSaved:  Date.now() / 1000             //  {number}  a timestamp of when this data was stored. divided by 1000 so we get the value in seconds
+            };
+            isImageFound   = true;
           }
+        }
+        if( !obj.url && i === (redditData.length - 1) ){
+          obj.error = true;
+          obj.name = val.data.name;
+          obj.subreddit = val.data.subreddit;
         }
       });
 
-      return obj;
+      cb( obj );
 
     },
     /**   @name:   isUsedImage
       *   @params: currentImage[object], imgs[array]
       *   @desc:   does the actual looping through the old images and determines if the passed curentImage is used or not
       */
-    isUsedImage = function( currentImage, imgs ){
+    isUsedImage = function( currentImage ){
       var imageBeenUsed = false;
 
-      if( imgs.usedImages && imgs.usedImages.length > 0 ){
-        imgs.usedImages.forEach(function( val ){
-          if( val.id === currentImage.id ){
-            // console.warn("Found an image that has been used before!");
-            imageBeenUsed = true;
-          }
+      if( !$ettings.Settings.usedImages )
+        throw "Trying to test if it's a used image, but couldn't find the list of usedImages";
+      if( $ettings.Settings.usedImages.length <= 0 )
+        return imageBeenUsed; // early return if there are no used images
 
-        });
-      }
-      if(imageBeenUsed ){
-        console.warn("This img has been used!", currentImage);
-      }else{
-        console.info("This img has been not used!", currentImage);
-      }
+      $ettings.Settings.usedImages.forEach(function( val ){
+        if( val.id === currentImage.id ){
+          console.warn("Found an image that has been used before!");
+          imageBeenUsed = true;
+        }
+      });
+
       return imageBeenUsed;
     },
     /**   @name:   setStuff
@@ -129,6 +133,9 @@
       *                  that way it could just use 'this.domain'
       */
     setStuff = function( $ ){
+
+      if( !$.data.url )
+        throw "Could not find any data passed to setStuff";
 
       console.log("setStuff called with this data:", $.data);
 
@@ -168,20 +175,14 @@
       var diff = newTime - oldTime;
       return (diff/60)/60;
     },
-    /**   @name:   isLongerThanHrs
-      *   @params: then [number, date], maxHrs [number]
-      *   @desc:   takes the old time and the max # of hours
-      *            returns true if the difference between then and now is > mxhrs
-      *            TODO: see if this function is actually needed - getHrsDiff() may actually be fine on it's own
+    /**   @name:   longerThanMins
+      *   @params: then [number, timestamp], maxMins [number]
+      *   @desc:   returns true if more mins have passed since 'then' than specified by 'maxMins'
       */
-    isLongerThanHrs = function( then, maxHrs ){
-      var hrsSince = getHrsDiff( then, (Date.now() / 1000) );
-          console.log( 'The time difference is: '+ hrsSince + ' hours');
-
-          if( hrsSince > maxHrs )
-            return true;
-          else
-            return false;
+    longerThanMins = function( then, maxMins ) {
+      //  difference is then vs now in miliseconds, then divided into 60 for minutes
+      var diff = ((Date.now() / 1000) - then)/60;
+      return diff > maxMins ? true : false;
     },
     /**   @name:   clearLocalStorage
       *   @params: {none}
@@ -203,8 +204,6 @@
         console.log("Successfully removed "+item+" from localStorage!");
       });
     },
-
-
     /**   @name:   saveNewImageInfo
       *   @params: d [object]
       *   @desc:   stores the "oldData" in localStorage AND stores the ID in the "usedItems"
@@ -220,21 +219,16 @@
         time: Date.now()/1000
       };
 
-      getUsedImages( function(d){
-        /**   TODO:
-          *       I feel like the use of two setting functions
-          *       below could be merged into one...just saying
-          */
-        //  based on if it's the first one or not, it either pushes the
-        if(Object.keys(d).length){
-          //  dont forget that d is the data object holding our array
-          d.usedImages.push(newlyUsedImage);
-          addNewlyUsedImageToLocalStorage( d.usedImages );
-        }else{
-          //  else just pass the new object down to the initiater
-          addFirstUsedImageToLocalStorage( newlyUsedImage );
-        }
-      });
+      if( $ettings.Settings ){
+        //  add a newlyUsedImage to the list of usedImages
+        $ettings.Settings.usedImages.push(newlyUsedImage);
+        $ettings.updateSettings($ettings.Settings, function(){
+          console.info("We were able to save the settings with the newlyUsedImage:", $ettings);
+        });
+      }else{
+        throw "$ettings doesnt exist - please use promises so this shit literally never happens...";
+      }
+
     },
     /**   @name:   saveRedditDataToLocalStorage
       *   @params: d [object]
@@ -248,36 +242,6 @@
           saveBase64ToLocalStorage( d,  base64data );
         });
       });
-    },
-    /**   @name:   addNewlyUsedImageToLocalStorage
-      *   @params: newlyUpdatedImages[object]
-      *   @desc:   updates the list of used images in localstorage
-      */
-    addNewlyUsedImageToLocalStorage = function( newlyUpdatedImages ){
-      chrome.storage.local.set({'usedImages': newlyUpdatedImages}, function(){
-        console.log('Updated the used images list!');
-      });
-    },
-    /**   @name:   addFirstUsedImageToLocalStorage
-      *   @params: newItem[object]
-      *   @desc:   same as the regular one except that it initiates the usedImages object with the images array in there
-      */
-    addFirstUsedImageToLocalStorage = function( newItem ){
-      var o = [];
-      o.push(newItem);
-      chrome.storage.local.set({'usedImages': o}, function(){
-        console.log('Initiated the used images list!');
-      });
-    },
-    /**   @name:   getUsedImages
-      *   @params: cb[function, callback]
-      *   @desc:   wrapper for grabbing the old used image list from localStorage
-      */
-    getUsedImages = function( cb ){
-      if( typeof cb === 'function' )
-        chrome.storage.local.get( 'usedImages', cb);
-      else
-        throw "Must pass a valid callback function to getUsedImages!";
     },
     /**   @name:   saveBase64ToLocalStorage
       *   @params: d [object], n64 [string]
@@ -419,7 +383,6 @@
         }, 500);//actual anim time is 0.45s in the Less file
       }
       if( toggle === 'open' && el.classList.contains( hidden ) ){
-        console.log('closing the settings, opening the ');
         el.style.display = 'block';
         setTimeout(function(){
           removeClass( el, hidden );
@@ -444,7 +407,9 @@
       //  no need to check if $ettings exists cause it has to by now
       var randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
       //  go fetch some data from that subreddit
-      fetchRedditData(parseRedditData, randomSub);
+
+
+      fetchRedditData(parseRedditData, "http://www.reddit.com/r/"+randomSub+"/.json");
     },
     /**   @name:    setClock
       *   @params:  el [string, selector], oldTime [number, time; optional]
@@ -561,14 +526,13 @@
             if(d.settings) {
               console.log('Using old data for settings');
               This.Settings = d.settings;
-              //  the real question is do you really need to pass stuff to parseSettings
               This.parseSettings();
               This.finishedInit = true;
             }else{
               console.log('Using new data for settings');
               var newSettings = This.buildDefaultSettings();
               This.updateSettings( newSettings, function(d){
-                console.log('Updated the localStorage Settings!');
+                console.log('Updated the Settings in localStorage!');
                 This.Settings = newSettings;
                 This.parseSettings();
                 This.finishedInit = true;
@@ -594,14 +558,16 @@
           *   @params:  [none]
           *   @desc:    does two things for now:
           *               1. inject the subreddits
-          *               2. inject the frequency range input
+          *               2. inject the frequency range input ///REMOVED
           */
         parseSettings: function(){
 
-          //  setting the frequency initially, using whatever is in Settings as our value
-          this.setFrequency( this.Settings.updateFrequency, '.js-settings-update-frequency' );
           this.injectSubs( '.js-settings-subs' );
-          this.setupFrequencyChangeListener( '.js-settings-update-frequency' );
+          //  goes to set up the initial theme based on whatever our theme is
+          this.initTheme();
+          //  handles setting up the theme
+          this.listenForThemeChanges( '.js-theme' );
+          //  handles listening to the checkboxes
           this.setupCheckboxChangeListener();
 
         },
@@ -611,8 +577,9 @@
           */
         buildDefaultSettings: function(){
           var s = {
-            updateFrequency: 8,
-            subs: []
+            currentTheme: 'light',
+            subs: [],
+            usedImages: []
           },
           This = this;
 
@@ -669,72 +636,6 @@
           if( cb ){ cb();}
 
         },
-        /**   @name:    convertFrequencyToHrs
-          *   @params:  frequency[number]
-          *   @desc:    quickly converts our "base48" number to hrs string
-          */
-        convertFrequencyToHrs: function( frequency ){
-          return frequency * 0.25;
-        },
-        /**   @name:    setFrequency
-          *   @params:  frequency[number], els [selector, string], cb[callback function]
-          *   @desc:    sets the update frequency meter based on the settings
-          *             accepts a callback that will reset the "beingChanged" flag on the event listener
-          */
-        setFrequency: function( newFrequency, el, cb ){
-
-      //  TODO: this was breaking shit. lets make sure our frequency is saved as a number
-          // if( typeof newFrequency !== 'number' )
-          //   throw "setFrequency requires a number be passed as the first parameter!";
-
-          var element = resolveElement(el),
-              //  TODO: this selector should be based of the element string passed in here...
-              innerFrequencyEl = ".js-settings-update-frequency::-webkit-slider-thumb:before";
-
-          //  actually setting the value of the range <input> element
-          element.value = newFrequency;
-
-          //  adds value to the css content element
-          var val = this.convertFrequencyToHrs(newFrequency);
-          document.styleSheets[0].addRule( innerFrequencyEl, "content: '"+val+"'" );
-
-          //  if there is a callback we call it
-          if( cb ){ cb(); }
-
-        },
-        /**   @name:    setupFrequencyChangeListener
-          *   @params:  el[selector string]
-          *   @desc:    sets the settings to "available"
-          */
-        setupFrequencyChangeListener: function( el ){
-
-          var element = resolveElement(el),
-              beingChanged = false,
-              This = this;
-
-          element.addEventListener('input', function(){
-            var val = parseInt(element.value);
-            if(!beingChanged){
-              beingChanged = true;
-              This.setFrequency( val, el, function(){
-                beingChanged = false;
-                /* Should the below stuff be in the callback also? */
-              });
-
-              //  update the global settings object
-              This.Settings.updateFrequency = element.value;
-              //  Show our save settings alert
-              This.showSaveSettings();
-              //  actually save da new settings
-              This.updateSettings( This.Settings, function(){
-                console.log("\nSuccessfully saved settings!");
-                // console.log( This.Settings );
-              });
-
-            }
-          });
-
-        },
         /**   @name:    setupCheckboxChangeListener
           *   @params:  [none]
           *   @desc:    setupCheckboxChangeListener loops through the sublist and
@@ -770,6 +671,13 @@
 
             });
           });
+        },
+        /**   @name:    logUsedImages
+          *   @params:  [none]
+          *   @desc:    UTIL for logging all the used images to the console for easy viewing
+          */
+        logUsedImages: function(){
+          console.log(this.Settings.usedImages);
         },
         /**   @name:    showSaveSettings
           *   @params:  [none]
@@ -817,6 +725,86 @@
           var ran = Math.floor(Math.random() * activeSubs.length);
 
           return activeSubs[ran];
+        },
+        /**   @name:    initTheme
+          *   @params:  [none]
+          *   @desc:    sets the initial theme based on the currentTheme in Settings
+          */
+        initTheme: function(  ) {
+          if( this.Settings.currentTheme === 'light' ){
+            this.setTheme('main-t-light');
+            //  to ensure the proper theme is actually selected
+            document.querySelector("#theme-light").checked = true;
+          }
+          if( this.Settings.currentTheme === 'dark' ){
+            this.setTheme('main-t-dark');
+            //  to ensure the proper theme is actually selected
+            document.querySelector("#theme-dark").checked = true;
+          }
+        },
+        /**   @name:    setTheme
+          *   @params:  themeClass [string]
+          *   @desc:    takes a theme (as a class) and applies it to the main element
+          */
+        setTheme: function( themeClass ){
+
+          var el = document.querySelector('.main'),
+              light = 'main-t-light',
+              dark  = 'main-t-dark';
+
+          if( themeClass === light ) {
+            if( el.classList.contains(dark) )
+              removeClass( el, dark );
+            if( !el.classList.contains(light) )
+              addClass( el, light );
+            // early return
+            return;
+          }
+          if( themeClass === dark ){
+            if( el.classList.contains(light) )
+              removeClass( el, light );
+            if( !el.classList.contains(dark) )
+              addClass( el, dark );
+            // early return
+            return;
+          }
+          throw "What the whaaaa? http://bit.ly/1IjwmfN";
+        },
+        /**   @name:    listenForThemeChanges
+          *   @params:  element [string]
+          *   @desc:    adds click events to the theme selection radios
+          */
+        listenForThemeChanges: function( element ){
+
+          var els = document.querySelectorAll(element),
+              This = this;
+
+          if( !els )
+            throw "Trying to attach click events to theme radio options but couldn't find those elements!";
+
+          //  TODO: can these be looped thru?
+
+          //  click event for light theme
+          els[0].addEventListener('click', function(e){
+            This.setTheme('main-t-light');
+            This.Settings.currentTheme = 'light';
+
+            This.updateSettings( This.Settings, function(){
+              console.log("\nSuccessfully set theme to Light Theme!");
+              This.showSaveSettings();
+            });
+          });
+          //  click event for dark theme
+          els[1].addEventListener('click', function(e){
+            This.setTheme('main-t-dark');
+            This.Settings.currentTheme = 'dark';
+
+            This.updateSettings( This.Settings, function(){
+              console.log("\nSuccessfully set theme to Dark Theme!");
+              This.showSaveSettings();
+            });
+          });
+
         }
       };
     },
@@ -916,12 +904,16 @@
 
           if(this.data.base64Img){
             document.styleSheets[0].addRule( el, "background-image: url("+this.data.base64Img+")" );
-            console.log( "Using the base64!" );
-            addClass( '.main', 'main-visible' );
+            //  wait 200ms so the bg image can load (?)
+            setTimeout(function(){
+              addClass( '.main', 'main-visible' );
+            }, 200);
           }else{
             element.style.backgroundImage = "url("+this.data.bgUrl+")";
-            console.log( "Using the img url!" );
-            addClass( '.main', 'main-visible' );
+            //  wait 200ms so the bg image can load (?)
+            setTimeout(function(){
+              addClass( '.main', 'main-visible' );
+            }, 200);
           }
 
         }
@@ -943,61 +935,43 @@
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
 
-
+//  Global Settings Object
 var $ettings;
 
 document.addEventListener("DOMContentLoaded", function(event) {
-
-  //  Sets the clock
-  setClock('.js-time');
 
   //  get the whole $ettings ball rolling
   $ettings = GetSettings();
   $ettings.init();
 
-  //  sets up the flip event on the main circle
-  setupFlipEvent({  el:       'js-flip-container',
-                    targetEl: 'js-flip-container',
-                    open:     'i-container-s-open',
-                    close:    'i-container-s-closed'
-                  });
-
-  //  setup the thing to open settings
-  setupToggleSettingsEvent({
-    settings: document.querySelector('.settings'),
-    openSettings: document.querySelector('.js-settings-controller')
-  });
-
-
-  // setup force refresh click event
-  document.querySelector('.js-force-refresh').addEventListener("click", forceBGRefresh);
-
   //  Fetch oldData. Async.
+  //  TODO: This should all just be an init() fn like settings above.
   chrome.storage.local.get( 'oldData', function(d){
-    var randomSub, maxHrs;
+    var randomSub, maxMins, interval;
     //  check if there is any data
     //  FIX for #25 - data was found kinda, but no actual url to use
     if(d.oldData && d.oldData.url){
-
-      //  check if settings exist yet
-      //  TODO: no fallback if it don't :-\
-      if($ettings.Settings){
-        // set our maxHrs;
-        maxHrs = $ettings.Settings.updateFrequency * 0.25;
-      }else{
-        throw "$ettings.Settings was not available when we looked for it!";
-      }
-
-      //  check if it's been longer than the specified number of max hrs
-      if( isLongerThanHrs( d.oldData.timeSaved, maxHrs ) ){
-        console.log("It's been longer than "+maxHrs+" hr(s)\nFetching new data!");
+      //  As of v0.4.0 frequency can no longer be set/is overridden here
+      maxMins = 5;
+      //  check if it's been longer than 5 mins
+      if( longerThanMins( d.oldData.timeSaved, maxMins ) ){
+        console.log("It's been longer than "+maxMins+" mins!\nFetching new data!");
         //  grab us a random sub, chosen from the currently selected subs
-        randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
+        if($ettings.finishedInit){
+          randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
+        }else{
+          interval = setInterval(function(){
+            if($ettings.finishedInit){
+              randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
+              clearInterval(interval);
+            }
+          }, 100);
+        }
         //  go fetch some data from that subreddit
-        fetchRedditData(parseRedditData, randomSub);
+        fetchRedditData(parseRedditData, "http://www.reddit.com/r/"+randomSub+"/.json");
       }else{
-        console.log("It's been less than "+maxHrs+" hr(s)\nUsing old data!");
-        //  in case we weren't able to save the base64, let's get that whole process started
+        console.log("It's been less than "+maxMins+" mins!\nUsing old data!");
+        //  in case we weren't able to save the base64 last time, let's get that whole process started
         if( !d.oldData.base64Img ){
           //  this function is an async function that converts an image url into a base64 image
           convertImgToBase64URL( d.oldData.url, function(base64data){
@@ -1013,19 +987,40 @@ document.addEventListener("DOMContentLoaded", function(event) {
     else{
       if($ettings.finishedInit){
         randomSub = $ettings.gimmieARandomActiveSub().toLowerCase();
-        fetchRedditData(parseRedditData, randomSub);
+        fetchRedditData(parseRedditData, "http://www.reddit.com/r/"+randomSub+"/.json");
       }else{
-        var interval = setInterval(function(){
+        interval = setInterval(function(){
           if($ettings.finishedInit){
             randomSub = $ettings.gimmieARandomActiveSub().toLowerCase();
-            fetchRedditData(parseRedditData, randomSub);
+            fetchRedditData(parseRedditData, "http://www.reddit.com/r/"+randomSub+"/.json");
+            clearInterval(interval);
           }
-          clearInterval(interval);
         }, 100);
       }
 
     }
 
   });
+
+  //    DOM Setting Shit
+  //    MOVED down here as that chrome.storage mafack should be async
+  //  Sets the clock
+  setClock('.js-time');
+
+  //  sets up the flip event on the main circle
+  setupFlipEvent({  el:       'js-flip-container',
+                    targetEl: 'js-flip-container',
+                    open:     'i-container-s-open',
+                    close:    'i-container-s-closed'
+                  });
+
+  //  setup the thing to open settings
+  setupToggleSettingsEvent({
+    settings: document.querySelector('.settings'),
+    openSettings: document.querySelector('.js-settings-controller')
+  });
+
+  // setup force refresh click event
+  document.querySelector('.js-force-refresh').onclick = forceBGRefresh;
 
 });
