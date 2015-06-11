@@ -82,7 +82,7 @@ gulp.task( 'dev:compile-css', function(){
 
 gulp.task( 'dev:compile-js', function(){
 
-  return gulp.src([ './src/js/_main.js', './src/js/settings.js', './src/js/_data.js', './src/js/_init.js' ])
+  return gulp.src([ './src/js/_main.js', './src/js/_settings.js', './src/js/_data.js', './src/js/_init.js' ])
           .pipe($.concat('script.js'))
           .pipe(gulp.dest('./src/js/'));
 
