@@ -39,7 +39,7 @@
   content: "\e601";
 }
 .icon-award:before {
-  content: "\2665";
+  content: "\2660";
 }
 .icon-time:before {
   content: "\23f0";
@@ -523,7 +523,10 @@ button {
   transform: scale(1.3);
 }
 .settings-action-button-fav:hover .settings-action-button-icon:before {
-  color: red;
+  color: #F44336;
+}
+.settings-action-button-fav.settings-action-button-fav-s-active .settings-action-button-icon:before {
+  color: #F44336;
 }
 .settings-action-button-open {
   bottom: 5%;

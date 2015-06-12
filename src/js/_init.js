@@ -52,6 +52,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
         }
         //  go and set the styles and stuffs, using this old data
         setStuff(GetData( d.oldData ));
+        setupFavClickEvent( '.js-fav-button', d.oldData );
       }
 
     }// else, if there is no oldData in

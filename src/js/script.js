@@ -71,6 +71,7 @@
           removeItemFromLocalStorage('oldData');
           saveNewImageInfo( newImage );
           setStuff(GetData( newImage ));//sets DOM elements
+          setupFavClickEvent( '.js-fav-button', newImage );
         }
       });
     },
@@ -97,6 +98,7 @@
               created:    val.data.created_utc,         //  {number}  a timestamp of when this post was created.
               domain:     val.data.domain,              //  {string}  a string of the domain of the post
               id:         val.data.id,                  //  {string}  a unique string that will be used to test if this image has been used yet or not
+              isFav:      false,                        //  {boolean} sets wether or not this is a fav'd image or not
               name:       val.data.name,                //  {string}  an also unique string that will be used to build our url when fetching more results
               redditLink: 'http://www.reddit.com'+val.data.permalink, //  {string}  link to the reddit post
               title:      val.data.title.replace(/\[.*?\]/g, ''),     //  {string}  a sanitized string, title of the post (strips out "[ ]" shit).
@@ -333,6 +335,23 @@
 
     },
 
+
+
+    setupFavClickEvent = function( el, currentImage ){
+      var element = resolveElement(el);
+
+      console.log(currentImage);
+
+      // //  first thing to do is apply the "fav" class if this is a fav image
+      // if( currentImage.isFav )
+      //   addClass( element, currentImage );
+
+
+      // element.onclick = function(){
+
+      // };
+
+    },
     /**   @name:    setupToggleSettingsEvent
       *   @params:  els [object]
       *   @desc:    accepts an object of elements and goes and sets the toggle event
@@ -991,6 +1010,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
         }
         //  go and set the styles and stuffs, using this old data
         setStuff(GetData( d.oldData ));
+        setupFavClickEvent( '.js-fav-button', d.oldData );
       }
 
     }// else, if there is no oldData in
