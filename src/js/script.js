@@ -67,10 +67,9 @@
           //  this time we pass the fetchRound through to fetchRedditData
           fetchRedditData( parseRedditData, generateRedditUrl( s, count, n ), fetchRound );
         }else{
+          //  Eventually, after finding a valid image, this runs.
           //clear localstorage before we do a set
-          removeItemFromLocalStorage('oldData');
-          saveNewImageInfo( newImage );
-          setStuff(GetData( newImage ));//sets DOM elements
+          setNewImage( newImage );
         }
       });
     },
@@ -97,6 +96,7 @@
               created:    val.data.created_utc,         //  {number}  a timestamp of when this post was created.
               domain:     val.data.domain,              //  {string}  a string of the domain of the post
               id:         val.data.id,                  //  {string}  a unique string that will be used to test if this image has been used yet or not
+              isFav:      false,                        //  {boolean} sets wether or not this is a fav'd image or not
               name:       val.data.name,                //  {string}  an also unique string that will be used to build our url when fetching more results
               redditLink: 'http://www.reddit.com'+val.data.permalink, //  {string}  link to the reddit post
               title:      val.data.title.replace(/\[.*?\]/g, ''),     //  {string}  a sanitized string, title of the post (strips out "[ ]" shit).
@@ -117,6 +117,17 @@
 
       cb( obj );
 
+    },
+
+    /**   @name:   setNewImage
+      *   @params: newImage[]
+      *   @desc:   handles the actual setting of a new image
+      */
+    setNewImage = function( newImage ){
+      removeItemFromLocalStorage('oldData');
+      saveNewImageInfo( newImage );
+      setStuff(GetData( newImage ));//sets DOM elements
+      setupFavClickEvent( '.js-fav-button', newImage );
     },
     /**   @name:   generateRedditUrl
       *   @params: sub[string], count[number/string], after[string]
@@ -263,10 +274,12 @@
       */
     saveRedditDataToLocalStorage = function( d ){
       chrome.storage.local.set({'oldData': d}, function(){
-        console.log('Saved settings to localStorage!');
-        convertImgToBase64URL( d.url, function(base64data){
-          saveBase64ToLocalStorage( d,  base64data );
-        });
+        console.log('Saved redditData to localStorage!');
+        if( !d.base64Img ){
+          convertImgToBase64URL( d.url, function(base64data){
+            saveBase64ToLocalStorage( d,  base64data );
+          });
+        }
       });
     },
     /**   @name:   saveBase64ToLocalStorage
@@ -333,6 +346,88 @@
 
     },
 
+
+
+    setupFavClickEvent = function( el, currentImage ){
+      var element = resolveElement(el);
+
+      console.log( "Here's currentImage:" );
+      console.log(currentImage);
+
+      //  first thing to do is apply the "fav" class if this is a fav image
+      if( currentImage.isFav ){
+        setFavIconToActive( element );
+      }else{
+        element.onclick = function(){
+          if( !this.classList.contains( 'settings-action-button-fav-s-active' ) ){
+            setFavIconToActive( element );
+            currentImage.isFav = true;
+            registerFav( currentImage );
+          }
+        };
+      }
+    },
+    /**   @name:    setFavIconToActive
+      *   @params:  el [object or string]
+      *   @desc:    very simple addClasser for setting the fav icon to active
+      */
+    setFavIconToActive = function( el ){
+      var element = resolveElement(el);
+      if( !element.classList.contains( 'settings-action-button-fav-s-active' ) )
+        addClass( element, 'settings-action-button-fav-s-active' );
+    },
+    /**   @name:    setFavIconToInactive
+      *   @params:  el [object or string]
+      *   @desc:    very simple removeClasser for setting the fav icon to active
+      */
+    setFavIconToInactive = function( el ){
+      var element = resolveElement(el);
+      if( element.classList.contains( 'settings-action-button-fav-s-active' ) )
+        removeClass( element, 'settings-action-button-fav-s-active' );
+    },
+    /**   @name:    registerFav
+      *   @params:  favedImg [object]
+      *   @desc:    takes the newly fav'd object, adds it to the $ettings and then calls updateSettings
+      */
+    registerFav = function( favedImg ){
+      $ettings.Settings.favImgs.push(favedImg);
+      //  should work
+      saveRedditDataToLocalStorage(favedImg);
+      //  TODO: $ettings.updateSettings should default to the old $ettings.Settings object if nothing is passed in
+      $ettings.updateSettings( $ettings.Settings, function(){
+        console.log("Saved your favorite image!");
+      } );
+
+    },
+    /**   @name:    gimmieARandomFavImage
+      *   @params:  [none]
+      *   @desc:    returns a random 
+      */
+    gimmieARandomFavImage = function(){
+      var l = $ettings.Settings.favImgs.length,
+          r = Math.floor( Math.random()*l );
+      return $ettings.Settings.favImgs[ r ];
+    },
+    /**   @name:    isUsingFavOrOld
+      *   @params:  favFreq [object]
+      *   @desc:    isUsingFavOrOld determines if we use a new image or an old favorite
+      *             favFreq is the 1:X ratio that dictates how often shit gets fired
+      */
+    isUsingFavOrOld = function( favFreq ){
+      if(!favFreq || typeof favFreq !== "number" )
+        throw "Please pass a valid favFreq to isUsingFavOrOld!";
+      // first lets check if there are actually even any favs
+      if( $ettings.Settings.favImgs.length <= 0 )
+        return false;
+      //  THIS GOVERNS WHAT DECIDES IF IT'S A FAV IMAGE THAT GETS USED OR NOT
+      var r1 = Math.floor(Math.random()*favFreq)+1,
+          r2 = Math.floor(Math.random()*favFreq)+1;
+      //  essentially if both of our random numbers are the same then this passes
+      if( r1 === r2 )
+        return true;
+      else
+        return false;
+    },
     /**   @name:    setupToggleSettingsEvent
       *   @params:  els [object]
       *   @desc:    accepts an object of elements and goes and sets the toggle event
@@ -402,15 +497,24 @@
     forceBGRefresh = function(){
       //  remove visible class from main
       removeClass( '.main', 'main-visible' );
+      //  reset the class on the fav button/icon
+      setFavIconToInactive( '.js-fav-button' );
       //  programatically click the settings to close it
       //  TODO: not an ideal solution
       var set = document.querySelector('.js-settings-controller');
       set.click.apply(set);
 
-      //  no need to check if $ettings exists cause it has to by now
-      var randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
-      //  go fetch some data from that subreddit
-      fetchRedditData(parseRedditData, generateRedditUrl( randomSub ));
+      //  go get a new background image
+      if( isUsingFavOrOld(9) ){ // note that a slightly better odds are given when force refreshing cause it's nicer to the user
+        console.warn("\nUSING AN OLD FAV!\n");
+        setNewImage( gimmieARandomFavImage() );
+      }
+      else{
+        //  no need to check if $ettings exists cause it has to by now
+        var randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
+        //  go fetch some data from that subreddit
+        fetchRedditData(parseRedditData, generateRedditUrl( randomSub ));
+      }
     },
 
     /**   @name:    clearUsedImages
@@ -594,7 +698,8 @@ GetSettings = function(){
       var s = {
         currentTheme: 'light',
         subs: [],
-        usedImages: []
+        usedImages: [],
+        favImgs: []
       },
       This = this;
 
@@ -832,8 +937,7 @@ GetSettings = function(){
   *            This is a ninja function, I wish the rest of the application was structured like this
   */
 GetData = function( data ){
-
-  var o = {
+  return {
     data: data,
     /**   @name:   setInnerHtml
       *   @params: el[string, selector], title[string]
@@ -933,7 +1037,6 @@ GetData = function( data ){
 
     }
   };
-  return o;
 };
 
 ///////////////////////////////////////////////////////////////////////////
@@ -965,19 +1068,26 @@ document.addEventListener("DOMContentLoaded", function(event) {
       //  check if it's been longer than 5 mins
       if( longerThanMins( d.oldData.timeSaved, maxMins ) ){
         console.log("It's been longer than "+maxMins+" mins!\nFetching new data!");
-        //  grab us a random sub, chosen from the currently selected subs
-        if($ettings.finishedInit){
-          randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
-        }else{
-          interval = setInterval(function(){
-            if($ettings.finishedInit){
-              randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
-              clearInterval(interval);
-            }
-          }, 100);
+        //  first, check if we're grabbing a new or an old image
+        if( isUsingFavOrOld(10) ){
+          console.warn("\nUSING AN OLD FAV!\n");
+          setNewImage( gimmieARandomFavImage() );
         }
-        //  go fetch some data from that subreddit
-        fetchRedditData(parseRedditData, generateRedditUrl( randomSub ));
+        else{
+          //  grab us a random sub, chosen from the currently selected subs
+          if($ettings.finishedInit){
+            randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
+          }else{
+            interval = setInterval(function(){
+              if($ettings.finishedInit){
+                randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
+                clearInterval(interval);
+              }
+            }, 100);
+          }
+          //  go fetch some data from that subreddit
+          fetchRedditData(parseRedditData, generateRedditUrl( randomSub ));
+        }
       }else{
         console.log("It's been less than "+maxMins+" mins!\nUsing old data!");
         //  in case we weren't able to save the base64 last time, let's get that whole process started
@@ -990,18 +1100,31 @@ document.addEventListener("DOMContentLoaded", function(event) {
         }
         //  go and set the styles and stuffs, using this old data
         setStuff(GetData( d.oldData ));
+        setupFavClickEvent( '.js-fav-button', d.oldData );
       }
 
     }// else, if there is no oldData in
     else{
       if($ettings.finishedInit){
-        randomSub = $ettings.gimmieARandomActiveSub().toLowerCase();
-        fetchRedditData(parseRedditData, generateRedditUrl( randomSub ));
+        //  first check if we're using a new or an old image
+        if( isUsingFavOrOld(10) ){
+          console.warn("\nUSING AN OLD FAV!\n");
+          setNewImage( gimmieARandomFavImage() );
+        }else{
+          randomSub = $ettings.gimmieARandomActiveSub().toLowerCase();
+          fetchRedditData(parseRedditData, generateRedditUrl( randomSub ));
+        }
       }else{
         interval = setInterval(function(){
           if($ettings.finishedInit){
-            randomSub = $ettings.gimmieARandomActiveSub().toLowerCase();
-            fetchRedditData(parseRedditData, generateRedditUrl( randomSub ));
+            //  first see if we are using a new image or a old image
+            if( isUsingFavOrOld(10) ){
+              console.warn("\nUSING AN OLD FAV!\n");
+              setNewImage( gimmieARandomFavImage() );
+            }else{
+              randomSub = $ettings.gimmieARandomActiveSub().toLowerCase();
+              fetchRedditData(parseRedditData, generateRedditUrl( randomSub ));
+            }
             clearInterval(interval);
           }
         }, 100);

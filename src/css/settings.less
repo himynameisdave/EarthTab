@@ -1,48 +1,72 @@
 
 
+
 .settings-action-button {
   background: transparent;
   border: 0;
   cursor: pointer;
   height: 1.5rem;
   position: absolute;
-  bottom: 5%; right: 5%;
   width: 1.5rem;
-  &:hover {
-    .settings-button-icon {
-      color: #f1f1f1;
-    }
-  }
-  .settings-button-icon {
-    color: #333;
-    position: absolute;
-    top:0; left:0;
-    height: 100%;
-    width: 100%;
-    transition: all 0.45s ease-in-out;
-    &:before{
-      text-shadow: 0 0 7px rgba( 255, 255, 255, 0.55 );
-      font-size: 1.5rem;
-      height: 100%;
-      width: 100%;
-    }
-  }
   &:focus {
     outline: none;
   }
+}
+
+.settings-action-button-icon {
+  color: #333;
+  position: absolute;
+  top:0; left:0;
+  height: 100%;
+  width: 100%;
+  transition: all 0.45s ease-in-out;
+  &:before{
+    color: #333;
+    font-size: 1.5rem;
+    height: 100%;
+    text-shadow: 0 0 7px rgba( 255, 255, 255, 0.6 );
+    transition: color 0.25s ease-in-out;
+    width: 100%;
+  }
+}
+
+.settings-action-button-fav {
+  bottom: 5%; left: 5%;
+  transition: transform 0.235s ease-in-out;
+  &:hover {
+    transform: scale(1.225);
+    .settings-action-button-icon:before {
+      color: #F44336;
+    }
+  }
+  &.settings-action-button-fav-s-active{
+    transform: scale(1.225);
+    .settings-action-button-icon:before{
+      color: #F44336;
+    }
+  }
+}
+
+.settings-action-button-open {
+  bottom: 5%; right: 5%;
+  &:hover {
+    .settings-action-button-icon {
+      color: #f1f1f1;
+    }
+  }
   &.settings-button-s-closed {
-    .settings-button-icon.icon-settings-close{
+    .settings-action-button-icon.icon-settings-close{
       transform: scale(0);
     }
-    .settings-button-icon.icon-settings-open{
+    .settings-action-button-icon.icon-settings-open{
       transform: scale(1);
     }
   }
   &.settings-button-s-open {
-    .settings-button-icon.icon-settings-close{
+    .settings-action-button-icon.icon-settings-close{
       transform: scale(1);
     }
-    .settings-button-icon.icon-settings-open{
+    .settings-action-button-icon.icon-settings-open{
       transform: scale(0);
     }
   }

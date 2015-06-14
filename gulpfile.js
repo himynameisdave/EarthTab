@@ -68,7 +68,7 @@ gulp.task( 'build:zip', ['build:compile-css', 'build:compile-js', 'build:move-ht
 gulp.task( 'default', function(){
 
   gulp.watch( './src/css/*.less' , ['dev:compile-css'] );
-  gulp.watch( './src/js/*.js' , ['dev:compile-js'] );
+  gulp.watch( ['./src/js/*.js', '!./src/js/script.js'] , ['dev:compile-js'] );
 
 })
 
