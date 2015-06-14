@@ -27,19 +27,26 @@ document.addEventListener("DOMContentLoaded", function(event) {
       //  check if it's been longer than 5 mins
       if( longerThanMins( d.oldData.timeSaved, maxMins ) ){
         console.log("It's been longer than "+maxMins+" mins!\nFetching new data!");
-        //  grab us a random sub, chosen from the currently selected subs
-        if($ettings.finishedInit){
-          randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
-        }else{
-          interval = setInterval(function(){
-            if($ettings.finishedInit){
-              randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
-              clearInterval(interval);
-            }
-          }, 100);
+        //  first, check if we're grabbing a new or an old image
+        if( isUsingFavOrOld(10) ){
+          console.warn("\nUSING AN OLD FAV!\n");
+          setNewImage( gimmieARandomFavImage() );
         }
-        //  go fetch some data from that subreddit
-        fetchRedditData(parseRedditData, generateRedditUrl( randomSub ));
+        else{
+          //  grab us a random sub, chosen from the currently selected subs
+          if($ettings.finishedInit){
+            randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
+          }else{
+            interval = setInterval(function(){
+              if($ettings.finishedInit){
+                randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
+                clearInterval(interval);
+              }
+            }, 100);
+          }
+          //  go fetch some data from that subreddit
+          fetchRedditData(parseRedditData, generateRedditUrl( randomSub ));
+        }
       }else{
         console.log("It's been less than "+maxMins+" mins!\nUsing old data!");
         //  in case we weren't able to save the base64 last time, let's get that whole process started
@@ -58,13 +65,25 @@ document.addEventListener("DOMContentLoaded", function(event) {
     }// else, if there is no oldData in
     else{
       if($ettings.finishedInit){
-        randomSub = $ettings.gimmieARandomActiveSub().toLowerCase();
-        fetchRedditData(parseRedditData, generateRedditUrl( randomSub ));
+        //  first check if we're using a new or an old image
+        if( isUsingFavOrOld(10) ){
+          console.warn("\nUSING AN OLD FAV!\n");
+          setNewImage( gimmieARandomFavImage() );
+        }else{
+          randomSub = $ettings.gimmieARandomActiveSub().toLowerCase();
+          fetchRedditData(parseRedditData, generateRedditUrl( randomSub ));
+        }
       }else{
         interval = setInterval(function(){
           if($ettings.finishedInit){
-            randomSub = $ettings.gimmieARandomActiveSub().toLowerCase();
-            fetchRedditData(parseRedditData, generateRedditUrl( randomSub ));
+            //  first see if we are using a new image or a old image
+            if( isUsingFavOrOld(10) ){
+              console.warn("\nUSING AN OLD FAV!\n");
+              setNewImage( gimmieARandomFavImage() );
+            }else{
+              randomSub = $ettings.gimmieARandomActiveSub().toLowerCase();
+              fetchRedditData(parseRedditData, generateRedditUrl( randomSub ));
+            }
             clearInterval(interval);
           }
         }, 100);

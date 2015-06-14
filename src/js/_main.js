@@ -67,11 +67,9 @@
           //  this time we pass the fetchRound through to fetchRedditData
           fetchRedditData( parseRedditData, generateRedditUrl( s, count, n ), fetchRound );
         }else{
+          //  Eventually, after finding a valid image, this runs.
           //clear localstorage before we do a set
-          removeItemFromLocalStorage('oldData');
-          saveNewImageInfo( newImage );
-          setStuff(GetData( newImage ));//sets DOM elements
-          setupFavClickEvent( '.js-fav-button', newImage );
+          setNewImage( newImage );
         }
       });
     },
@@ -119,6 +117,17 @@
 
       cb( obj );
 
+    },
+
+    /**   @name:   setNewImage
+      *   @params: newImage[]
+      *   @desc:   handles the actual setting of a new image
+      */
+    setNewImage = function( newImage ){
+      removeItemFromLocalStorage('oldData');
+      saveNewImageInfo( newImage );
+      setStuff(GetData( newImage ));//sets DOM elements
+      setupFavClickEvent( '.js-fav-button', newImage );
     },
     /**   @name:   generateRedditUrl
       *   @params: sub[string], count[number/string], after[string]
@@ -390,6 +399,35 @@
       } );
 
     },
+    /**   @name:    gimmieARandomFavImage
+      *   @params:  [none]
+      *   @desc:    returns a random 
+      */
+    gimmieARandomFavImage = function(){
+      var l = $ettings.Settings.favImgs.length,
+          r = Math.floor( Math.random()*l );
+      return $ettings.Settings.favImgs[ r ];
+    },
+    /**   @name:    isUsingFavOrOld
+      *   @params:  favFreq [object]
+      *   @desc:    isUsingFavOrOld determines if we use a new image or an old favorite
+      *             favFreq is the 1:X ratio that dictates how often shit gets fired
+      */
+    isUsingFavOrOld = function( favFreq ){
+      if(!favFreq || typeof favFreq !== "number" )
+        throw "Please pass a valid favFreq to isUsingFavOrOld!";
+      // first lets check if there are actually even any favs
+      if( $ettings.Settings.favImgs.length <= 0 )
+        return false;
+      //  THIS GOVERNS WHAT DECIDES IF IT'S A FAV IMAGE THAT GETS USED OR NOT
+      var r1 = Math.floor(Math.random()*favFreq)+1,
+          r2 = Math.floor(Math.random()*favFreq)+1;
+      //  essentially if both of our random numbers are the same then this passes
+      if( r1 === r2 )
+        return true;
+      else
+        return false;
+    },
     /**   @name:    setupToggleSettingsEvent
       *   @params:  els [object]
       *   @desc:    accepts an object of elements and goes and sets the toggle event
@@ -466,10 +504,17 @@
       var set = document.querySelector('.js-settings-controller');
       set.click.apply(set);
 
-      //  no need to check if $ettings exists cause it has to by now
-      var randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
-      //  go fetch some data from that subreddit
-      fetchRedditData(parseRedditData, generateRedditUrl( randomSub ));
+      //  go get a new background image
+      if( isUsingFavOrOld(9) ){ // note that a slightly better odds are given when force refreshing cause it's nicer to the user
+        console.warn("\nUSING AN OLD FAV!\n");
+        setNewImage( gimmieARandomFavImage() );
+      }
+      else{
+        //  no need to check if $ettings exists cause it has to by now
+        var randomSub = ($ettings.gimmieARandomActiveSub()).toLowerCase();
+        //  go fetch some data from that subreddit
+        fetchRedditData(parseRedditData, generateRedditUrl( randomSub ));
+      }
     },
 
     /**   @name:    clearUsedImages
