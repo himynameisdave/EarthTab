@@ -7,8 +7,7 @@
   *            This is a ninja function, I wish the rest of the application was structured like this
   */
 GetData = function( data ){
-
-  var o = {
+  return {
     data: data,
     /**   @name:   setInnerHtml
       *   @params: el[string, selector], title[string]
@@ -108,5 +107,4 @@ GetData = function( data ){
 
     }
   };
-  return o;
 };

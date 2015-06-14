@@ -265,10 +265,12 @@
       */
     saveRedditDataToLocalStorage = function( d ){
       chrome.storage.local.set({'oldData': d}, function(){
-        console.log('Saved settings to localStorage!');
-        convertImgToBase64URL( d.url, function(base64data){
-          saveBase64ToLocalStorage( d,  base64data );
-        });
+        console.log('Saved redditData to localStorage!');
+        if( !d.base64Img ){
+          convertImgToBase64URL( d.url, function(base64data){
+            saveBase64ToLocalStorage( d,  base64data );
+          });
+        }
       });
     },
     /**   @name:   saveBase64ToLocalStorage
@@ -340,16 +342,52 @@
     setupFavClickEvent = function( el, currentImage ){
       var element = resolveElement(el);
 
+      console.log( "Here's currentImage:" );
       console.log(currentImage);
 
-      // //  first thing to do is apply the "fav" class if this is a fav image
-      // if( currentImage.isFav )
-      //   addClass( element, currentImage );
-
-
-      // element.onclick = function(){
-
-      // };
+      //  first thing to do is apply the "fav" class if this is a fav image
+      if( currentImage.isFav ){
+        setFavIconToActive( element );
+      }else{
+        element.onclick = function(){
+          if( !this.classList.contains( 'settings-action-button-fav-s-active' ) ){
+            setFavIconToActive( element );
+            currentImage.isFav = true;
+            registerFav( currentImage );
+          }
+        };
+      }
+    },
+    /**   @name:    setFavIconToActive
+      *   @params:  el [object or string]
+      *   @desc:    very simple addClasser for setting the fav icon to active
+      */
+    setFavIconToActive = function( el ){
+      var element = resolveElement(el);
+      if( !element.classList.contains( 'settings-action-button-fav-s-active' ) )
+        addClass( element, 'settings-action-button-fav-s-active' );
+    },
+    /**   @name:    setFavIconToInactive
+      *   @params:  el [object or string]
+      *   @desc:    very simple removeClasser for setting the fav icon to active
+      */
+    setFavIconToInactive = function( el ){
+      var element = resolveElement(el);
+      if( element.classList.contains( 'settings-action-button-fav-s-active' ) )
+        removeClass( element, 'settings-action-button-fav-s-active' );
+    },
+    /**   @name:    registerFav
+      *   @params:  favedImg [object]
+      *   @desc:    takes the newly fav'd object, adds it to the $ettings and then calls updateSettings
+      */
+    registerFav = function( favedImg ){
+      $ettings.Settings.favImgs.push(favedImg);
+      //  should work
+      saveRedditDataToLocalStorage(favedImg);
+      //  TODO: $ettings.updateSettings should default to the old $ettings.Settings object if nothing is passed in
+      $ettings.updateSettings( $ettings.Settings, function(){
+        console.log("Saved your favorite image!");
+      } );
 
     },
     /**   @name:    setupToggleSettingsEvent
@@ -421,6 +459,8 @@
     forceBGRefresh = function(){
       //  remove visible class from main
       removeClass( '.main', 'main-visible' );
+      //  reset the class on the fav button/icon
+      setFavIconToInactive( '.js-fav-button' );
       //  programatically click the settings to close it
       //  TODO: not an ideal solution
       var set = document.querySelector('.js-settings-controller');
@@ -852,8 +892,7 @@ GetSettings = function(){
   *            This is a ninja function, I wish the rest of the application was structured like this
   */
 GetData = function( data ){
-
-  var o = {
+  return {
     data: data,
     /**   @name:   setInnerHtml
       *   @params: el[string, selector], title[string]
@@ -953,7 +992,6 @@ GetData = function( data ){
 
     }
   };
-  return o;
 };
 
 ///////////////////////////////////////////////////////////////////////////
