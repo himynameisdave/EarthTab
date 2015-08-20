@@ -88,6 +88,7 @@ gulp.task( 'dev:bundle-js', function(){
 
   return browserify('./src/js/main.js')
           .bundle()
+          .on( 'error', function(e){ console.log(e) } )
           .pipe(source('bundle.js'))
           .pipe(gulp.dest('./src/js/'));
 
