@@ -29,7 +29,22 @@ module.exports = (function(){
         console.log("Cool bro");
       });
 
-  var Data = require('./modules/data.js')( UsedImages );
-      // Data.fetch(  );
+  //  Here's the elements that will get stuff set
+  //  We set them up here for easier access
+  var elements = {
+    author:          '.js-username',
+    backgroundImage: '.js-img',
+    userLink:        '.js-username',
+    redditLink:      '.js-time-posted',
+    subreddit:       '.js-subreddit',
+    title:           '.js-title',
+    timePosted:      '.js-time-posted'
+  };
+
+  var Data = require('./modules/data.js')( UsedImages, elements );
+      // Data.fetch( Data.parse, url );
+
+
+
 
 })();

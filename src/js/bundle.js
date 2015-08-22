@@ -30,12 +30,27 @@ module.exports = (function(){
         console.log("Cool bro");
       });
 
-  var Data = require('./modules/data.js')( UsedImages );
-      // Data.fetch(  );
+  //  Here's the elements that will get stuff set
+  //  We set them up here for easier access
+  var elements = {
+    author:          '.js-username',
+    backgroundImage: '.js-img',
+    userLink:        '.js-username',
+    redditLink:      '.js-time-posted',
+    subreddit:       '.js-subreddit',
+    title:           '.js-title',
+    timePosted:      '.js-time-posted'
+  };
+
+  var Data = require('./modules/data.js')( UsedImages, elements );
+      // Data.fetch( Data.parse, url );
+
+
+
 
 })();
 
-},{"./modules/clock.js":2,"./modules/data.js":3,"./modules/settings.js":4,"./modules/usedImages.js":5,"./modules/utils.js":6}],2:[function(require,module,exports){
+},{"./modules/clock.js":2,"./modules/data.js":3,"./modules/settings.js":5,"./modules/usedImages.js":6,"./modules/utils.js":7}],2:[function(require,module,exports){
 /*||
 ||||   Module::Clock
 ||||
@@ -81,8 +96,11 @@ module.exports = Clock;
 ||||   Gets and sets data in chrome storage, other stuff.
 */
 
+var $   = require('./utils.js')(),
+    DOM = require('./dom.js');//  Don't instantiate yet
 
-var Data = function( UsedImages ){
+
+var Data = function( UsedImages, elements ){
 
     return {
       fetch: function( cb, url, fetchRound ){
@@ -100,42 +118,60 @@ var Data = function( UsedImages ){
 
         var topImg = this.returnTopImage( newData );
 
-        /*
-        //  loops thru the reddit data and supplies a valid top image to be saved and used
-        loopThruRedditDataForTopImg( newData, function( newImage ){
+        if( !topImg.error ){
+          //  removes the item before setting it again
+          this.storage.remove();
+          this.storage.set( topImg );
 
-          //  if loopThruRedditDataForTopImg did not yeild any results, we need to fetch new data
-          if( newImage.error ){
+          //  store that as a new image
+          UsedImages.add({
+            id: topImg.id,
+            redditLink: topImg.redditLink,
+            url: topImg.url,
+            time: Date.now()/1000
+          }, function(){
+            console.log("Successfully added newly used image!");
+          });
 
-            //  for all the inital ones, fetchRound isn't even passed in, so if that's the case we need to start it
-            if(!fetchRound)
-              fetchRound = 1;
-            else
-              fetchRound++; // increment the fetchRound if it exists
+          //  instantiate the DOM module with our data
+          DOM( topImg ).setAll( elements );
 
-            //  data used to build the URL
-            var n     = newImage.name,
-                s     = newImage.subreddit,
-                count = 25 * fetchRound;
-
-            //  nice little warning
-            console.warn("Failed to find a suitable image in "+count+" images, fetching new Reddit data!");
-
-            //  NOT YOUR USUAL fetchRedditData,
-            //  this time we pass the fetchRound through to fetchRedditData
-            fetchRedditData( parseRedditData, "http://www.reddit.com/r/"+s+"/.json?count="+count+"&after="+n, fetchRound );
-          }else{
-            //clear localstorage before we do a set
-            removeItemFromLocalStorage('oldData');
-            saveNewImageInfo( newImage );
-            setStuff(GetData( newImage ));//sets DOM elements
-          }
-        });
-        */
+        }else {
+          console.info("Fetching new batch of images!");
+          //  increment the fetchRound
+          fetchRound = !fetchRound ? 1 : fetchRound + 1;
+          var n     = topImg.name,
+              s     = topImg.subreddit,
+              count = 25 * fetchRound;
+          //  Do our other fetch
+          this.fetch( this.parse, "http://www.reddit.com/r/"+s+"/.json?count="+count+"&after="+n, fetchRound  );
+        }
 
       },
-      returnTopImage: function( data ){
+      storage: {
+        remove: function(){
+          chrome.storage.local.remove( "lastImage", function(){
+            console.log("Successfully removed lastImage from localStorage!");
+          });
+        },
+        set: function( image ){
+          chrome.storage.local.set({'lastImage': image}, function(){
+            console.log("Successfully added lastImage to localStorage!");
+            $.convertImgToBase64URL( image.url, function(base64data){
+              this.setBase64(image,  base64data);
+            }.bind(this));
+          }.bind(this));
+        },
+        setBase64: function( d, n64 ){
+          var o = d;
+              o.base64Img = n64;
+          chrome.storage.local.set({'oldData': o}, function(){
+            console.log('Saved base64 image to localStorage!');
+          });
+        }
+      },
 
+      returnTopImage: function( data ){
         var obj = {},
           isImageFound = false;
 
@@ -226,7 +262,93 @@ var Data = function( UsedImages ){
 
 
 module.exports = Data;
-},{}],4:[function(require,module,exports){
+},{"./dom.js":4,"./utils.js":7}],4:[function(require,module,exports){
+/*||
+||||   Module::DOM
+||||
+||||   Used to set items in the DOM
+*/
+
+var $ = require('./utils.js')();
+
+
+var DOM = function( data ){
+  /**   @name:   setInnerHtml
+    *   @params: el[string, selector], title[string]
+    *   @desc:   takes a selector string and a title and appends that element with the specified content
+    */
+  var setInnerHtml = function( el, text ){
+    var element = document.querySelector(el);
+    element.innerHTML = text;
+  },
+  setLink = function( el, link ){
+    var element = document.querySelector(el);
+    element.href = link;
+  };
+
+  return {
+    set: {
+      author:          function( el ){
+        setInnerHtml( el, data.author );
+      },
+      backgroundImage: function( el ){
+        var element = document.querySelector(el);
+
+        if( !data.base64Img && !data.bgUrl && !data.url )
+          throw "Trying to set background, however could not find a base64Img or bgUrl or url in the data set!";
+
+        if(data.base64Img){
+          document.styleSheets[0].addRule( el, "background-image: url("+data.base64Img+")" );
+          //  wait 200ms so the bg image can load (?)
+          setTimeout(function(){
+            $.addClass( '.main', 'main-visible' );
+          }, 200);
+        }else{
+          element.style.backgroundImage = "url("+data.bgUrl+")";
+          //  wait 200ms so the bg image can load (?)
+          setTimeout(function(){
+            $.addClass( '.main', 'main-visible' );
+          }, 200);
+        }
+      },
+      userLink:        function( el ){
+        setLink( el, 'http://www.reddit.com/user/'+data.author+'/' );
+      },
+      redditLink:      function( el ){
+        setLink( els, data.redditLink );
+      },
+      subreddit:       function( el ){
+        setInnerHtml(el, data.subreddit);
+        setLink(el, "http://www.reddit.com/r/"+data.subreddit);
+      },
+      title:           function( el ){
+        setInnerHtml( el, data.title );
+      },
+      timePosted:      function( el ){
+        var element = document.querySelector(el),
+            now     = Date.now()/1000,
+            posted  = data.created;
+
+        setInnerHtml( el, $.truncatePostTime($.getHrsDiff( posted, now )) + " ago" );
+      }
+    },
+    setAll: function( elements ){
+      this.set.author( elements.author );
+      this.set.backgroundImage( elements.backgroundImage );
+      this.set.userLink( elements.userLink );
+      this.set.redditLink( elements.redditLink );
+      this.set.subreddit( elements.subreddit );
+      this.set.title( elements.title );
+      this.set.timePosted( elements.timePosted );
+    }
+  }
+};
+
+
+
+module.exports = DOM;
+
+},{"./utils.js":7}],5:[function(require,module,exports){
 /*||
 ||||   Module::Settings
 ||||
@@ -474,7 +596,7 @@ var Settings = function(){
 };
 
 module.exports = Settings;
-},{"./utils.js":6}],5:[function(require,module,exports){
+},{"./utils.js":7}],6:[function(require,module,exports){
 
 
 
@@ -511,7 +633,7 @@ var UsedImages = function(){
 
 
 module.exports = UsedImages;
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 /*||
 ||||   Module::Utils
 ||||
@@ -521,6 +643,50 @@ module.exports = UsedImages;
 
 var Utils = function(){
   return {
+    /**   @name:    addClass
+      *   @params:  el [string, selector], class [string]
+      *   @desc:    simplifies adding a class to an element
+      */
+    addClass: function( el, className ){
+      var element;
+      if( typeof el === 'object' )
+        element = el;
+      else if( typeof el === 'string' )
+        element = document.querySelector( el );
+      else
+        throw "addClass() needs either an element or a selector string!";
+      element.classList.add(className);
+    },
+    /**   @name:    convertImgToBase64URL
+      *   @params:  url [string], callback [function], outputFormat [string]
+      *   @desc:    creates a base64 of an image based on a given URL. ASYNC
+      *
+      *   Mega props to this Stackoverflow post:
+      *   http://stackoverflow.com/a/20285053/4060044
+      */
+    convertImgToBase64URL: function(url, callback, outputFormat){
+      var img = new Image();
+          img.crossOrigin = 'Anonymous';
+          img.onload = function(){
+              var canvas = document.createElement('CANVAS'),
+              ctx = canvas.getContext('2d'), dataURL;
+              canvas.height = img.height;
+              canvas.width = img.width;
+              ctx.drawImage(img, 0, 0);
+              dataURL = canvas.toDataURL(outputFormat);
+              callback(dataURL);
+              canvas = null;
+          };
+          img.src = url;
+    },
+    /**   @name:   getHrsDiff
+      *   @params: oldTime [number, timestamp], newTime [number, timestamp]
+      *   @desc:   returns the number of hours between two given times, NOT ROUNDED
+      */
+    getHrsDiff: function( oldTime, newTime ){
+      var diff = newTime - oldTime;
+      return (diff/60)/60;
+    },
     /**   @name:    resolveElement
       *   @params:  el [string, selector OR DOM element object]
       *   @desc:    handy utility that returns the actual element, whether passed a selector string or actual element
@@ -536,20 +702,6 @@ var Utils = function(){
         throw "Not a real element!\nPlease pass either a selector string or element object!";
       return element;
     },
-    /**   @name:    addClass
-      *   @params:  el [string, selector], class [string]
-      *   @desc:    simplifies adding a class to an element
-      */
-    addClass: function( el, className ){
-      var element;
-      if( typeof el === 'object' )
-        element = el;
-      else if( typeof el === 'string' )
-        element = document.querySelector( el );
-      else
-        throw "addClass() needs either an element or a selector string!";
-      element.classList.add(className);
-    },
     /**   @name:    removeClass
       *   @params:  el [string, selector], class [string]
       *   @desc:    simplifies removing a class from an element
@@ -563,6 +715,24 @@ var Utils = function(){
       else
         throw "removeClass() needs either an element or a selector string!";
       element.classList.remove(className);
+    },
+    truncatePostTime: function( hrs ){
+      var h, s;
+      if( hrs < 24 ){
+        h = Math.floor(hrs);
+        s = (h > 1 ? " hrs" : " hr");
+        return h + s;
+      }
+      if( hrs >= 24 && hrs < 168 ){
+        h = Math.floor(hrs/24);
+        s = (h > 1 ? " days" : " day");
+        return h + s;
+      }
+      if( hrs >= 168 ){
+        h = Math.floor(hrs/168);
+        s = (h > 1 ? " weeks" : " week");
+        return h + s;
+      }
     }
   }
 };

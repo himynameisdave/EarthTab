@@ -4,8 +4,11 @@
 ||||   Gets and sets data in chrome storage, other stuff.
 */
 
+var $   = require('./utils.js')(),
+    DOM = require('./dom.js');//  Don't instantiate yet
 
-var Data = function( UsedImages ){
+
+var Data = function( UsedImages, elements ){
 
     return {
       fetch: function( cb, url, fetchRound ){
@@ -23,42 +26,60 @@ var Data = function( UsedImages ){
 
         var topImg = this.returnTopImage( newData );
 
-        /*
-        //  loops thru the reddit data and supplies a valid top image to be saved and used
-        loopThruRedditDataForTopImg( newData, function( newImage ){
+        if( !topImg.error ){
+          //  removes the item before setting it again
+          this.storage.remove();
+          this.storage.set( topImg );
 
-          //  if loopThruRedditDataForTopImg did not yeild any results, we need to fetch new data
-          if( newImage.error ){
+          //  store that as a new image
+          UsedImages.add({
+            id: topImg.id,
+            redditLink: topImg.redditLink,
+            url: topImg.url,
+            time: Date.now()/1000
+          }, function(){
+            console.log("Successfully added newly used image!");
+          });
 
-            //  for all the inital ones, fetchRound isn't even passed in, so if that's the case we need to start it
-            if(!fetchRound)
-              fetchRound = 1;
-            else
-              fetchRound++; // increment the fetchRound if it exists
+          //  instantiate the DOM module with our data
+          DOM( topImg ).setAll( elements );
 
-            //  data used to build the URL
-            var n     = newImage.name,
-                s     = newImage.subreddit,
-                count = 25 * fetchRound;
-
-            //  nice little warning
-            console.warn("Failed to find a suitable image in "+count+" images, fetching new Reddit data!");
-
-            //  NOT YOUR USUAL fetchRedditData,
-            //  this time we pass the fetchRound through to fetchRedditData
-            fetchRedditData( parseRedditData, "http://www.reddit.com/r/"+s+"/.json?count="+count+"&after="+n, fetchRound );
-          }else{
-            //clear localstorage before we do a set
-            removeItemFromLocalStorage('oldData');
-            saveNewImageInfo( newImage );
-            setStuff(GetData( newImage ));//sets DOM elements
-          }
-        });
-        */
+        }else {
+          console.info("Fetching new batch of images!");
+          //  increment the fetchRound
+          fetchRound = !fetchRound ? 1 : fetchRound + 1;
+          var n     = topImg.name,
+              s     = topImg.subreddit,
+              count = 25 * fetchRound;
+          //  Do our other fetch
+          this.fetch( this.parse, "http://www.reddit.com/r/"+s+"/.json?count="+count+"&after="+n, fetchRound  );
+        }
 
       },
-      returnTopImage: function( data ){
+      storage: {
+        remove: function(){
+          chrome.storage.local.remove( "lastImage", function(){
+            console.log("Successfully removed lastImage from localStorage!");
+          });
+        },
+        set: function( image ){
+          chrome.storage.local.set({'lastImage': image}, function(){
+            console.log("Successfully added lastImage to localStorage!");
+            $.convertImgToBase64URL( image.url, function(base64data){
+              this.setBase64(image,  base64data);
+            }.bind(this));
+          }.bind(this));
+        },
+        setBase64: function( d, n64 ){
+          var o = d;
+              o.base64Img = n64;
+          chrome.storage.local.set({'oldData': o}, function(){
+            console.log('Saved base64 image to localStorage!');
+          });
+        }
+      },
 
+      returnTopImage: function( data ){
         var obj = {},
           isImageFound = false;
 
