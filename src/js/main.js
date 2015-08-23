@@ -61,18 +61,28 @@ module.exports = (function(){
         //  TODO: can we split this out somewhere? an init fn or something?
         function(d){
           //  some vars
-          var randomSub,
+          var randomSub, // our random sub
+              interval   // the interval for checking if settings is inited
               maxMins   = 5;
           //  FIX for #25 - data was found kinda, but no actual url to use
           if( d.lastImage && d.lastImage.url ){
             //  As of v0.4.0 frequency can no longer be set/is overridden here
             if($.longerThanMins( d.lastImage.timeSaved, maxMins )){
               console.info("It's been longer than "+maxMins+" mins, fetching new data!");
-              if( Settings.initComplete )
+              if( Settings.initComplete ){
                 randomSub = Settings.gimmieARandomActiveSub().toLowerCase();
-              else
-                throw "Hey the Settings weren't initialized when trying to get a random sub";
-
+                Data.fetch( "http://www.reddit.com/r/"+randomSub+"/.json" )
+              }else{
+                // throw "Hey the Settings weren't initialized when trying to get a random sub";
+                console.warn("Hey the Settings weren't initialized when trying to get a random sub");
+                interval = setInterval(function(){
+                  if(Settings.initComplete){
+                    randomSub = Settings.gimmieARandomActiveSub().toLowerCase();
+                    Data.fetch( "http://www.reddit.com/r/"+randomSub+"/.json" )
+                    clearInterval(interval);
+                  }
+                }, 100);
+              }
             }else{
               console.info("It's been less than "+maxMins+" mins, using old data!");
               if( !d.lastImage.base64Img ){
@@ -84,8 +94,18 @@ module.exports = (function(){
             //  no last image found, gotta get started!
             if( Settings.initComplete ){
               randomSub = Settings.gimmieARandomActiveSub().toLowerCase();
-              Data.fetch( Data.parse, "http://www.reddit.com/r/"+randomSub+"/.json" )
-            } else { throw "Hey the Settings weren't initialized when trying to get a random sub"; }
+              Data.fetch( "http://www.reddit.com/r/"+randomSub+"/.json" )
+            } else {
+              // throw "Hey the Settings weren't initialized when trying to get a random sub";
+                console.warn("Hey the Settings weren't initialized when trying to get a random sub");
+                interval = setInterval(function(){
+                  if(Settings.initComplete){
+                    randomSub = Settings.gimmieARandomActiveSub().toLowerCase();
+                    Data.fetch( "http://www.reddit.com/r/"+randomSub+"/.json" )
+                    clearInterval(interval);
+                  }
+                }, 100);
+            }
           }
         }
       );

@@ -11,20 +11,18 @@ var $   = require('./utils.js')(),
 var Data = function( UsedImages, elements ){
 
     return {
-      fetch: function( cb, url, fetchRound ){
+      fetch: function( url, fetchRound ){
         var r = new XMLHttpRequest();
         r.open("get", url , true);
         r.onload = function(xmlEvent){
           if(!fetchRound)
-            cb(JSON.parse(r.response).data.children);
+            this.parse(JSON.parse(r.response).data.children);
           else
-            cb(JSON.parse(r.response).data.children, fetchRound);
-        };
+            this.parse(JSON.parse(r.response).data.children)
+        }.bind(this);
         r.send();
       },
       parse: function( newData, fetchRound ){
-        console.log(this.returnTopImage);
-
         var topImg = this.returnTopImage( newData );
 
         if( !topImg.error ){
