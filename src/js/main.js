@@ -22,11 +22,24 @@ module.exports = (function(){
       Clock.setClock();
 
 
+  var Flipper = require('./modules/flipper.js')();
+      Flipper.setup({
+                      el:       'js-flip-container',
+                      targetEl: 'js-flip-container',
+                      open:     'i-container-s-open',
+                      close:    'i-container-s-closed'
+                    });
+
+
   var UsedImages = require('./modules/usedImages.js')();
       UsedImages.init();
 
 
-  var Settings = require('./modules/settings.js')();
+  var settingsElements = {
+        settings: $.resolveElement('.settings'),
+        openSettings: $.resolveElement('.js-settings-controller')
+      },
+      Settings = require('./modules/settings.js')(settingsElements);
       Settings.init(function(){
         console.log("Cool bro");
       });

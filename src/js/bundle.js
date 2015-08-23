@@ -23,11 +23,24 @@ module.exports = (function(){
       Clock.setClock();
 
 
+  var Flipper = require('./modules/flipper.js')();
+      Flipper.setup({
+                      el:       'js-flip-container',
+                      targetEl: 'js-flip-container',
+                      open:     'i-container-s-open',
+                      close:    'i-container-s-closed'
+                    });
+
+
   var UsedImages = require('./modules/usedImages.js')();
       UsedImages.init();
 
 
-  var Settings = require('./modules/settings.js')();
+  var settingsElements = {
+        settings: $.resolveElement('.settings'),
+        openSettings: $.resolveElement('.js-settings-controller')
+      },
+      Settings = require('./modules/settings.js')(settingsElements);
       Settings.init(function(){
         console.log("Cool bro");
       });
@@ -81,7 +94,7 @@ module.exports = (function(){
 
 })();
 
-},{"./modules/clock.js":2,"./modules/data.js":3,"./modules/dom.js":4,"./modules/settings.js":5,"./modules/usedImages.js":6,"./modules/utils.js":7}],2:[function(require,module,exports){
+},{"./modules/clock.js":2,"./modules/data.js":3,"./modules/dom.js":4,"./modules/flipper.js":5,"./modules/settings.js":6,"./modules/usedImages.js":7,"./modules/utils.js":8}],2:[function(require,module,exports){
 /*||
 ||||   Module::Clock
 ||||
@@ -146,6 +159,7 @@ var Data = function( UsedImages, elements ){
         r.send();
       },
       parse: function( newData, fetchRound ){
+        console.log(this.returnTopImage);
 
         var topImg = this.returnTopImage( newData );
 
@@ -204,7 +218,6 @@ var Data = function( UsedImages, elements ){
           });
         }
       },
-
       returnTopImage: function( data ){
         var obj = {},
           isImageFound = false;
@@ -296,7 +309,7 @@ var Data = function( UsedImages, elements ){
 
 
 module.exports = Data;
-},{"./dom.js":4,"./utils.js":7}],4:[function(require,module,exports){
+},{"./dom.js":4,"./utils.js":8}],4:[function(require,module,exports){
 /*||
 ||||   Module::DOM
 ||||
@@ -349,7 +362,7 @@ var DOM = function( data ){
         setLink( el, 'http://www.reddit.com/user/'+data.author+'/' );
       },
       redditLink:      function( el ){
-        setLink( els, data.redditLink );
+        setLink( el, data.redditLink );
       },
       subreddit:       function( el ){
         setInnerHtml(el, data.subreddit);
@@ -382,7 +395,40 @@ var DOM = function( data ){
 
 module.exports = DOM;
 
-},{"./utils.js":7}],5:[function(require,module,exports){
+},{"./utils.js":8}],5:[function(require,module,exports){
+/*||
+||||   Module::Flipper
+||||
+||||   Literally just handles the flip event
+*/
+
+var $ = require('./utils.js')();
+
+
+var Flipper = function(){
+  return {
+    setup: function( e ){
+      var element = document.querySelector('.'+e.el);
+
+      element.addEventListener( 'click', function(){
+        if( element.classList.contains(e.close) ){
+          $.removeClass( element, e.close );
+          $.addClass( element, e.open );
+        }
+        else if( element.classList.contains(e.open) ){
+          $.removeClass( element, e.open );
+          $.addClass( element, e.close );
+        }else{
+          throw "What the whaaaa? http://bit.ly/1IjwmfN";
+        }
+       });
+    }
+  }
+};
+
+
+module.exports = Flipper;
+},{"./utils.js":8}],6:[function(require,module,exports){
 /*||
 ||||   Module::Settings
 ||||
@@ -393,7 +439,7 @@ module.exports = DOM;
 var $ = require('./utils.js')();
 
 
-var Settings = function(){
+var Settings = function( config ){
   return {
     Settings: {},
     subList: [  'EarthPorn',
@@ -415,6 +461,8 @@ var Settings = function(){
         if(d.settings){
           this.Settings = d.settings;
           this.parseSettings();
+          //  setup the settings toggle event
+          this.setupSettingsToggleEvent(config);
           this.initComplete = true;
           //  fire the callback if it exists
           if(cb)
@@ -425,6 +473,8 @@ var Settings = function(){
             this.Settings = newSettings;
             console.log("newSettings: ", newSettings);
             this.parseSettings();
+            //  setup the settings toggle event
+            this.setupSettingsToggleEvent(config);
             this.initComplete = true;
             //  fire the callback if it exists
             if(cb)
@@ -484,7 +534,7 @@ var Settings = function(){
     },
     injectSubs: function( el ){
 
-      var element = $.resolveElement( el ),
+      var element      = $.resolveElement( el ),
           subsListHtml = '';
 
       this.Settings.subs.forEach(function( val, i ){
@@ -631,12 +681,61 @@ var Settings = function(){
       });
       //  returns a random sub that's active
       return activeSubs[Math.floor(Math.random() * activeSubs.length)];
+    },
+    setupSettingsToggleEvent: function( els ){
+      els.openSettings.addEventListener('click', function(){
+
+        if( els.settings.classList.contains( 'settings-s-closed' ) ){
+          $.removeClass( '.settings', 'settings-s-closed' );
+          $.addClass( '.settings', 'settings-s-open' );
+          $.removeClass( els.openSettings, 'settings-button-s-closed' );
+          $.addClass( els.openSettings, 'settings-button-s-open' );
+          this.toggleContainerVisibility('close');
+        }
+        else if( els.settings.classList.contains( 'settings-s-open' ) ){
+          $.removeClass( '.settings', 'settings-s-open' );
+          $.addClass( '.settings', 'settings-s-closed' );
+          this.toggleContainerVisibility('open');
+          $.removeClass( els.openSettings, 'settings-button-s-open' );
+          $.addClass( els.openSettings, 'settings-button-s-closed' );
+        }else{
+          throw "What the whaaaa? http://bit.ly/1IjwmfN";
+        }
+      }.bind(this));
+    },
+    toggleContainerVisibility: function( toggle ){
+
+      //  hella safeguarding
+      if( typeof toggle !== 'string' )
+        throw 'toggleContainerVisibility() needs a string yo!';
+      if( toggle !== 'open' && toggle !== 'close' )
+        throw "You gotta pass 'open' or 'close' to toggleContainerVisibility()";
+
+      var el      = document.querySelector('.i-container'),
+          visible = 'i-container-s-visible',
+          hidden  = 'i-container-s-hidden';
+
+      if( toggle === 'close' && el.classList.contains( visible ) ){
+        $.removeClass( el, visible );
+        $.addClass( el, hidden );
+        setTimeout(function(){
+          el.style.display = 'none';
+        }, 500);//actual anim time is 0.45s in the Less file
+      }
+      if( toggle === 'open' && el.classList.contains( hidden ) ){
+        el.style.display = 'block';
+        setTimeout(function(){
+          $.removeClass( el, hidden );
+          $.addClass( el, visible );
+        }, 50);
+      }
+
     }
   };
 };
 
 module.exports = Settings;
-},{"./utils.js":7}],6:[function(require,module,exports){
+},{"./utils.js":8}],7:[function(require,module,exports){
 
 
 
@@ -673,7 +772,7 @@ var UsedImages = function(){
 
 
 module.exports = UsedImages;
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 /*||
 ||||   Module::Utils
 ||||

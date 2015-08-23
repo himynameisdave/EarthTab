@@ -50,7 +50,7 @@ var DOM = function( data ){
         setLink( el, 'http://www.reddit.com/user/'+data.author+'/' );
       },
       redditLink:      function( el ){
-        setLink( els, data.redditLink );
+        setLink( el, data.redditLink );
       },
       subreddit:       function( el ){
         setInnerHtml(el, data.subreddit);

@@ -23,6 +23,7 @@ var Data = function( UsedImages, elements ){
         r.send();
       },
       parse: function( newData, fetchRound ){
+        console.log(this.returnTopImage);
 
         var topImg = this.returnTopImage( newData );
 
@@ -81,7 +82,6 @@ var Data = function( UsedImages, elements ){
           });
         }
       },
-
       returnTopImage: function( data ){
         var obj = {},
           isImageFound = false;

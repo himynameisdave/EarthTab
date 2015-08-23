@@ -8,7 +8,7 @@
 var $ = require('./utils.js')();
 
 
-var Settings = function(){
+var Settings = function( config ){
   return {
     Settings: {},
     subList: [  'EarthPorn',
@@ -30,6 +30,8 @@ var Settings = function(){
         if(d.settings){
           this.Settings = d.settings;
           this.parseSettings();
+          //  setup the settings toggle event
+          this.setupSettingsToggleEvent(config);
           this.initComplete = true;
           //  fire the callback if it exists
           if(cb)
@@ -40,6 +42,8 @@ var Settings = function(){
             this.Settings = newSettings;
             console.log("newSettings: ", newSettings);
             this.parseSettings();
+            //  setup the settings toggle event
+            this.setupSettingsToggleEvent(config);
             this.initComplete = true;
             //  fire the callback if it exists
             if(cb)
@@ -99,7 +103,7 @@ var Settings = function(){
     },
     injectSubs: function( el ){
 
-      var element = $.resolveElement( el ),
+      var element      = $.resolveElement( el ),
           subsListHtml = '';
 
       this.Settings.subs.forEach(function( val, i ){
@@ -246,6 +250,55 @@ var Settings = function(){
       });
       //  returns a random sub that's active
       return activeSubs[Math.floor(Math.random() * activeSubs.length)];
+    },
+    setupSettingsToggleEvent: function( els ){
+      els.openSettings.addEventListener('click', function(){
+
+        if( els.settings.classList.contains( 'settings-s-closed' ) ){
+          $.removeClass( '.settings', 'settings-s-closed' );
+          $.addClass( '.settings', 'settings-s-open' );
+          $.removeClass( els.openSettings, 'settings-button-s-closed' );
+          $.addClass( els.openSettings, 'settings-button-s-open' );
+          this.toggleContainerVisibility('close');
+        }
+        else if( els.settings.classList.contains( 'settings-s-open' ) ){
+          $.removeClass( '.settings', 'settings-s-open' );
+          $.addClass( '.settings', 'settings-s-closed' );
+          this.toggleContainerVisibility('open');
+          $.removeClass( els.openSettings, 'settings-button-s-open' );
+          $.addClass( els.openSettings, 'settings-button-s-closed' );
+        }else{
+          throw "What the whaaaa? http://bit.ly/1IjwmfN";
+        }
+      }.bind(this));
+    },
+    toggleContainerVisibility: function( toggle ){
+
+      //  hella safeguarding
+      if( typeof toggle !== 'string' )
+        throw 'toggleContainerVisibility() needs a string yo!';
+      if( toggle !== 'open' && toggle !== 'close' )
+        throw "You gotta pass 'open' or 'close' to toggleContainerVisibility()";
+
+      var el      = document.querySelector('.i-container'),
+          visible = 'i-container-s-visible',
+          hidden  = 'i-container-s-hidden';
+
+      if( toggle === 'close' && el.classList.contains( visible ) ){
+        $.removeClass( el, visible );
+        $.addClass( el, hidden );
+        setTimeout(function(){
+          el.style.display = 'none';
+        }, 500);//actual anim time is 0.45s in the Less file
+      }
+      if( toggle === 'open' && el.classList.contains( hidden ) ){
+        el.style.display = 'block';
+        setTimeout(function(){
+          $.removeClass( el, hidden );
+          $.addClass( el, visible );
+        }, 50);
+      }
+
     }
   };
 };
