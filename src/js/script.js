@@ -519,7 +519,7 @@
                   ],
         finishedInit: false,
         init: function(){
-          var This = this;//  this is weird but makes sense
+          var This = this;//  TODO THIS SHOULD USE A BIND!!!
 
           this.fetchOldSettings(function(d){
 
@@ -616,11 +616,11 @@
           return li;
         },
         /**   @name:    injectSubs
-          *   @params:  el [selector, string], cb [function]
+          *   @params:  el [selector, string]
           *   @desc:    injectSubs adds the subs html to the given element
                         has a callback so that when it's done it's shit it can call "showSettingsAsAvailable"
           */
-        injectSubs: function( el, cb ){
+        injectSubs: function( el ){
 
           var element = resolveElement( el ),
               subsListHtml = '';
@@ -631,9 +631,6 @@
 
           //  appending it
           element.innerHTML = subsListHtml;
-
-          //now we call our callback, if it exists
-          if( cb ){ cb();}
 
         },
         /**   @name:    setupCheckboxChangeListener

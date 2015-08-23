@@ -1,12 +1,15 @@
-var gulp = require('gulp'),
-    $    = require('gulp-load-plugins')({
-              scope: ['devDependencies'],
-              replaceString: 'gulp-',
-            });
+var gulp       = require('gulp'),
+    browserify = require('browserify'),
+    source     = require('vinyl-source-stream'),
+    $          = require('gulp-load-plugins')({
+                    scope: ['devDependencies'],
+                    replaceString: 'gulp-',
+                  });
 
 
-/**     BUILD IT UP!    **/
-
+//
+//      Build tasks
+//////////////////////////////
 gulp.task( 'build', ['build:compile-css', 'build:compile-js', 'build:move-html', 'build:move-fonts', 'build:move-images', 'build:zip'] )
 
 gulp.task( 'build:compile-css', function(){
@@ -23,9 +26,9 @@ gulp.task( 'build:compile-css', function(){
 
 });
 
-gulp.task( 'build:compile-js', function(){
+gulp.task( 'build:compile-js', ['dev:bundle-js'], function(){
 
-  return gulp.src('./src/js/script.js')
+  return gulp.src('./src/js/bundle.js')
           .pipe($.stripDebug())
           .pipe($.uglify())
           .pipe(gulp.dest('./build/js/'))
@@ -63,11 +66,13 @@ gulp.task( 'build:zip', ['build:compile-css', 'build:compile-js', 'build:move-ht
 });
 
 
-/**     DEV IT UP!    **/
-
+//
+//      Dev/Default tasks
+//////////////////////////////
 gulp.task( 'default', function(){
 
   gulp.watch( './src/css/*.less' , ['dev:compile-css'] );
+  gulp.watch( './src/js/**/*.js', ['dev:bundle-js'] );
 
 })
 
@@ -76,5 +81,15 @@ gulp.task( 'dev:compile-css', function(){
   return gulp.src('./src/css/style.less')
           .pipe($.less())
           .pipe(gulp.dest('./src/css/'));
+
+});
+
+gulp.task( 'dev:bundle-js', function(){
+
+  return browserify('./src/js/main.js')
+          .bundle()
+          .on( 'error', function(e){ console.log(e) } )
+          .pipe(source('bundle.js'))
+          .pipe(gulp.dest('./src/js/'));
 
 });
