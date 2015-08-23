@@ -55,6 +55,15 @@ var Utils = function(){
       *   @params:  el [string, selector OR DOM element object]
       *   @desc:    handy utility that returns the actual element, whether passed a selector string or actual element
       */
+    /**   @name:   longerThanMins
+      *   @params: then [number, timestamp], maxMins [number]
+      *   @desc:   returns true if more mins have passed since 'then' than specified by 'maxMins'
+      */
+    longerThanMins: function( then, maxMins ) {
+      //  difference is then vs now in miliseconds, then divided into 60 for minutes
+      var diff = ((Date.now() / 1000) - then)/60;
+      return diff > maxMins ? true : false;
+    },
     resolveElement: function( el ){
       var element;
       if( typeof el === 'string' )

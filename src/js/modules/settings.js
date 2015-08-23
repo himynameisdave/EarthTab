@@ -10,7 +10,6 @@ var $ = require('./utils.js')();
 
 var Settings = function(){
   return {
-
     Settings: {},
     subList: [  'EarthPorn',
                 'SkyPorn',
@@ -233,14 +232,21 @@ var Settings = function(){
         }.bind(this), this.settingsAlertShowTime);
 
       }
+    },
+    /**   @name:    gimmieARandomActiveSub
+      *   @params:  [none]
+      *   @desc:    loops through the subs, and from the active ones, one is randomly chosen
+      */
+    gimmieARandomActiveSub: function(){
+      var activeSubs = [];
+      //  Location of an error... becuase this don't exist yet
+      this.Settings.subs.forEach(function(val, i){
+        if(val.active)
+          activeSubs.push(val.name);
+      });
+      //  returns a random sub that's active
+      return activeSubs[Math.floor(Math.random() * activeSubs.length)];
     }
-
-
-
-
-
-
-
   };
 };
 

@@ -57,11 +57,6 @@ var Data = function( UsedImages, elements ){
 
       },
       storage: {
-        remove: function(){
-          chrome.storage.local.remove( "lastImage", function(){
-            console.log("Successfully removed lastImage from localStorage!");
-          });
-        },
         set: function( image ){
           chrome.storage.local.set({'lastImage': image}, function(){
             console.log("Successfully added lastImage to localStorage!");
@@ -69,6 +64,14 @@ var Data = function( UsedImages, elements ){
               this.setBase64(image,  base64data);
             }.bind(this));
           }.bind(this));
+        },
+        get: function( cb ){
+          chrome.storage.local.get('lastImage', cb);
+        },
+        remove: function(){
+          chrome.storage.local.remove( "lastImage", function(){
+            console.log("Successfully removed lastImage from localStorage!");
+          });
         },
         setBase64: function( d, n64 ){
           var o = d;

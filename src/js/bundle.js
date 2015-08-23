@@ -15,7 +15,9 @@
 
 module.exports = (function(){
 
-  var $ = require('./modules/utils.js')();
+  //  this tends to be called in the individual modules so we may not need this
+  var $   = require('./modules/utils.js')(),
+      DOM = require('./modules/dom.js');
 
   var Clock = require('./modules/clock.js')('.js-time');
       Clock.setClock();
@@ -43,14 +45,43 @@ module.exports = (function(){
   };
 
   var Data = require('./modules/data.js')( UsedImages, elements );
-      // Data.fetch( Data.parse, url );
+      Data.storage.get(
+        //  TODO: can we split this out somewhere? an init fn or something?
+        function(d){
+          //  some vars
+          var randomSub,
+              maxMins   = 5;
+          //  FIX for #25 - data was found kinda, but no actual url to use
+          if( d.lastImage && d.lastImage.url ){
+            //  As of v0.4.0 frequency can no longer be set/is overridden here
+            if($.longerThanMins( d.lastImage.timeSaved, maxMins )){
+              console.info("It's been longer than "+maxMins+" mins, fetching new data!");
+              if( Settings.initComplete )
+                randomSub = Settings.gimmieARandomActiveSub().toLowerCase();
+              else
+                throw "Hey the Settings weren't initialized when trying to get a random sub";
 
-
+            }else{
+              console.info("It's been less than "+maxMins+" mins, using old data!");
+              if( !d.lastImage.base64Img ){
+                // do some base64 conversion stuff, somehow
+              }
+              DOM( d.lastImage ).setAll( elements );
+            }
+          }else{
+            //  no last image found, gotta get started!
+            if( Settings.initComplete ){
+              randomSub = Settings.gimmieARandomActiveSub().toLowerCase();
+              Data.fetch( Data.parse, "http://www.reddit.com/r/"+randomSub+"/.json" )
+            } else { throw "Hey the Settings weren't initialized when trying to get a random sub"; }
+          }
+        }
+      );
 
 
 })();
 
-},{"./modules/clock.js":2,"./modules/data.js":3,"./modules/settings.js":5,"./modules/usedImages.js":6,"./modules/utils.js":7}],2:[function(require,module,exports){
+},{"./modules/clock.js":2,"./modules/data.js":3,"./modules/dom.js":4,"./modules/settings.js":5,"./modules/usedImages.js":6,"./modules/utils.js":7}],2:[function(require,module,exports){
 /*||
 ||||   Module::Clock
 ||||
@@ -149,11 +180,6 @@ var Data = function( UsedImages, elements ){
 
       },
       storage: {
-        remove: function(){
-          chrome.storage.local.remove( "lastImage", function(){
-            console.log("Successfully removed lastImage from localStorage!");
-          });
-        },
         set: function( image ){
           chrome.storage.local.set({'lastImage': image}, function(){
             console.log("Successfully added lastImage to localStorage!");
@@ -161,6 +187,14 @@ var Data = function( UsedImages, elements ){
               this.setBase64(image,  base64data);
             }.bind(this));
           }.bind(this));
+        },
+        get: function( cb ){
+          chrome.storage.local.get('lastImage', cb);
+        },
+        remove: function(){
+          chrome.storage.local.remove( "lastImage", function(){
+            console.log("Successfully removed lastImage from localStorage!");
+          });
         },
         setBase64: function( d, n64 ){
           var o = d;
@@ -361,7 +395,6 @@ var $ = require('./utils.js')();
 
 var Settings = function(){
   return {
-
     Settings: {},
     subList: [  'EarthPorn',
                 'SkyPorn',
@@ -584,14 +617,21 @@ var Settings = function(){
         }.bind(this), this.settingsAlertShowTime);
 
       }
+    },
+    /**   @name:    gimmieARandomActiveSub
+      *   @params:  [none]
+      *   @desc:    loops through the subs, and from the active ones, one is randomly chosen
+      */
+    gimmieARandomActiveSub: function(){
+      var activeSubs = [];
+      //  Location of an error... becuase this don't exist yet
+      this.Settings.subs.forEach(function(val, i){
+        if(val.active)
+          activeSubs.push(val.name);
+      });
+      //  returns a random sub that's active
+      return activeSubs[Math.floor(Math.random() * activeSubs.length)];
     }
-
-
-
-
-
-
-
   };
 };
 
@@ -691,6 +731,15 @@ var Utils = function(){
       *   @params:  el [string, selector OR DOM element object]
       *   @desc:    handy utility that returns the actual element, whether passed a selector string or actual element
       */
+    /**   @name:   longerThanMins
+      *   @params: then [number, timestamp], maxMins [number]
+      *   @desc:   returns true if more mins have passed since 'then' than specified by 'maxMins'
+      */
+    longerThanMins: function( then, maxMins ) {
+      //  difference is then vs now in miliseconds, then divided into 60 for minutes
+      var diff = ((Date.now() / 1000) - then)/60;
+      return diff > maxMins ? true : false;
+    },
     resolveElement: function( el ){
       var element;
       if( typeof el === 'string' )
