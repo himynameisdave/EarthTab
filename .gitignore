@@ -1,5 +1,6 @@
 node_modules/
 build/
+*.sublime-workspace
 !build/README.md
 *.DS_Store
 assets/
